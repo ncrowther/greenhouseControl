@@ -5,6 +5,12 @@ from machine import Pin, I2C
 import binascii
 import ssd1306
 
+#################################################
+### Greenouse controller for Rasberry Pi Pico ###
+### Author: Nigel T. Crowther
+### Date: 02-Sep-2024
+#################################################
+
 #### DEFINE WATERING TIMES HERE ####
 WATERING_TIMES = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"]
 
@@ -269,7 +275,7 @@ pwmSwitch.pumpOff()
 try:
     while True:     
         
-        averageTemp = controlTemperature(dht11Sensor, pwmSwitch)
+        controlTemperature(dht11Sensor, pwmSwitch)
         
         oled.showData(dht11Sensor, rtc)
                 
