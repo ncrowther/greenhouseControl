@@ -8,17 +8,39 @@ import ssd1306
 #################################################
 ### Greenouse controller for Rasberry Pi Pico ###
 ### Author: Nigel T. Crowther
-### Date: 02-Sep-2024
+### Date: 03-Sep-2024
 #################################################
 
 #### DEFINE WATERING TIMES HERE ####
-WATERING_TIMES = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"]
+WATERING_TIMES = ["10:00", "12:00", "16:00"]
 
 ### DEFINE FAN ON TEMPERATURE
 FAN_ON_TEMPERATURE = 23
 
+# Define light on and off times
+LIGHT_ON_HOUR  = 8 # 24 hour
+LIGHT_OFF_HOUR = 21 # 24 hour
+LIGHT_ON_TIME  = time.mktime((2000, 01, 01, LIGHT_ON_HOUR, 00, 00, 0, 0))
+LIGHT_OFF_TIME = time.mktime((2000, 01, 01, LIGHT_OFF_HOUR, 00, 00, 0, 0))
+
+class LightSwitch(object):
+    # Relay light switch
+
+    def __init__(self):
+        # GPIO pin number  relay is connected to
+        RELAY_PIN = 22
+        self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
+
+    def on(self):
+        self.relay_pin.value(1)  # Set relay to ON state
+
+    def off(self):
+        self.relay_pin.value(0)  # Set relay to OFF state
+
+
+    
 class PwmSwitch(object):
-# PWM dual power switch
+    # PWM dual power switch
 
     def __init__(self):
         #Define pins for Pump
@@ -120,16 +142,35 @@ class ds3231(object):
     
     def getDateTime(self):
         t = self.bus.readfrom_mem(int(self.address),int(self.start_reg),7)
+        return t
+    
+    def getTimeInSeconds(self):
+        t = self.getDateTime()
+        hour = t[2]  #hour
+        minute = t[1]  #minute
+        
+        hour = int("%02x" % hour)
+        minute = int("%02x" % minute)   
+           
+        timeInSeconds = time.mktime((2000, 01, 01, hour, minute, 00, 0, 0))
+        
+        return timeInSeconds    
+    
+    def timeInRange(self, startRange, endRange):    
+        timeNow = self.getTimeInSeconds()        
+        return (time.ticks_diff(startRange, timeNow) <= 0) and (time.ticks_diff(endRange, timeNow) > 0)
+    
+    def printDateTime(self, t):
         a = t[0]&0x7F  #second
         b = t[1]&0x7F  #minute
         c = t[2]&0x3F  #hour
         d = t[3]&0x07  #week
         e = t[4]&0x3F  #day
         f = t[5]&0x1F  #month
-        print("20%x/%02x/%02x %02x:%02x:%02x %s" %(t[6],t[5],t[4],t[2],t[1],t[0],self.w[t[3]-1]))
+        print("20%x/%02x/%02x %02x:%02x:%02x %s" %(t[6],t[5],t[4],t[2],t[1],t[0],self.w[t[3]-1]))       
 
-    def getTime(self):
-        t = self.bus.readfrom_mem(int(self.address),int(self.start_reg),7)
+    def getTimeStr(self):
+        t = self.getDateTime()
         hour = t[2]  #hour
         minute = t[1]  #minute
         
@@ -172,7 +213,7 @@ class Oled(object):
         
         self.clearOled()
         
-        timeNow= rtc.getTime()
+        timeNow= rtc.getTimeStr()
         
         timeStr = "Time: " + timeNow
         temperatureStr = "Temp: " + str(dht11Sensor.temperature) + "C"
@@ -189,8 +230,8 @@ class Oled(object):
         self.oled.show()
     
 def controlTemperature(dht11Sensor, pwmSwitch):
-    SAMPLE_SIZE = 5 # sample size
-    SECONDS = 1000 # ms
+    SAMPLE_SIZE = 3 # sample size
+    SECONDS = 5000 # ms
     temperatureArray = [None] * SAMPLE_SIZE
     
     for i in range(SAMPLE_SIZE):
@@ -213,25 +254,10 @@ def controlTemperature(dht11Sensor, pwmSwitch):
         pwmSwitch.fanOff()
         
     return averageTemp
-
-# def getNextWateringTime(rtc, lastWateringTime, WATERING_TIMES):
-#     
-#     hourNow = rtc.getHour()
-#         
-#     indexPos = WATERING_TIMES.index(hourNow)
-#     
-#     indexPos = currentPos + 1;
-#     
-#     if (currentPos == len(WATERING_TIMES)):
-#         index = 0
-#     
-#     nextWateringTime = WATERING_TIMES[indexPos]
-#     
-#     return nextWateringTime
         
 def controlWatering(averageTemp, pwmSwitch):
             
-    timeNow = rtc.getTime()
+    timeNow = rtc.getTimeStr()
     
     if (timeNow in WATERING_TIMES):
         pwmSwitch.pumpOn()
@@ -249,40 +275,73 @@ def controlWatering(averageTemp, pwmSwitch):
     else:
         pwmSwitch.pumpOff()
         
+def controlLights(lightSwitch, rtc):
+
+    if (rtc.timeInRange(LIGHT_ON_TIME, LIGHT_OFF_TIME)):
+        lightSwitch.on()
+    else:
+       lightSwitch.off() 
+           
+        
 def sleep(period):
     print("Sleep for " + str(period) + "ms") 
     time.sleep_ms(period)
     
 ## MAIN ##
-
-pwmSwitch = PwmSwitch()
-pwmSwitch.fanOn()
-pwmSwitch.pumpOn()     
         
-dht11Sensor = DHT11Sensor()
+# Set internal clock
+rtc = ds3231()
 
+#rtc.set_time('18:26:00,Friday,2024-09-06')
+
+timeNow = rtc.getDateTime()
+rtc.printDateTime(timeNow)        
+
+## Creat the objects to be controlled
+lightSwitch = LightSwitch()
+dht11Sensor = DHT11Sensor()
+pwmSwitch = PwmSwitch()
 oled = Oled()
+
+# Turn on and off objects for startup check
+pwmSwitch.fanOn()
+pwmSwitch.pumpOn()
+lightSwitch.on()
+        
+# Clear screen
 oled.clearOled()
 
-rtc = ds3231()
-#rtc.set_time('09:14:00,Monday,2024-09-02')
-rtc.getDateTime()
+sleep(1000)
 
-sleep(2000)
+# Turn off everything before starting loop
 pwmSwitch.fanOff()
 pwmSwitch.pumpOff()
-    
+lightSwitch.off()
+
+sleep(1000)
+  
+# loop forever looking after plants
 try:
-    while True:     
+    while True:
         
-        controlTemperature(dht11Sensor, pwmSwitch)
+        controlLights(lightSwitch, rtc)        
+        
+        averageTemp = controlTemperature(dht11Sensor, pwmSwitch)
         
         oled.showData(dht11Sensor, rtc)
                 
         controlWatering(averageTemp, pwmSwitch)
         
-except:
+        
+except Exception as e:
+    print(e)
     print("Terminated")
     pwmSwitch.fanOff()
     pwmSwitch.pumpOff()
+    lightSwitch.off()
     
+
+
+
+
+
