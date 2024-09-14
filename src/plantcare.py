@@ -1,9 +1,12 @@
 from machine import Pin, PWM, ADC, I2C
 import dht
 import time
-from machine import Pin, I2C
 import binascii
 import ssd1306
+import machine
+import onewire
+import ds18x20
+from pico_i2c_lcd import I2cLcd
 
 #################################################
 ### Greenouse controller for Rasberry Pi Pico ###
@@ -12,16 +15,21 @@ import ssd1306
 #################################################
 
 #### DEFINE WATERING TIMES HERE ####
-WATERING_TIMES = ["10:00", "12:00", "16:00"]
+WATERING_TIMES = ["10:00", "12:00", "17:00"]
 
 ### DEFINE FAN ON TEMPERATURE
 FAN_ON_TEMPERATURE = 23
 
 # Define light on and off times
-LIGHT_ON_HOUR  = 8 # 24 hour
-LIGHT_OFF_HOUR = 21 # 24 hour
+LIGHT_ON_HOUR  = 09 # 24 hour
+LIGHT_OFF_HOUR = 20 # 24 hour
 LIGHT_ON_TIME  = time.mktime((2000, 01, 01, LIGHT_ON_HOUR, 00, 00, 0, 0))
 LIGHT_OFF_TIME = time.mktime((2000, 01, 01, LIGHT_OFF_HOUR, 00, 00, 0, 0))
+
+# Define midnight reset period
+RESET_HOUR = 00 # 24 hour
+RESET_ON_TIME  = time.mktime((2000, 01, 01, RESET_HOUR, 00, 00, 0, 0))
+RESET_OFF_TIME = time.mktime((2000, 01, 01, RESET_HOUR, 01, 00, 0, 0))
 
 class LightSwitch(object):
     # Relay light switch
@@ -44,14 +52,14 @@ class PwmSwitch(object):
 
     def __init__(self):
         #Define pins for Pump
-        PWM_IN = 16
-        PWM_OUT = 17
+        PWM_IN = 18
+        PWM_OUT = 19    
         self.pump_a = PWM(Pin(PWM_IN), freq=1000)
         self.pump_b = PWM(Pin(PWM_OUT), freq=1000)
 
         # Define pins for Fan
-        PWM_IN = 18
-        PWM_OUT = 19        
+        PWM_IN = 16
+        PWM_OUT = 17    
         self.fan_a = PWM(Pin(PWM_IN), freq=1000)
         self.fan_b = PWM(Pin(PWM_OUT), freq=1000)
         
@@ -78,25 +86,40 @@ class PwmSwitch(object):
         self.fan_b.duty_u16(0)        
 
 
-class DHT11Sensor(object):
-
+class DDS18B20Probe(object):
+  
+    # Temperature probe
     # DHT temp sensor  
     def __init__(self):
         #Define pin for Temperature sensor
-        SENSOR_PIN = 4        
-        dht_pin = machine.Pin(SENSOR_PIN)
-        self.dht_sensor = dht.DHT11(dht_pin)    
+        SENSOR_PIN = 28    
+    
+        ds_pin = machine.Pin(SENSOR_PIN)
+        self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
+        self.temperature = 0
         self.highTemp = 0
         self.lowTemp = 100
         
-    def measureIt(self):   
-        try: 
-            # get temp and humidity sensor
-            self.dht_sensor.measure()
+    def measureIt(self, rtc):   
+        try:
+            # get temp 
+            roms = self.ds_sensor.scan()
+            print('Found DS devices: ', roms)
+
+            self.ds_sensor.convert_temp()
+            time.sleep_ms(750)
+            for rom in roms:
+                print(rom)
+                self.temperature = self.ds_sensor.read_temp(rom)
+                print('temperature (ºC):', "{:.2f}".format(self.temperature))
             
-            self.humidity = self.dht_sensor.humidity()            
-            self.temperature = self.dht_sensor.temperature()
+            # Reset stats at midnight
+            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
+                print("Reset temperature stats")
+                self.highTemp = 0
+                self.lowTemp = 100
              
+            # Set high score
             if (self.temperature > self.highTemp):
                 self.highTemp = self.temperature
             
@@ -104,9 +127,9 @@ class DHT11Sensor(object):
                 self.lowTemp = self.temperature
 
         except:
-            print("DHT failed to read temperature/humidity")
-           
-    
+            print("DDS18B20 Probe failed to read temperature")
+            print(e)
+   
 
 class ds3231(object):
 #            13:45:00 Mon 24 May 2021
@@ -182,54 +205,54 @@ class ds3231(object):
         #print("Time: ", timeStr)
         return timeStr
 
-class Oled(object):
-
+class Lcd(object):
+    
     def __init__(self):
         
         #  I2C Pins
-        I2C_PORT = 0
-        I2C_SDA = 20
-        I2C_SCL = 21
-
+        I2C_PORT = 1
+        I2C_SDA = 6
+        I2C_SCL = 7
+        I2C_FREQ = 400000
+        
         # setup the I2C communication for the OLED display
-        self.bus = I2C(I2C_PORT,scl=Pin(I2C_SCL),sda=Pin(I2C_SDA))        
+        self.bus = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=I2C_FREQ)
 
-        # Set up the OLED display (128x64 pixels) on the I2C bus
-        # SSD1306_I2C is a subclass of FrameBuffer. FrameBuffer provides support for graphics primitives.
-        # http://docs.micropython.org/en/latest/pyboard/library/framebuf.html
-        self.oled = ssd1306.SSD1306_I2C(128, 64, self.bus)
-        
-    def clearOled(self):
-        # Clear the display by filling it with white and then showing the update
-        #self.oled.fill(1)
-        #self.oled.show()
-        #sleep(1000)  # Wait for 1 second
+        addr = self.bus.scan()
+        print(addr)
 
-        # Clear the display again by filling it with black
-        self.oled.fill(0)
-        self.oled.show()
-        
-    def showData(self, dht11Sensor, rtc):
-        
-        self.clearOled()
-        
-        timeNow= rtc.getTimeStr()
-        
-        timeStr = "Time: " + timeNow
-        temperatureStr = "Temp: " + str(dht11Sensor.temperature) + "C"
-        humidityStr = "Humidity: " + str(dht11Sensor.humidity) + "%"
-        highLowStr = "High " + str(dht11Sensor.highTemp) + "C Low " + str(dht11Sensor.lowTemp) + "C"
-        
-        # Display text on the OLED screen
-        self.oled.text(timeStr, 0, 0)  
-        self.oled.text(temperatureStr, 0, 16)  
-        self.oled.text(humidityStr, 0, 32)
-        self.oled.text(highLowStr, 0, 48)
+        addr = self.bus.scan()[0]
+        print(addr)
 
-        # The following line sends what to show to the display
-        self.oled.show()
+        self.lcd = I2cLcd(self.bus, addr, 2, 16)
+        
+        self.lcd.putstr("Hello RPi Pico!\n")
+        
+    def showData(self, ddsProbe, rtc):
+                
+        ddsProbe.measureIt(rtc)
+        
+        timeNow= rtc.getTimeStr()    
+        timeStr = "Time: " + timeNow ;
+        temperatureStr = "Temp: " + str(ddsProbe.temperature) + "C"
+        highStr = "High: " + str(ddsProbe.highTemp) + "C"
+        lowStr =  "Low:  " + str(ddsProbe.lowTemp) + "C"        
+        
+        # Display high lows on the LCD screen       
+        self.lcd.clear()
+        self.lcd.putstr(highStr)
+        self.lcd.putstr("\n")        
+        self.lcd.putstr(lowStr)
+        
+        sleep(4000)
+        
+        # Display time & temp on the LCD screen       
+        self.lcd.clear()
+        self.lcd.putstr(timeStr)
+        self.lcd.putstr("\n")
+        self.lcd.putstr(temperatureStr)        
     
-def controlTemperature(dht11Sensor, pwmSwitch):
+def controlTemperature(ddsProbe, pwmSwitch, rtc):
     SAMPLE_SIZE = 3 # sample size
     SECONDS = 5000 # ms
     temperatureArray = [None] * SAMPLE_SIZE
@@ -238,8 +261,8 @@ def controlTemperature(dht11Sensor, pwmSwitch):
         
         time.sleep_ms(SECONDS)
         
-        dht11Sensor.measureIt()
-        temperature = dht11Sensor.temperature
+        ddsProbe.measureIt(rtc)
+        temperature = ddsProbe.temperature
         temperatureArray[i] = temperature
     
     averageTemp = sum(temperatureArray) / SAMPLE_SIZE
@@ -256,10 +279,11 @@ def controlTemperature(dht11Sensor, pwmSwitch):
     return averageTemp
         
 def controlWatering(averageTemp, pwmSwitch):
-            
+    
+    MIN_WATERING_TEMP = 10
     timeNow = rtc.getTimeStr()
     
-    if (timeNow in WATERING_TIMES):
+    if (averageTemp > MIN_WATERING_TEMP and timeNow in WATERING_TIMES):
         pwmSwitch.pumpOn()
         
         wateringPeriod = int(pow(averageTemp, 3) * 3)
@@ -267,7 +291,7 @@ def controlWatering(averageTemp, pwmSwitch):
         print("Watering Period %s seconds " %wateringPeriodSeconds)
         sleep(wateringPeriod)
         pwmSwitch.pumpOff()
-        # Do nothing for the rest of one minute
+        # Do nothing for the rest of one minute to prevent this 'if statement' repeating
         minuteRemainder = 60000 - wateringPeriod
         print("Remaining seconds %s " %minuteRemainder)
         if (minuteRemainder > 0):
@@ -288,51 +312,52 @@ def sleep(period):
     time.sleep_ms(period)
     
 ## MAIN ##
+
+rtc = ds3231()
         
 # Set internal clock
-rtc = ds3231()
-
-#rtc.set_time('18:26:00,Friday,2024-09-06')
-
-timeNow = rtc.getDateTime()
-rtc.printDateTime(timeNow)        
+rtc.set_time('20:37:00,Saturday,2024-09-14')       
 
 ## Creat the objects to be controlled
 lightSwitch = LightSwitch()
-dht11Sensor = DHT11Sensor()
+ddsProbe = DDS18B20Probe()
 pwmSwitch = PwmSwitch()
-oled = Oled()
+lcd = Lcd()
 
+lcd.showData(ddsProbe, rtc)
+        
 # Turn on and off objects for startup check
 pwmSwitch.fanOn()
 pwmSwitch.pumpOn()
 lightSwitch.on()
         
 # Clear screen
-oled.clearOled()
+# oled.clearOled()
 
-sleep(1000)
+sleep(5000)
 
 # Turn off everything before starting loop
 pwmSwitch.fanOff()
 pwmSwitch.pumpOff()
 lightSwitch.off()
 
-sleep(1000)
+sleep(2000)
   
 # loop forever looking after plants
 try:
     while True:
         
+        timeNow = rtc.getDateTime()
+        rtc.printDateTime(timeNow) 
+        
         controlLights(lightSwitch, rtc)        
         
-        averageTemp = controlTemperature(dht11Sensor, pwmSwitch)
+        averageTemp = controlTemperature(ddsProbe, pwmSwitch, rtc)
         
-        oled.showData(dht11Sensor, rtc)
-                
+        lcd.showData(ddsProbe, rtc)
+        
         controlWatering(averageTemp, pwmSwitch)
-        
-        
+           
 except Exception as e:
     print(e)
     print("Terminated")
@@ -340,8 +365,3 @@ except Exception as e:
     pwmSwitch.pumpOff()
     lightSwitch.off()
     
-
-
-
-
-
