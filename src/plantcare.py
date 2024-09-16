@@ -21,7 +21,9 @@ WATERING_TIMES = ["10:00", "12:00", "17:00"]
 FAN_ON_TEMPERATURE = 25
 
 # Open window temperature
-OPEN_WINDOW_TEMPERATURE = 20 
+OPEN_WINDOW_TEMPERATURE = 22
+# Close window temperature
+CLOSE_WINDOW_TEMPERATURE = 18
 
 # Define light on and off times
 LIGHT_ON_HOUR  = 09 # 24 hour
@@ -33,6 +35,9 @@ LIGHT_OFF_TIME = time.mktime((2000, 01, 01, LIGHT_OFF_HOUR, 00, 00, 0, 0))
 RESET_HOUR = 00 # 24 hour
 RESET_ON_TIME  = time.mktime((2000, 01, 01, RESET_HOUR, 00, 00, 0, 0))
 RESET_OFF_TIME = time.mktime((2000, 01, 01, RESET_HOUR, 01, 00, 0, 0))
+
+actuatorUpCount = 0
+actuatorDownCount = 0
 
 class LightSwitch(object):
     # Relay light switch
@@ -277,16 +282,16 @@ class Lcd(object):
         self.lcd.putstr("\n")
         self.lcd.putstr(temperatureStr)        
     
-def controlTemperature(dht11Sensor, pwmSwitch, actuator):
-    SAMPLE_SIZE = 5 # sample size
-    SECONDS = 1000 # ms
+def controlTemperature(dht11Sensor, pwmSwitch, rtc, actuator):
+    SAMPLE_SIZE = 3 # sample size
+    SECONDS = 10000 # ms
     temperatureArray = [None] * SAMPLE_SIZE
     
     for i in range(SAMPLE_SIZE):
         
         time.sleep_ms(SECONDS)
         
-        dht11Sensor.measureIt()
+        dht11Sensor.measureIt(rtc)
         temperature = dht11Sensor.temperature
         temperatureArray[i] = temperature
     
@@ -296,12 +301,27 @@ def controlTemperature(dht11Sensor, pwmSwitch, actuator):
     
     print("Average temperature over " + str(secs) + " seconds: " + str(averageTemp) + "C")
     
-    
-    if (averageTemp >= OPEN_WINDOW_TEMPERATURE):
-        actuator.up(5000)        
-    else:
+    global actuatorDownCount
+    global actuatorUpCount
+
+    # Open window 
+    if (averageTemp >= OPEN_WINDOW_TEMPERATURE and actuatorUpCount < 10):
+        actuator.up(5000)
+        actuatorUpCount = actuatorUpCount + 1
+        if (actuatorDownCount > 0):
+            actuatorDownCount = actuatorDownCount - 1       
+
+    # Close window 
+    if (averageTemp < CLOSE_WINDOW_TEMPERATURE and actuatorDownCount < 10):
         actuator.down(5000)
-         
+        actuatorDownCount = actuatorDownCount + 1
+        if (actuatorUpCount > 0):
+            actuatorUpCount = actuatorUpCount - 1        
+        
+    print("Up: " + str(actuatorUpCount))
+    print("Down: " + str(actuatorDownCount) )   
+
+    # Turn on/off fan
     if (averageTemp >= FAN_ON_TEMPERATURE):
         pwmSwitch.fanOn()        
     else:
@@ -359,8 +379,7 @@ lcd = Lcd()
 lcd.showData(ddsProbe, rtc)
         
 # Turn on and off objects for startup check
-linearActuator.up(5000)
-linearActuator.down(5000)
+linearActuator.down(60000)
 pwmSwitch.fanOn()
 pwmSwitch.pumpOn()
 lightSwitch.on()
@@ -368,7 +387,7 @@ lightSwitch.on()
 # Clear screen
 # oled.clearOled()
 
-sleep(6000)
+sleep(2000)
 
 # Turn off everything before starting loop
 pwmSwitch.fanOff()
@@ -378,23 +397,23 @@ lightSwitch.off()
 sleep(2000)
   
 # loop forever looking after plants
-try:
-    while True:
+#try:
+while True:
         
-        timeNow = rtc.getDateTime()
-        rtc.printDateTime(timeNow) 
-        
-        controlLights(lightSwitch, rtc)        
-        
-        averageTemp = controlTemperature(ddsProbe, pwmSwitch, rtc, linearActuator)
-        
-        lcd.showData(ddsProbe, rtc)
-        
-        controlWatering(averageTemp, pwmSwitch)
+    timeNow = rtc.getDateTime()
+    rtc.printDateTime(timeNow) 
+    
+    controlLights(lightSwitch, rtc)        
+    
+    averageTemp = controlTemperature(ddsProbe, pwmSwitch, rtc, linearActuator)
+    
+    lcd.showData(ddsProbe, rtc)
+    
+    controlWatering(averageTemp, pwmSwitch)
            
-except Exception as e:
-    print(e)
-    print("Terminated")
+#except Exception as e:
+#    print(e)
+ #   print("Terminated")
     pwmSwitch.fanOff()
     pwmSwitch.pumpOff()
     lightSwitch.off()
