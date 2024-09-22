@@ -17,13 +17,13 @@ from pico_i2c_lcd import I2cLcd
 #### DEFINE WATERING TIMES HERE ####
 WATERING_TIMES = ["10:00", "12:00", "17:00"]
 
-### DEFINE FAN ON TEMPERATURE
-FAN_ON_TEMPERATURE = 25
+### DEFINE FAN ON/OFF TEMPERATURE
+FAN_ON_TEMPERATURE = 27
+FAN_OFF_TEMPERATURE = 25
 
-# Open window temperature
-OPEN_WINDOW_TEMPERATURE = 22
-# Close window temperature
-CLOSE_WINDOW_TEMPERATURE = 18
+# Define window open/close temperature
+OPEN_WINDOW_TEMPERATURE = 25
+CLOSE_WINDOW_TEMPERATURE = 22
 
 # Define light on and off times
 LIGHT_ON_HOUR  = 09 # 24 hour
@@ -36,8 +36,16 @@ RESET_HOUR = 00 # 24 hour
 RESET_ON_TIME  = time.mktime((2000, 01, 01, RESET_HOUR, 00, 00, 0, 0))
 RESET_OFF_TIME = time.mktime((2000, 01, 01, RESET_HOUR, 01, 00, 0, 0))
 
+# Define millisecond amounts
+ONE_MINUTE = 60000
+
+# Define actuator pulse count and length
+MAX_ACTUATOR_PULSE = 12
+PULSE_TIME = 5000
+
+# Globals to hold pulse
 actuatorUpCount = 0
-actuatorDownCount = 0
+actuatorDownCount = MAX_ACTUATOR_PULSE
 
 class LightSwitch(object):
     # Relay light switch
@@ -82,14 +90,14 @@ class PwmSwitch(object):
 
     def __init__(self):
         #Define pins for Pump
-        PWM_IN = 18
-        PWM_OUT = 19    
+        PWM_IN = 16
+        PWM_OUT = 17          
         self.pump_a = PWM(Pin(PWM_IN), freq=1000)
         self.pump_b = PWM(Pin(PWM_OUT), freq=1000)
 
         # Define pins for Fan
-        PWM_IN = 16
-        PWM_OUT = 17    
+        PWM_IN = 18
+        PWM_OUT = 19 
         self.fan_a = PWM(Pin(PWM_IN), freq=1000)
         self.fan_b = PWM(Pin(PWM_OUT), freq=1000)
         
@@ -305,26 +313,27 @@ def controlTemperature(dht11Sensor, pwmSwitch, rtc, actuator):
     global actuatorUpCount
 
     # Open window 
-    if (averageTemp >= OPEN_WINDOW_TEMPERATURE and actuatorUpCount < 10):
-        actuator.up(5000)
+    if (averageTemp >= OPEN_WINDOW_TEMPERATURE and actuatorUpCount < MAX_ACTUATOR_PULSE):
+        actuator.up(PULSE_TIME)
         actuatorUpCount = actuatorUpCount + 1
         if (actuatorDownCount > 0):
             actuatorDownCount = actuatorDownCount - 1       
 
     # Close window 
-    if (averageTemp < CLOSE_WINDOW_TEMPERATURE and actuatorDownCount < 10):
-        actuator.down(5000)
+    if (averageTemp < CLOSE_WINDOW_TEMPERATURE and actuatorDownCount < MAX_ACTUATOR_PULSE):
+        actuator.down(PULSE_TIME)
         actuatorDownCount = actuatorDownCount + 1
         if (actuatorUpCount > 0):
             actuatorUpCount = actuatorUpCount - 1        
         
-    print("Up: " + str(actuatorUpCount))
-    print("Down: " + str(actuatorDownCount) )   
+    #print("Up: " + str(actuatorUpCount))
+    #print("Down: " + str(actuatorDownCount) )   
 
     # Turn on/off fan
     if (averageTemp >= FAN_ON_TEMPERATURE):
         pwmSwitch.fanOn()        
-    else:
+
+    if (averageTemp >= FAN_OFF_TEMPERATURE):
         pwmSwitch.fanOff()
         
     return averageTemp
@@ -343,7 +352,7 @@ def controlWatering(averageTemp, pwmSwitch):
         sleep(wateringPeriod)
         pwmSwitch.pumpOff()
         # Do nothing for the rest of one minute to prevent this 'if statement' repeating
-        minuteRemainder = 60000 - wateringPeriod
+        minuteRemainder = ONE_MINUTE - wateringPeriod
         print("Remaining seconds %s " %minuteRemainder)
         if (minuteRemainder > 0):
            sleep(minuteRemainder)
@@ -367,7 +376,7 @@ def sleep(period):
 rtc = ds3231()
         
 # Set internal clock
-rtc.set_time('20:37:00,Saturday,2024-09-14')       
+rtc.set_time('19:45:00,Sunday,2024-09-22')       
 
 ## Creat the objects to be controlled
 lightSwitch = LightSwitch()
@@ -379,42 +388,39 @@ lcd = Lcd()
 lcd.showData(ddsProbe, rtc)
         
 # Turn on and off objects for startup check
-linearActuator.down(60000)
-pwmSwitch.fanOn()
+###linearActuator.down(ONE_MINUTE)
+#pwmSwitch.fanOn()
 pwmSwitch.pumpOn()
-lightSwitch.on()
-        
-# Clear screen
-# oled.clearOled()
+#lightSwitch.on()
 
 sleep(2000)
 
 # Turn off everything before starting loop
-pwmSwitch.fanOff()
+#pwmSwitch.fanOff()
 pwmSwitch.pumpOff()
-lightSwitch.off()
-
-sleep(2000)
+#lightSwitch.off()
   
 # loop forever looking after plants
-#try:
-while True:
+try:
+    while True:
+            
+        timeNow = rtc.getDateTime()
+        rtc.printDateTime(timeNow) 
         
-    timeNow = rtc.getDateTime()
-    rtc.printDateTime(timeNow) 
-    
-    controlLights(lightSwitch, rtc)        
-    
-    averageTemp = controlTemperature(ddsProbe, pwmSwitch, rtc, linearActuator)
-    
-    lcd.showData(ddsProbe, rtc)
-    
-    controlWatering(averageTemp, pwmSwitch)
-           
-#except Exception as e:
-#    print(e)
- #   print("Terminated")
-    pwmSwitch.fanOff()
+        #controlLights(lightSwitch, rtc)        
+        
+        averageTemp = controlTemperature(ddsProbe, pwmSwitch, rtc, linearActuator)
+        
+        lcd.showData(ddsProbe, rtc)
+        
+        controlWatering(averageTemp, pwmSwitch)
+               
+except Exception as e:
+    print(e)
+    print("Terminated")
+    #pwmSwitch.fanOff()
     pwmSwitch.pumpOff()
-    lightSwitch.off()
+    #lightSwitch.off()
     
+
+
