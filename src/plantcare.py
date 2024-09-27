@@ -190,7 +190,7 @@ class Wifi(object):
     def __init__(self):
         #  Connect WIFI
         ssid = 'TALKTALKE0F9AF'
-        password = 'H6K8EK9M'        
+        password = 'XXXXXXXX'        
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.connect(ssid, password)
