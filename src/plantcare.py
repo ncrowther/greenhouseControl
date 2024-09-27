@@ -45,8 +45,8 @@ RESET_OFF_TIME = time.mktime((2000, 01, 01, RESET_HOUR, 01, 00, 0, 0))
 ONE_MINUTE = 60000
 
 # Define actuator pulse count and length
-MAX_ACTUATOR_PULSE = 12
-PULSE_TIME = 5000
+MAX_ACTUATOR_PULSE = 60
+PULSE_TIME = 1000
 
 # Globals for actuator
 actuatorUpCount = 0
@@ -477,6 +477,10 @@ class PlantCare(object):
     async def getTemperatureData(self):
         print(".........get temp..............")
         return [self.ddsProbe.temperature, self.ddsProbe.highTemp, self.ddsProbe.lowTemp]
+    
+    async def getSystemData(self):
+        print(".........get date and override status..............")
+        return [self.rtc.getTimeStr(), self.manualOverride]    
             
 async def count():
     print("One")
