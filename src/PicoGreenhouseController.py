@@ -100,7 +100,6 @@ async def main():
     while True:
         asyncio.create_task(plantCare.careforplants())
         await asyncio.sleep(5)
-    #await asyncio.gather(plantCare.careforplants())
 
 if __name__ == "__main__":
     try:
@@ -109,3 +108,4 @@ if __name__ == "__main__":
         asyncio.new_event_loop()
     
     
+
