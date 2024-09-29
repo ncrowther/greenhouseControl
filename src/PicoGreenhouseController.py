@@ -73,28 +73,35 @@ class PlantServer(object):
             pass
 
         request = str(request_line)
-        windowAuto = request.find('/window/auto')    
+        windowAuto = request.find('/auto')    
         windowOpen = request.find('/window/open')
         windowClosed = request.find('/window/close')
+        lightOn = request.find('/light/on')
+        lightOff = request.find('/light/off')          
         print( 'window auto = ' + str(windowAuto))    
         print( 'window open = ' + str(windowOpen))
         print( 'window closed = ' + str(windowClosed))
-
-        stateis = ""
+        print( 'light on = ' + str(lightOn))
+        print( 'light off = ' + str(lightOff))
+       
         if windowAuto == 6:
             self.plantCare.manualOverrideOff()
-            stateis = "Window Auto"
             
         if windowOpen == 6:
-            self.plantCare.openWindows()
-            stateis = "Window Open"
+            self.plantCare.setWindow(True)
 
         if windowClosed == 6:
-            plantCare.closeWindows()
-            stateis = "Window Closed"
+            self.plantCare.setWindow(False)
+            
+        if lightOn == 6:
+            self.plantCare.setLight(True)
+            
+        if lightOff == 6:
+            self.plantCare.setLight(False)               
 
         time = self.plantCare.getSystemTime()
         mode = self.plantCare.getSystemMode()
+        light = self.plantCare.getLightStatus()
         
         temperatureData = self.plantCare.getTemperatureData()
         
@@ -103,7 +110,8 @@ class PlantServer(object):
             <head> <title>Pico Greenhouse Controller</title> </head>
             <body> <h1>Pico Greenhouse Controller</h1>
                 <p>Time: {}</p>
-                <p>Mode: {}</p>  
+                <p>Mode: {}</p>
+                <p>Light: {}</p>                 
                 <p>Temperature: {:.2f}</p>
                 <p>High: {:.2f}</p>
                 <p>Low: {:.2f}</p>
@@ -111,7 +119,7 @@ class PlantServer(object):
         </html>
         """
         
-        response = html.format(time, mode, temperatureData[0], temperatureData[1], temperatureData[2])
+        response = html.format(time, mode, light, temperatureData[0], temperatureData[1], temperatureData[2])
         
         writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
         writer.write(response)
@@ -141,3 +149,6 @@ if __name__ == "__main__":
     finally:
         asyncio.new_event_loop()
     
+    
+
+

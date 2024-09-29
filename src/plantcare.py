@@ -29,7 +29,7 @@ CLOSE_WINDOW_TEMPERATURE = 22
 
 # Define light on and off times
 LIGHT_ON_HOUR  = 09 # 24 hour
-LIGHT_OFF_HOUR = 20 # 24 hour
+LIGHT_OFF_HOUR = 19 # 24 hour
 LIGHT_ON_TIME  = time.mktime((2000, 01, 01, LIGHT_ON_HOUR, 00, 00, 0, 0))
 LIGHT_OFF_TIME = time.mktime((2000, 01, 01, LIGHT_OFF_HOUR, 00, 00, 0, 0))
 
@@ -54,12 +54,18 @@ class LightSwitch(object):
         # GPIO pin number  relay is connected to
         RELAY_PIN = 22
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
+        self.onState = False
 
     def on(self):
         self.relay_pin.value(1)  # Set relay to ON state
+        self.onState = True
 
     def off(self):
         self.relay_pin.value(0)  # Set relay to OFF state
+        self.onState = False
+        
+    def status(self):
+        return self.onState
 
 
 class LinearActuator(object):
@@ -424,23 +430,34 @@ class PlantCare(object):
             
     def controlLights(self, lightSwitch, rtc):
 
-        if (rtc.timeInRange(LIGHT_ON_TIME, LIGHT_OFF_TIME)):
-            lightSwitch.on()
-        else:
-           lightSwitch.off() 
+        if (not self.manualOverride):
+            if (rtc.timeInRange(LIGHT_ON_TIME, LIGHT_OFF_TIME)):
+                lightSwitch.on()
+            else:
+               lightSwitch.off() 
                
             
     def sleep(self, period):
         print("Sleep for " + str(period) + "ms") 
         time.sleep_ms(period)
             
-    def openWindows(self):
-        self.manualOverride = True        
-        self.linearActuator.manualOpen()
+    def setWindow(self, open):
+        self.manualOverride = True
+        if open:       
+            self.linearActuator.manualOpen()
+        else:  
+            self.linearActuator.manualClose()
+        
+    def setLight(self, on):
+        self.manualOverride = True      
+        if on:       
+            self.lightSwitch.on()
+        else:  
+            self.lightSwitch.off()            
         
     def closeWindows(self):
         self.manualOverride = True
-        self.linearActuator.manualClose()
+        self.linearActuator.manualClose()        
         
     def manualOverrideOff(self):       
         self.manualOverride = False
@@ -450,6 +467,12 @@ class PlantCare(object):
     
     def getSystemTime(self):
         return self.rtc.getTimeStr()
+    
+    def getLightStatus(self):
+        if ( self.lightSwitch.status()):
+            return "On"
+        else:
+            return "Off"   
     
     def getSystemMode(self):
         
