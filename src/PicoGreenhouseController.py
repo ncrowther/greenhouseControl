@@ -9,8 +9,8 @@ from plantcare import PlantCare
 
 class PlantServer(object):
     
-    # ssid = 'TALKTALKE0F9AF_EXT'
-    ssid = 'TALKTALKE0F9AF'
+    ssid = 'TALKTALKE0F9AF_EXT'
+    #ssid = 'TALKTALKE0F9AF'
     password = 'H6K8EK9M'
         
     def __init__(self):
@@ -58,7 +58,7 @@ class PlantServer(object):
         r.close()
         return formatedTime
     
-    async def care(self):
+    def care(self):
         print("Care for plants...")
         await self.plantCare.careforplants()
         
@@ -102,16 +102,18 @@ class PlantServer(object):
         time = self.plantCare.getSystemTime()
         mode = self.plantCare.getSystemMode()
         light = self.plantCare.getLightStatus()
+        pump = self.plantCare.getPumpStatus()
         
         temperatureData = self.plantCare.getTemperatureData()
-        
+    
         html = """<!DOCTYPE html>
         <html>
             <head> <title>Pico Greenhouse Controller</title> </head>
             <body> <h1>Pico Greenhouse Controller</h1>
                 <p>Time: {}</p>
                 <p>Mode: {}</p>
-                <p>Light: {}</p>                 
+                <p>Light: {}</p>
+                <p>Pump: {}</p>                    
                 <p>Temperature: {:.2f}</p>
                 <p>High: {:.2f}</p>
                 <p>Low: {:.2f}</p>
@@ -119,7 +121,7 @@ class PlantServer(object):
         </html>
         """
         
-        response = html.format(time, mode, light, temperatureData[0], temperatureData[1], temperatureData[2])
+        response = html.format(time, mode, light, pump, temperatureData[0], temperatureData[1], temperatureData[2])
         
         writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
         writer.write(response)
@@ -147,8 +149,9 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())          
     finally:
-        asyncio.new_event_loop()
+        print("Done")
+        #asyncio.new_event_loop()
     
     
 
-
+ 

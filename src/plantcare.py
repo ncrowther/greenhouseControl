@@ -17,7 +17,7 @@ import asyncio
 #################################################
 
 #### DEFINE WATERING TIMES HERE ####
-WATERING_TIMES = ["10:00", "12:00", "17:00"]
+WATERING_TIMES = ["10:00", "12:00", "21:00"]
 
 ### DEFINE FAN ON/OFF TEMPERATURE
 FAN_ON_TEMPERATURE = 27
@@ -95,25 +95,25 @@ class LinearActuator(object):
     def manualClose(self): 
         self.up_pin.value(0)  # Set up to OFF state        
         self.down_pin.value(1)  # Set down to ON state
-        self.actuatorAngle = 0
+        self.actuatorAngle = 0  
         
-    def up(self):
+    async def up(self):
         
-        if (self.actuatorAngle >= self.MAX_ACTUATOR_ANGLE):
+        if (self.actuatorAngle <= self.MAX_ACTUATOR_ANGLE):
             self.down_pin.value(0)  # Set down to OFF state
             self.up_pin.value(1)  # Set up to ON state
-            time.sleep_ms(self.PULSE_TIME)
+            await asyncio.sleep_ms(self.PULSE_TIME)
             self.up_pin.value(0)  # Set up to OFF state
             
             # Increment degrees incline
             self.actuatorAngle = self.actuatorAngle + 1 
         
-    def down(self):
+    async def down(self):
         
-        if (self.actuatorAngle >= 0):        
+        if (self.actuatorAngle > 0):        
             self.up_pin.value(0)  # Set up to OFF state   
             self.down_pin.value(1)  # Set down to ON state
-            time.sleep_ms(self.PULSE_TIME)
+            await asyncio.sleep_ms(self.PULSE_TIME)
             self.down_pin.value(0)  # Set down  to OFF state
             
             # Decrement degrees incline
@@ -156,6 +156,9 @@ class PwmSwitch(object):
             self.pumpOnState = False
             self.pump_a.duty_u16(0)
             self.pump_b.duty_u16(0)
+            
+    def pumpStatus(self):
+        return self.pumpOnState            
         
     def fanOn(self):
         
@@ -173,7 +176,10 @@ class PwmSwitch(object):
             print("Fan OFF")
             self.fanOnState = False            
             self.fan_a.duty_u16(0)
-            self.fan_b.duty_u16(0)        
+            self.fan_b.duty_u16(0)
+            
+    def fanStatus(self):
+        return self.fanOnState               
 
 
 class DDS18B20Probe(object):
@@ -194,11 +200,11 @@ class DDS18B20Probe(object):
         self.roms = self.ds_sensor.scan()
         print('Found DS devices: ', self.roms)
         
-    def measureIt(self, rtc):   
+    async def measureIt(self, rtc):   
         try:
-            self.ds_sensor.convert_temp()
-            # This needs to be a SYNC sleep
-            time.sleep_ms(750)           
+            print('measureIt')
+            self.ds_sensor.convert_temp()      
+            await asyncio.sleep_ms(750)        
             for rom in self.roms:
                 self.temperature = self.ds_sensor.read_temp(rom)
                 print('temperature (ºC):', "{:.2f}".format(self.temperature))
@@ -217,6 +223,7 @@ class DDS18B20Probe(object):
                 self.lowTemp = self.temperature
 
         except:
+            print('measureIt error')   
             raise HardwareError("DDS18B20 Probe", 100)
         
 
@@ -324,7 +331,7 @@ class Lcd(object):
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    def showData(self, ddsProbe, rtc):
+    async def showData(self, ddsProbe, rtc):
         
         timeNow= rtc.getTimeStr()    
         timeStr = "Time: " + timeNow ;
@@ -377,7 +384,7 @@ class PlantCare(object):
         self.pwmSwitch.pumpOn()
         self.lightSwitch.on()
 
-        time.sleep_ms(2000)
+        time.sleep_ms(500)
 
         # Turn off everything before starting loop
         self.pwmSwitch.fanOff()
@@ -387,59 +394,63 @@ class PlantCare(object):
     
     async def controlTemperature(self, dht11Sensor, pwmSwitch, rtc, actuator):
 
-        dht11Sensor.measureIt(rtc)
+        await dht11Sensor.measureIt(rtc)
         temperature = dht11Sensor.temperature
 
         # Open window 
         if (not self.manualOverride and (temperature >= OPEN_WINDOW_TEMPERATURE)):
-            actuator.up()      
+            await actuator.up()      
 
         # Close window 
         if (not self.manualOverride and (temperature < CLOSE_WINDOW_TEMPERATURE)):
-            actuator.down()  
+            await actuator.down()  
 
         # Turn on/off fan
         if (temperature >= FAN_ON_TEMPERATURE):
             pwmSwitch.fanOn()        
 
-        if (temperature >= FAN_OFF_TEMPERATURE):
+        if (temperature <= FAN_OFF_TEMPERATURE):
             pwmSwitch.fanOff()
             
         return temperature
-            
-    def controlWatering(self, temperature, pwmSwitch, rtc):
+      
+    async def waterOff(self, pwmSwitch, wateringPeriod):  
+        await asyncio.sleep_ms(wateringPeriod)
+        print("Watering Period OFF ")
+        pwmSwitch.pumpOff()        
+       
+               
+    async def controlWatering(self, temperature, pwmSwitch, rtc):
         
         MIN_WATERING_TEMP = 10
         timeNow = rtc.getTimeStr()
         
-        if (temperature > MIN_WATERING_TEMP and timeNow in WATERING_TIMES):
-            pwmSwitch.pumpOn()
+        print("Pump on %s" %pwmSwitch.pumpOnState)    
+        
+        if (temperature > MIN_WATERING_TEMP and timeNow in WATERING_TIMES and pwmSwitch.pumpOnState is False):
+            t = int(pow(temperature, 3) * 3)
+            wateringPeriod = t/1000
             
-            wateringPeriod = int(pow(temperature, 3) * 3)
-            wateringPeriodSeconds = wateringPeriod/1000
-            print("Watering Period %s seconds " %wateringPeriodSeconds)
-            self.sleep(wateringPeriod)
-            pwmSwitch.pumpOff()
-            # Do nothing for the rest of one minute to prevent this 'if statement' repeating
-            minuteRemainder = ONE_MINUTE - wateringPeriod
-            print("Remaining seconds %s " %minuteRemainder)
-            if (minuteRemainder > 0):
-               self.sleep(minuteRemainder)
-        else:
-            pwmSwitch.pumpOff()
+            # Cannot be less than one minute
+            if (wateringPeriod < ONE_MINUTE):
+                wateringPeriod = ONE_MINUTE
+                            
+            pwmSwitch.pumpOn()
+            print("Watering Period %s mseconds " %wateringPeriod )                              
+            await self.waterOff(pwmSwitch, wateringPeriod)
+
             
     def controlLights(self, lightSwitch, rtc):
 
-        if (not self.manualOverride):
-            if (rtc.timeInRange(LIGHT_ON_TIME, LIGHT_OFF_TIME)):
-                lightSwitch.on()
-            else:
-               lightSwitch.off() 
-               
+        print("self.manualOverride:" + str(self.manualOverride))
+
+        if (not self.manualOverride) and (rtc.timeInRange(LIGHT_ON_TIME, LIGHT_OFF_TIME)):
+            lightSwitch.on()
+            print("LIGHT ON")
             
-    def sleep(self, period):
-        print("Sleep for " + str(period) + "ms") 
-        time.sleep_ms(period)
+        if (not self.manualOverride) and (not rtc.timeInRange(LIGHT_ON_TIME, LIGHT_OFF_TIME)):            
+            lightSwitch.off()
+            print("LIGHT OFF")                
             
     def setWindow(self, open):
         self.manualOverride = True
@@ -472,7 +483,13 @@ class PlantCare(object):
         if ( self.lightSwitch.status()):
             return "On"
         else:
-            return "Off"   
+            return "Off"
+        
+    def getPumpStatus(self):
+        if ( self.pwmSwitch.pumpStatus()):
+            return "On"
+        else:
+            return "Off"           
     
     def getSystemMode(self):
         
@@ -494,15 +511,20 @@ class PlantCare(object):
             timeNow = self.rtc.getDateTime()
             self.rtc.printDateTime(timeNow) 
             
+            print("controlLights...")
             self.controlLights(self.lightSwitch, self.rtc)        
             
+            print("controlTemperature...")
             temperature = await self.controlTemperature(self.ddsProbe, self.pwmSwitch, self.rtc, self.linearActuator)
+           
+            print("display data...")
+            await self.lcd.showData(self.ddsProbe, self.rtc)
             
-            self.lcd.showData(self.ddsProbe, self.rtc)
-            
-            self.controlWatering(temperature, self.pwmSwitch, self.rtc)
+            print("controlWatering...")
+            await self.controlWatering(temperature, self.pwmSwitch, self.rtc)
         
         except HardwareError as e:
+            print(e)            
             self.cleanUp()
             self.lcd.showError(e.error_code, e.message)
             sys.exit("Terminated")
@@ -514,19 +536,15 @@ class PlantCare(object):
             sys.exit("Terminated")
             
 async def count():
-    print("One")
-    await asyncio.sleep(1)
-    print("Two")            
+    print(".")         
             
 async def main():
     
-    datetime = '13:45:00,Sunday,2024-09-29' 
+    datetime = '10:00:00,Sunday,2024-09-29' 
     plantCare = PlantCare(datetime)
     
     while True:
         await asyncio.gather(plantCare.careforplants(), count())
 
 if __name__ == "__main__":
-    asyncio.run(main())          
-
-
+    asyncio.run(main())
