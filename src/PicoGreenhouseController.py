@@ -5,7 +5,7 @@ import time
 import uasyncio as asyncio
 import urequests
 import json
-from plantcare import PlantCare
+from plantcare import PlantCare, WindowState, OnOffState
 
 class PlantServer(object):
     
@@ -73,35 +73,45 @@ class PlantServer(object):
             pass
 
         request = str(request_line)
-        windowAuto = request.find('/auto')    
         windowOpen = request.find('/window/open')
         windowClosed = request.find('/window/close')
+        windowAuto = request.find('/window/auto')
         lightOn = request.find('/light/on')
-        lightOff = request.find('/light/off')          
-        print( 'window auto = ' + str(windowAuto))    
-        print( 'window open = ' + str(windowOpen))
-        print( 'window closed = ' + str(windowClosed))
-        print( 'light on = ' + str(lightOn))
-        print( 'light off = ' + str(lightOff))
+        lightOff = request.find('/light/off')
+        lightAuto = request.find('/light/auto')
+        pumpOn = request.find('/pump/on')
+        pumpOff = request.find('/pump/off')
+        pumpAuto = request.find('/pump/auto')
+        FOUND = 6
        
-        if windowAuto == 6:
-            self.plantCare.manualOverrideOff()
-            
-        if windowOpen == 6:
-            self.plantCare.setWindow(True)
-
-        if windowClosed == 6:
-            self.plantCare.setWindow(False)
-            
-        if lightOn == 6:
-            self.plantCare.setLight(True)
-            
-        if lightOff == 6:
-            self.plantCare.setLight(False)               
+        # Window
+        if windowOpen == FOUND:
+            self.plantCare.setWindow(WindowState.OPEN)  
+        if windowClosed == FOUND:
+            self.plantCare.setWindow(WindowState.CLOSED)         
+        if windowAuto == FOUND:
+            self.plantCare.setWindow(WindowState.AUTO)            
+        
+        # Light
+        if lightOn == FOUND:
+            self.plantCare.setLight(OnOffState.ON)    
+        if lightOff == FOUND:
+            self.plantCare.setLight(OnOffState.OFF)
+        if lightAuto == FOUND:
+            self.plantCare.setLight(OnOffState.AUTO)
+        
+        # Pump
+        if pumpOn == FOUND:
+            self.plantCare.setPump(OnOffState.ON)          
+        if pumpOff == FOUND:
+            self.plantCare.setPump(OnOffState.OFF)       
+        if pumpAuto == FOUND:
+            self.plantCare.setPump(OnOffState.AUTO)                
 
         time = self.plantCare.getSystemTime()
-        mode = self.plantCare.getSystemMode()
         light = self.plantCare.getLightStatus()
+        windowStatus = self.plantCare.getWindowStatus()
+        windowAngle = self.plantCare.getWindowAngle()        
         pump = self.plantCare.getPumpStatus()
         
         temperatureData = self.plantCare.getTemperatureData()
@@ -111,17 +121,18 @@ class PlantServer(object):
             <head> <title>Pico Greenhouse Controller</title> </head>
             <body> <h1>Pico Greenhouse Controller</h1>
                 <p>Time: {}</p>
-                <p>Mode: {}</p>
                 <p>Light: {}</p>
-                <p>Pump: {}</p>                    
-                <p>Temperature: {:.2f}</p>
-                <p>High: {:.2f}</p>
-                <p>Low: {:.2f}</p>
+                <p>Window Status: {} </p>                
+                <p>Window Angle: {} Degrees</p>
+                <p>Pump: {}</p>                
+                <p>Temperature: {:.2f}C</p>
+                <p>High: {:.2f}C</p>
+                <p>Low: {:.2f}C</p>
             </body>
         </html>
         """
         
-        response = html.format(time, mode, light, pump, temperatureData[0], temperatureData[1], temperatureData[2])
+        response = html.format(time, light, windowStatus, windowAngle, pump, temperatureData[0], temperatureData[1], temperatureData[2])
         
         writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
         writer.write(response)
@@ -134,11 +145,11 @@ async def main():
     
     plantServer = PlantServer()
 
-    print('Set up plant webserver...')
-    asyncio.create_task(asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80))
-
-    try: 
-        while True:     
+    try:  
+        print('Start webserver...')
+        asyncio.create_task(asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80))
+    
+        while True:        
             asyncio.create_task(plantServer.care())
             await asyncio.sleep(5)      
     except Exception as e:
@@ -149,9 +160,5 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())          
     finally:
-        print("Done")
-        #asyncio.new_event_loop()
-    
-    
-
- 
+        print("Restart....")
+        asyncio.new_event_loop()
