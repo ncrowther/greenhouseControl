@@ -110,9 +110,12 @@ class PlantServer(object):
 
         time = self.plantCare.getSystemTime()
         light = self.plantCare.getLightStatus()
-        windowStatus = self.plantCare.getWindowStatus()
-        windowAngle = self.plantCare.getWindowAngle()        
+        lightSettings = self.plantCare.getLightSettings()        
+        windowStatus = self.plantCare.getWindowStatus()    
+        windowAngle = self.plantCare.getWindowAngle()
+        windowSettings = self.plantCare.getWindowSettings()
         pump = self.plantCare.getPumpStatus()
+        pumpSettings = self.plantCare.getPumpSettings()
         
         temperatureData = self.plantCare.getTemperatureData()
     
@@ -122,9 +125,12 @@ class PlantServer(object):
             <body> <h1>Pico Greenhouse Controller</h1>
                 <p>Time: {}</p>
                 <p>Light: {}</p>
+                <p>Light Times: {}</p>                
                 <p>Window Status: {} </p>                
                 <p>Window Angle: {} Degrees</p>
-                <p>Pump: {}</p>                
+                <p>Window Temperature Range: {} C</p>                
+                <p>Pump: {}</p>
+                <p>Pump Times: {}</p>                   
                 <p>Temperature: {:.2f}C</p>
                 <p>High: {:.2f}C</p>
                 <p>Low: {:.2f}C</p>
@@ -132,7 +138,7 @@ class PlantServer(object):
         </html>
         """
         
-        response = html.format(time, light, windowStatus, windowAngle, pump, temperatureData[0], temperatureData[1], temperatureData[2])
+        response = html.format(time, light, lightSettings, windowStatus, windowAngle, windowSettings, pump, pumpSettings, temperatureData[0], temperatureData[1], temperatureData[2])
         
         writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
         writer.write(response)
@@ -162,3 +168,4 @@ if __name__ == "__main__":
     finally:
         print("Restart....")
         asyncio.new_event_loop()
+    
