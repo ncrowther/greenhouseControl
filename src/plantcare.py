@@ -73,9 +73,11 @@ class LightSwitch(object):
         
         if (OnOffState.AUTO == self.status()) and (rtc.timeInRange(self.LIGHT_ON_TIME, self.LIGHT_OFF_TIME)):
             self.setState(OnOffState.ON)
+            self.setState(OnOffState.AUTO)           
             
         if (OnOffState.AUTO == self.status()) and (not rtc.timeInRange(self.LIGHT_ON_TIME, self.LIGHT_OFF_TIME)):            
-            self.setState(OnOffState.OFF)              
+            self.setState(OnOffState.OFF)
+            self.setState(OnOffState.AUTO)             
      
     def status(self):
         return self.state
@@ -93,7 +95,7 @@ class LinearActuator(object):
 
     # Define window pulse count and length
     MAX_ACTUATOR_ANGLE = 90
-    PULSE_TIME = 500  
+    PULSE_TIME = 1250  
     PULSE_DEGREE_CHANGE = 5
     
     def __init__(self):

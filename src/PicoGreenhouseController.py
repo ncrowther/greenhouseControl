@@ -122,13 +122,13 @@ class PlantServer(object):
         html = """<!DOCTYPE html>
         <html>
             <head> <title>Pico Greenhouse Controller</title> </head>
-            <body> <h1>Pico Greenhouse Controller</h1>
+            <body> <h1 style="color:green;">Pico Greenhouse Controller</h1>
                 <p>Time: {}</p>
                 <p>Light: {}</p>
                 <p>Light Times: {}</p>                
                 <p>Window Status: {} </p>                
                 <p>Window Angle: {} Degrees</p>
-                <p>Window Temperature Range: {} C</p>                
+                <p>Window Temperature Range: {}</p>                
                 <p>Pump: {}</p>
                 <p>Pump Times: {}</p>                   
                 <p>Temperature: {:.2f}C</p>
@@ -156,10 +156,9 @@ async def main():
         asyncio.create_task(asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80))
     
         while True:        
-            asyncio.create_task(plantServer.care())
+            await asyncio.create_task(plantServer.care())            
             await asyncio.sleep(5)      
     except Exception as e:
-        print("Terminated")
         sys.exit("Terminated after exception")
 
 if __name__ == "__main__":
@@ -169,3 +168,6 @@ if __name__ == "__main__":
         print("Restart....")
         asyncio.new_event_loop()
     
+    
+
+ 
