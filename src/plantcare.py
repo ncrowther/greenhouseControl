@@ -56,6 +56,13 @@ class LightSwitch(object):
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         self.state = OnOffState.AUTO
 
+    def setOnOffTime(self, onTime, offTime):
+        # refine light on and off times
+        self.LIGHT_ON_HOUR  = int(onTime) # 24 hour
+        self.LIGHT_OFF_HOUR = int(offTime) # 24 hour
+        self.LIGHT_ON_TIME  = time.mktime((2000, 01, 01, self.LIGHT_ON_HOUR, 00, 00, 0, 0))
+        self.LIGHT_OFF_TIME = time.mktime((2000, 01, 01, self.LIGHT_OFF_HOUR, 00, 00, 0, 0))        
+
     def setState(self, state):
         
         self.state = state
@@ -67,17 +74,24 @@ class LightSwitch(object):
             self.relay_pin.value(0)  # Set relay to OFF state
             print("LightOFF")
             
+    def toggleState(self):
+            
+        if (self.state == OnOffState.ON):
+            self.setState(OnOffState.OFF)
+        elif (self.state == OnOffState.OFF):
+            self.setState(OnOffState.AUTO)
+        elif (self.state == OnOffState.AUTO):
+            self.setState(OnOffState.ON)                
+            
     def controlLights(self, rtc):
 
         print("Light state %s" %self.status())
         
         if (OnOffState.AUTO == self.status()) and (rtc.timeInRange(self.LIGHT_ON_TIME, self.LIGHT_OFF_TIME)):
             self.setState(OnOffState.ON)
-            self.setState(OnOffState.AUTO)           
             
         if (OnOffState.AUTO == self.status()) and (not rtc.timeInRange(self.LIGHT_ON_TIME, self.LIGHT_OFF_TIME)):            
-            self.setState(OnOffState.OFF)
-            self.setState(OnOffState.AUTO)             
+            self.setState(OnOffState.OFF)              
      
     def status(self):
         return self.state
@@ -95,7 +109,7 @@ class LinearActuator(object):
 
     # Define window pulse count and length
     MAX_ACTUATOR_ANGLE = 90
-    PULSE_TIME = 1250  
+    PULSE_TIME = 500  
     PULSE_DEGREE_CHANGE = 5
     
     def __init__(self):
@@ -344,14 +358,20 @@ class Clock(object):
         timeNow = self.getTimeInSeconds()        
         return (time.ticks_diff(startRange, timeNow) <= 0) and (time.ticks_diff(endRange, timeNow) > 0)
     
-    def printDateTime(self, t):
+    def getDateTimeStr(self):
+        
+        t = self.getDateTime()
+                    
         a = t[0]&0x7F  #second
         b = t[1]&0x7F  #minute
         c = t[2]&0x3F  #hour
         d = t[3]&0x07  #week
         e = t[4]&0x3F  #day
         f = t[5]&0x1F  #month
-        print("20%x/%02x/%02x %02x:%02x:%02x %s" %(t[6],t[5],t[4],t[2],t[1],t[0],self.w[t[3]-1]))       
+        
+        datetimestr = "20%x/%02x/%02x %02x:%02x:%02x %s" %(t[6],t[5],t[4],t[2],t[1],t[0],self.w[t[3]-1])
+        
+        return datetimestr
 
     def getTimeStr(self):
         t = self.getDateTime()
@@ -390,7 +410,7 @@ class Lcd(object):
         
     async def showData(self, ddsProbe, rtc):
         
-        timeNow= rtc.getTimeStr()    
+        timeNow = rtc.getTimeStr()    
         timeStr = "Time: " + timeNow ;
         temperatureStr = "Temp: " + str(ddsProbe.temperature) + "C"
         
@@ -435,15 +455,21 @@ class PlantCare(object):
 
         # Turn off everything before starting loop
         #self.pump.fanOff()
-        self.windows.setState(WindowState.CLOSED)        
+        self.windows.setState(WindowState.CLOSED)
         self.pump.setState(OnOffState.OFF)
-        self.light.setState(OnOffState.OFF)                          
+        self.light.setState(OnOffState.OFF)
             
     def setWindow(self, state):      
-        self.windows.setState(state)
+        self.windows.setState(state)        
         
     def setLight(self, state):
         self.light.setState(state)
+        
+    def setLightOnOffTime(self, onTime, offTime):
+        self.light.setOnOffTime(onTime, offTime)
+        
+    def toggleLight(self):
+        self.light.toggleState()
         
     def setPump(self, state):
         self.pump.setState(state)            
@@ -452,7 +478,7 @@ class PlantCare(object):
         return [self.ddsProbe.temperature, self.ddsProbe.highTemp, self.ddsProbe.lowTemp]
     
     def getSystemTime(self):
-        return self.rtc.getTimeStr()
+        return self.rtc.getDateTimeStr()
     
     def getLightStatus(self):
         return self.light.status()
@@ -485,8 +511,8 @@ class PlantCare(object):
         print("careforplants...")
         # Look after plants
         try:        
-            timeNow = self.rtc.getDateTime()
-            self.rtc.printDateTime(timeNow) 
+            timestamp = self.rtc.getDateTimeStr() 
+            print(timestamp)
             
             print("controlLights...")
             self.light.controlLights(self.rtc)        
