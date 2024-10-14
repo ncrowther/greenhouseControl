@@ -5,6 +5,7 @@ import time
 import asyncio
 import urequests
 import json
+import gc
 
 from plantcare import PlantCare, WindowState, OnOffState
 
@@ -13,23 +14,22 @@ class PlantServer(object):
     ssid = 'TALKTALKE0F9AF_EXT'
     #ssid = 'TALKTALKE0F9AF'
     password = 'H6K8EK9M'
-    ipAddress = 0
         
     def __init__(self):
         
         self.wlan = network.WLAN(network.STA_IF)
-        self.connect_to_network()
+        ipAddress = self.connect_to_network()
         
         datetime = self.getDateTime()
         
-        self.plantCare = PlantCare(datetime)
+        self.plantCare = PlantCare(datetime, ipAddress)
             
     
-
     def connect_to_network(self):
 
         print('Connecting to Network...')
         
+        ip = "ERROR"
         self.wlan.active(True)
         self.wlan.config(pm = 0xa11140) # Disable power-save mode
         self.wlan.connect(self.ssid, self.password)
@@ -44,12 +44,14 @@ class PlantServer(object):
 
         if self.wlan.status() != 3:
             print('Network connection failed')
-            # raise OSError('Network connection failed')
+            raise OSError('Network connection failed')
         else:
             print('connected')
             status = self.wlan.ifconfig()
-            print('ip = ' + status[0])
-            self.ipAddress = status[0]
+            ip = status[0]
+            print('ip = ' + ip)
+     
+        return ip
             
     async def getBearerToken(self):
 
@@ -60,77 +62,100 @@ class PlantServer(object):
         }
         
         request_url = 'https://iam.cloud.ibm.com/identity/token'
-        res = urequests.post(request_url, headers = header, data = payload).json()
-
-        #jsonData = json.loads(data)
-        accessToken = res["access_token"]
         
-        bearerToken = 'Bearer ' + accessToken
-        
-        print(bearerToken)
-        
-        return bearerToken
+        gc.collect() 
+        resp = None
+        bearerToken = None
+        try:
+            resp = urequests.post(request_url, headers = header, data = payload)
+            
+            jsonData = resp.json()
+            accessToken = jsonData["access_token"]
+            
+            bearerToken = 'Bearer ' + accessToken         
+            
+        except Exception as e: # Here it catches any error.
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                resp.close()
+            print("Error: " +  e)
+        finally:
+            if resp:
+                resp.close()
+            gc.collect()
+            print(bearerToken)
+            return bearerToken
 
 
     async def setConfig(self, plantCare, bearerToken):
-        
-                
+                    
+        resp = None                    
         payload = ''
         header = {
           'Authorization': bearerToken }
         
         request_url = 'https://724c8e7f-5faa-49e1-8dc0-7a39ffd871ad-bluemix.cloudantnosqldb.appdomain.cloud/greenhouse/_all_docs?include_docs=true'
 
-        response = urequests.get(request_url, headers = header)
+        try: 
+            resp = urequests.get(request_url, headers = header)
      
-        jsonData = response.json()
-        print(jsonData)
+            jsonData = resp.json()
+            print(jsonData)
 
-        docs = jsonData["rows"][0]
-        doc = docs["doc"]
-        print(doc)
+            docs = jsonData["rows"][0]
+            doc = docs["doc"]
+            print(doc)
 
-        lightOnOff = doc["lightOnOff"]
-        onTime = lightOnOff[0]
-        offTime = lightOnOff[1]
-        print("Light on:" + onTime)
-        print("Light off:" + offTime)        
-        plantCare.setLightOnOffTime(onTime, offTime)
-        
-        lightState = doc["lightState"]
-        plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState      
+            lightOnOff = doc["lightOnOff"]
+            onTime = lightOnOff[0]
+            offTime = lightOnOff[1]
+            print("Light on:" + onTime)
+            print("Light off:" + offTime)        
+            plantCare.setLightOnOffTime(onTime, offTime)
+            
+            lightState = doc["lightState"]
+            plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState      
 
-        watering = doc["wateringTimes"]
-        print(watering)
+            watering = doc["wateringTimes"]
+            print(watering)
 
-        temperature = doc["temperatureRange"]
-        print(temperature)
-        
-        response.close()
+            temperature = doc["temperatureRange"]
+            print(temperature)
+            
+        except Exception as e: # Here it catches any error.
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                resp.close()
+            print(e)
+        finally:
+            if resp:
+                resp.close()
+            gc.collect()
 
     def getDateTime(self):
 
-        formatedTime = '10:00:00,Sunday,2024-09-29' 
-
-        try: 
-            ###  get date time
+        formatedTime = '00:00:00,Saturday,2000-01-01' 
+        resp = None
+        try:
             r = urequests.get("http://worldtimeapi.org/api/timezone/Europe/London")
             datetime = r.json()
             print(datetime)
             # 2024-09-27T19:55:53.468676+01:0
             formatedTime = datetime["datetime"]
+            formatedDate = formatedTime[0:10]
             formatedTime = formatedTime[11:19]
-            formatedTime = formatedTime + ',Sunday,2024-09-22'
+            formatedTime = formatedTime + ',Sunday,' + formatedDate
             print("Formatted time: " + formatedTime)
             r.close()
-        
-        finally:     
+            
+        except Exception as e: # Here it catches any error.
+            print(e)
+            if isinstance(e, OSError) and r: # If the error is an OSError the socket has to be closed.
+                r.close()
+        finally:   
+            gc.collect()    
             return formatedTime
     
     async def logData(self, bearerToken, timestamp, temperature):
         
-
-        payload = ''
         header = {
           'Content-Type': 'application/json',
           'Authorization': bearerToken
@@ -143,11 +168,23 @@ class PlantServer(object):
         
         request_url = 'https://724c8e7f-5faa-49e1-8dc0-7a39ffd871ad-bluemix.cloudantnosqldb.appdomain.cloud/greenhouselog'
 
-        res = urequests.post(request_url, headers = header, data = payload).json()
         
-        print(res)
-
-
+        gc.collect() 
+        resp = None
+        try:
+            resp = urequests.post(request_url, headers = header, data = payload)
+            resp.close()
+            
+        except Exception as e: # Here it catches any error.
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                resp.close()
+        finally:   
+            gc.collect()
+        
+        
+    def displayError(self, code, message):
+        self.plantCare.displayError(code, message)
+        
     async def care(self):
         
         print('Start care...')
@@ -161,17 +198,19 @@ class PlantServer(object):
         
         print('Start logger...')
         
-        FIFTEEN_MINUTES = 9 # in seconds
+        FIFTEEN_MINUTES = 900 #900 secs
    
         await asyncio.sleep(15) # Give 15 seconds for the first temperature reading
         while True:
             tok = await self.getBearerToken()
-            time = self.plantCare.getSystemTime()
-            temperatureData = self.plantCare.getTemperatureData()
-            await self.logData(tok, time, temperatureData[0])
             
-            # Get config data
-            await self.setConfig(self.plantCare, tok)
+            if (tok):
+                time = self.plantCare.getSystemTime()
+                temperatureData = self.plantCare.getTemperatureData()
+                await self.logData(tok, time, temperatureData[0])
+                
+                # Get config data
+                await self.setConfig(self.plantCare, tok)
             
             await asyncio.sleep(FIFTEEN_MINUTES)
             
@@ -179,6 +218,7 @@ class PlantServer(object):
     async def serve_client(self, reader, writer):
         
         print("Client connected")
+                    
         request_line = await reader.readline()
         print("Request:", request_line)
         # We are not interested in HTTP request headers, skip them
@@ -197,6 +237,7 @@ class PlantServer(object):
         pumpOn = request.find('/pump/on')
         pumpOff = request.find('/pump/off')
         pumpAuto = request.find('/pump/auto')
+        pumpToggle = request.find('/pump/toggle')            
         FOUND = 6
        
         # Window
@@ -207,7 +248,7 @@ class PlantServer(object):
         if windowAuto == FOUND:
             self.plantCare.setWindow(WindowState.AUTO)
         if windowToggle == FOUND:
-            self.plantCare.toggleWindow()              
+            self.plantCare.toggleWindow()       
         
         # Light
         if lightOn == FOUND:
@@ -225,7 +266,9 @@ class PlantServer(object):
         if pumpOff == FOUND:
             self.plantCare.setPump(OnOffState.OFF)       
         if pumpAuto == FOUND:
-            self.plantCare.setPump(OnOffState.AUTO)                
+            self.plantCare.setPump(OnOffState.AUTO)
+        if pumpToggle == FOUND:
+            self.plantCare.togglePump()                  
 
         time = self.plantCare.getSystemTime()
         light = self.plantCare.getLightStatus()
@@ -238,12 +281,11 @@ class PlantServer(object):
         
         temperatureData = self.plantCare.getTemperatureData()
     
-        lightAutoUrl = self.ipAddress
         html = """<!DOCTYPE html>
         <html>
             <head> <title>Pico Greenhouse Controller</title> </head>
             <body> <h1 style="color:green;">Pico Greenhouse Controller</h1>
-                <p>Time: {}</p>
+                <p>Time: {}</p>            
                 <p>Light: {}</p>
                 <p>Light Times: {}</p>                
                 <p>Window Status: {} </p>                
@@ -257,7 +299,16 @@ class PlantServer(object):
                 
                 <form action="/light/toggle" method="put" target="_blank">
                 <input type="submit" value="Light">
-                </form> 
+                </form>
+                
+                <form action="/window/toggle" method="put" target="_blank">
+                <input type="submit" value="Window">
+                </form>             
+                
+                <form action="/pump/toggle" method="put" target="_blank">
+                <input type="submit" value="Pump">
+                </form>                
+                
             </body>
         </html>
         """
@@ -273,32 +324,31 @@ class PlantServer(object):
 
 async def main():
     
-    plantServer = PlantServer()
+    try: 
+        plantServer = PlantServer()
 
-    tasks = await asyncio.gather(
-        asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
-        plantServer.care(),
-        plantServer.logger())
-    
-    print(tasks)
-    
-  
-    #except Exception as e:
-     #   sys.exit("Terminated after exception: " + str(e))
+        tasks = await asyncio.gather(
+            asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
+            plantServer.care(),
+            plantServer.logger())
+        
+        print(tasks)
+        
+    except Exception as err:
+        sys.print_exception(err)
+        errMsg = '{}: {}'.format(type(err).__name__, err)
+        print(errMsg)
+        plantServer.displayError(999, errMsg)
+        raise
 
 def doit():
     try: 
         asyncio.run(main())
     except Exception as err:
+        sys.print_exception(err)
         print(f"Unexpected {err=}, {type(err)=}")
         pass
 
 if __name__ == "__main__":
     
     doit()
-    
-    
-
- 
-
-

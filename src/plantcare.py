@@ -140,6 +140,15 @@ class LinearActuator(object):
             self.down_pin.value(1)  # Set down to ON state
             self.windowAngle = 0  
             print("Window CLOSED")
+            
+    def toggleState(self):
+            
+        if (self.state == WindowState.OPEN):
+            self.setState(WindowState.CLOSED)
+        elif (self.state == WindowState.CLOSED):
+            self.setState(WindowState.AUTO)
+        elif (self.state == WindowState.AUTO):
+            self.setState(WindowState.OPEN)               
         
     async def up(self):
         
@@ -219,6 +228,15 @@ class Pump(object):
             self.pump_b.duty_u16(0)
             
         self.state = state
+        
+    def toggleState(self):
+            
+        if (self.state == OnOffState.ON):
+            self.setState(OnOffState.OFF)
+        elif (self.state == OnOffState.OFF):
+            self.setState(OnOffState.AUTO)
+        elif (self.state == OnOffState.AUTO):
+            self.setState(OnOffState.ON)           
         
     async def waterOff(self, pump, wateringPeriod):  
         await asyncio.sleep_ms(wateringPeriod * 1000)
@@ -319,11 +337,13 @@ class Clock(object):
 
     def set_time(self,new_time):
         
+        # new_time = '10:00:00,Sunday,2024-09-29' 
         try: 
             hour = new_time[0] + new_time[1]
             minute = new_time[3] + new_time[4]
             second = new_time[6] + new_time[7]
-            week = "0" + str(self.w.index(new_time.split(",",2)[1])+1)
+            week = "00"
+            #week = "0" + str(self.w.index(new_time.split(",",2)[1])+1)
             year = new_time.split(",",2)[2][2] + new_time.split(",",2)[2][3]
             month = new_time.split(",",2)[2][5] + new_time.split(",",2)[2][6]
             day = new_time.split(",",2)[2][8] + new_time.split(",",2)[2][9]
@@ -369,7 +389,8 @@ class Clock(object):
         e = t[4]&0x3F  #day
         f = t[5]&0x1F  #month
         
-        datetimestr = "20%x/%02x/%02x %02x:%02x:%02x %s" %(t[6],t[5],t[4],t[2],t[1],t[0],self.w[t[3]-1])
+        #datetimestr = "20%x/%02x/%02x %02x:%02x:%02x %s" %(t[6],t[5],t[4],t[2],t[1],t[0],self.w[t[3]-1])
+        datetimestr = "20%x/%02x/%02x %02x:%02x:%02x" %(t[6],t[5],t[4],t[2],t[1],t[0])
         
         return datetimestr
 
@@ -388,6 +409,9 @@ class Clock(object):
 
 class Lcd(object):
     
+    #  display mode
+    screen = 0
+            
     def __init__(self):
         
         #  I2C Pins
@@ -395,7 +419,7 @@ class Lcd(object):
         I2C_SDA = 6
         I2C_SCL = 7
         I2C_FREQ = 400000
-        
+    
         # setup the I2C communication for the OLED display
         self.bus = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=I2C_FREQ)
 
@@ -408,17 +432,40 @@ class Lcd(object):
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    async def showData(self, ddsProbe, rtc):
+    async def showData(self, ddsProbe, rtc, ip):
+                
+        # Display time & temp on the LCD screen
+        # print("SCREEN: " + str(self.screen))
         
-        timeNow = rtc.getTimeStr()    
-        timeStr = "Time: " + timeNow ;
-        temperatureStr = "Temp: " + str(ddsProbe.temperature) + "C"
+        if (self.screen == 0):
+            timeNow = rtc.getTimeStr()    
+            timeStr = "Time: " + timeNow ;
+            temperatureStr = "Temp: " + str(ddsProbe.temperature) + "C"
         
-        # Display time & temp on the LCD screen       
-        self.lcd.clear()
-        self.lcd.putstr(timeStr)
-        self.lcd.putstr("\n")
-        self.lcd.putstr(temperatureStr)
+            self.lcd.clear()
+            self.lcd.putstr(timeStr)
+            self.lcd.putstr("\n")
+            self.lcd.putstr(temperatureStr)         
+            self.screen = 1
+            
+        elif (self.screen == 1):
+            highStr = "Hi: " + str(ddsProbe.highTemp) + "C"
+            lowStr =  "Lo: " + str(ddsProbe.lowTemp) + "C"
+            
+            self.lcd.clear()
+            self.lcd.putstr(highStr)
+            self.lcd.putstr("\n")
+            self.lcd.putstr(lowStr)                               
+            self.screen = 2
+            
+        elif (self.screen == 2):
+            timeStr = rtc.getDateTimeStr()[:10]  
+            self.lcd.clear()
+            self.lcd.putstr(timeStr)
+            self.lcd.putstr("\n")
+            self.lcd.putstr(ip)               
+            self.screen = 0
+            
         
     def showError(self, code, message):
         self.lcd.clear()
@@ -429,7 +476,9 @@ class Lcd(object):
     
 class PlantCare(object):
     
-    def __init__(self, datetime):
+    def __init__(self, datetime, ip):
+        
+        self.ip = ip
         
         self.rtc = Clock()
                 
@@ -443,7 +492,7 @@ class PlantCare(object):
         self.windows = LinearActuator()
         self.lcd = Lcd()
 
-        self.lcd.showData(self.ddsProbe, self.rtc)
+        self.lcd.showData(self.ddsProbe, self.rtc, self.ip)
                 
         # Startup check
         self.windows.setState(WindowState.OPEN)
@@ -460,7 +509,10 @@ class PlantCare(object):
         self.light.setState(OnOffState.OFF)
             
     def setWindow(self, state):      
-        self.windows.setState(state)        
+        self.windows.setState(state)
+        
+    def toggleWindow(self):
+        self.windows.toggleState()        
         
     def setLight(self, state):
         self.light.setState(state)
@@ -472,7 +524,10 @@ class PlantCare(object):
         self.light.toggleState()
         
     def setPump(self, state):
-        self.pump.setState(state)            
+        self.pump.setState(state)
+        
+    def togglePump(self):
+        self.pump.toggleState()        
         
     def getTemperatureData(self):
         return [self.ddsProbe.temperature, self.ddsProbe.highTemp, self.ddsProbe.lowTemp]
@@ -499,7 +554,10 @@ class PlantCare(object):
         return self.pump.status()
     
     def getPumpSettings(self):
-        return self.pump.settings()    
+        return self.pump.settings()
+    
+    def displayError(self, code, message):
+        self.lcd.showError(code, message)
     
     def cleanUp(self):
         #self.pump.fanOff()
@@ -524,7 +582,7 @@ class PlantCare(object):
             await self.pump.controlWatering(temperature, self.rtc)
             
             print("display data...")
-            await self.lcd.showData(self.ddsProbe, self.rtc)        
+            await self.lcd.showData(self.ddsProbe, self.rtc, self.ip)        
 
         except HardwareError as e:
             print(e)            
@@ -544,7 +602,7 @@ async def count():
 async def main():
     
     datetime = '10:00:00,Sunday,2024-09-29' 
-    plantCare = PlantCare(datetime)
+    plantCare = PlantCare(datetime, "192.168.1.1")
     
     while True:
         await asyncio.gather(plantCare.careforplants(), count())
