@@ -107,19 +107,22 @@ class PlantServer(object):
 
             lightOnOff = doc["lightOnOff"]
             onTime = lightOnOff[0]
-            offTime = lightOnOff[1]
-            print("Light on:" + onTime)
-            print("Light off:" + offTime)        
+            offTime = lightOnOff[1]        
             plantCare.setLightOnOffTime(onTime, offTime)
             
             lightState = doc["lightState"]
             plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState      
 
-            watering = doc["wateringTimes"]
-            print(watering)
-
-            temperature = doc["temperatureRange"]
-            print(temperature)
+            wateringTimes = doc["wateringTimes"]       
+            plantCare.setWateringTimes(wateringTimes)            
+            
+            pumpState = doc["pumpState"]
+            plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState     
+            
+            windowState = doc["windowState"]
+            plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
+            temperatureRange = doc["temperatureRange"]            
+            plantCare.setWindowTemperatureRange(temperatureRange[0], temperatureRange[1])            
             
         except Exception as e: # Here it catches any error.
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
@@ -154,7 +157,7 @@ class PlantServer(object):
             gc.collect()    
             return formatedTime
     
-    async def logData(self, bearerToken, timestamp, temperature):
+    async def logData(self, bearerToken, timestamp, temperature, humidity):
         
         header = {
           'Content-Type': 'application/json',
@@ -164,11 +167,11 @@ class PlantServer(object):
         payload = json.dumps({
           "timestamp": timestamp,
           "temperature": temperature,
+          "humidity": humidity
         })
         
         request_url = 'https://724c8e7f-5faa-49e1-8dc0-7a39ffd871ad-bluemix.cloudantnosqldb.appdomain.cloud/greenhouselog'
-
-        
+     
         gc.collect() 
         resp = None
         try:
@@ -198,6 +201,14 @@ class PlantServer(object):
         
         print('Start logger...')
         
+        # Set the config from cloudant on startup 
+        tok = await self.getBearerToken()
+            
+        if (tok):
+            # Set config data
+            await self.setConfig(self.plantCare, tok)
+        
+        
         FIFTEEN_MINUTES = 900 #900 secs
    
         await asyncio.sleep(15) # Give 15 seconds for the first temperature reading
@@ -207,10 +218,8 @@ class PlantServer(object):
             if (tok):
                 time = self.plantCare.getSystemTime()
                 temperatureData = self.plantCare.getTemperatureData()
-                await self.logData(tok, time, temperatureData[0])
-                
-                # Get config data
-                await self.setConfig(self.plantCare, tok)
+                humidityData = self.plantCare.getHumidityData()                
+                await self.logData(tok, time, temperatureData[0], humidityData[0])
             
             await asyncio.sleep(FIFTEEN_MINUTES)
             
@@ -280,12 +289,13 @@ class PlantServer(object):
         pumpSettings = self.plantCare.getPumpSettings()
         
         temperatureData = self.plantCare.getTemperatureData()
-    
+        humidityData = self.plantCare.getHumidityData()
+        
         html = """<!DOCTYPE html>
         <html>
             <head> <title>Pico Greenhouse Controller</title> </head>
             <body> <h1 style="color:green;">Pico Greenhouse Controller</h1>
-                <p>Time: {}</p>            
+                <p>DateTime: {}</p>            
                 <p>Light: {}</p>
                 <p>Light Times: {}</p>                
                 <p>Window Status: {} </p>                
@@ -293,9 +303,8 @@ class PlantServer(object):
                 <p>Window Temperature Range: {}</p>                
                 <p>Pump: {}</p>
                 <p>Pump Times: {}</p>                   
-                <p>Temperature: {:.2f}C</p>
-                <p>High: {:.2f}C</p>
-                <p>Low: {:.2f}C</p>
+                <p>Temperature: {:.2f}C High: {:.2f}C Low: {:.2f}C</p>
+                <p>Humidity: {:.2f}% High: {:.2f}% Low: {:.2f}%</p>                
                 
                 <form action="/light/toggle" method="put" target="_blank">
                 <input type="submit" value="Light">
@@ -311,9 +320,21 @@ class PlantServer(object):
                 
             </body>
         </html>
-        """
-        
-        response = html.format(time, light, lightSettings, windowStatus, windowAngle, windowSettings, pump, pumpSettings, temperatureData[0], temperatureData[1], temperatureData[2])
+        """  
+        response = html.format(time,
+                               light,
+                               lightSettings,
+                               windowStatus,
+                               windowAngle,
+                               windowSettings,
+                               pump,
+                               pumpSettings,
+                               temperatureData[0],
+                               temperatureData[1],
+                               temperatureData[2],
+                               humidityData[0],
+                               humidityData[1],
+                               humidityData[2])
         
         writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
         writer.write(response)
@@ -339,7 +360,8 @@ async def main():
         errMsg = '{}: {}'.format(type(err).__name__, err)
         print(errMsg)
         plantServer.displayError(999, errMsg)
-        raise
+        time.sleep(60)
+        doit()
 
 def doit():
     try: 
@@ -347,8 +369,8 @@ def doit():
     except Exception as err:
         sys.print_exception(err)
         print(f"Unexpected {err=}, {type(err)=}")
-        pass
 
 if __name__ == "__main__":
     
     doit()
+    

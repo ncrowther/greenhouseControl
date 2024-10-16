@@ -1,6 +1,7 @@
 import sys
 from machine import Pin, PWM, ADC, I2C
 import dht
+from micropython_sht20 import sht20
 import time
 import binascii
 import machine
@@ -125,6 +126,11 @@ class LinearActuator(object):
         self.windowAngle = 0
     
         self.state = WindowState.AUTO
+        
+    def setRange(self, upperTemperature, lowerTemperature):
+        # refine window open/close range
+        self.OPEN_WINDOW_TEMPERATURE  = int(upperTemperature) 
+        self.CLOSE_WINDOW_TEMPERATURE = int(lowerTemperature)         
 
     def setState(self, state):
         
@@ -238,15 +244,16 @@ class Pump(object):
         elif (self.state == OnOffState.AUTO):
             self.setState(OnOffState.ON)           
         
-    async def waterOff(self, pump, wateringPeriod):  
-        await asyncio.sleep_ms(wateringPeriod * 1000)
+    async def watering(self, wateringPeriod):
+        print("Watering Period %s seconds " %wateringPeriod )    
+        await asyncio.sleep(wateringPeriod)
         print("Watering Period OFF ")
-        pump.setState(OnOffState.OFF)
+        self.setState(OnOffState.OFF)
         
         # Sleep for a minute before turning back to AUTO mode so that we dont run again in the same time period
         await asyncio.sleep_ms(ONE_MINUTE)
         print("Watering sleep Period OFF ")
-        pump.setState(OnOffState.AUTO)
+        self.setState(OnOffState.AUTO)
        
                
     async def controlWatering(self, temperature, rtc):
@@ -260,9 +267,8 @@ class Pump(object):
             t = int(pow(temperature, 3) * 3)
             wateringPeriod = int(t/1000)
                             
-            self.setState(OnOffState.ON)
-            print("Watering Period %s mseconds " %wateringPeriod )                              
-            await self.waterOff(pump, wateringPeriod)         
+            self.setState(OnOffState.ON)                          
+            await self.watering(wateringPeriod)         
      
     def status(self):   
         return self.state
@@ -270,7 +276,68 @@ class Pump(object):
     def settings(self):
         return str(self.WATERING_TIMES)
     
-                           
+    def setTimes(self, wateringTimes):
+        self.WATERING_TIMES = wateringTimes
+    
+class TemperatureHumidityProbe(object):
+  
+    def __init__(self):
+        # setup the I2C communication for the SHT20 sensor
+        #  I2C Pins
+        I2C_PORT = 1
+        I2C_SDA = 6
+        I2C_SCL = 7        
+        i2c = I2C(1, sda=Pin(I2C_SDA), scl=Pin(I2C_SCL))  # Correct I2C pins for RP2040
+
+        self.sht = sht20.SHT20(i2c)
+        
+        self.temperature = 0        
+        self.highTemp = 0
+        self.lowTemp = 100
+        
+        self.humidity = 0        
+        self.highHumidity = 0
+        self.lowHumidity = 100        
+        
+    async def measureIt(self, rtc):   
+    
+        try:
+            print('measureIt')
+            self.temperature = self.sht.temperature
+            self.temperature = round(self.temperature, 2)
+                    
+            self.humidity = self.sht.humidity
+            self.humidity = round(self.humidity, 2)
+                 
+            print("Temperature (C): " + str(self.temperature))
+            print("Humidity (%RH): " + str(self.humidity))
+            
+            # Reset stats at midnight
+            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
+                print("Reset temperature stats")
+                self.highTemp = 0
+                self.lowTemp = 100
+             
+            # Set temperature high score
+            if (self.temperature > self.highTemp):
+                self.highTemp = self.temperature
+            
+            if (self.temperature < self.lowTemp):
+                self.lowTemp = self.temperature
+                
+            # Set humidity high score
+            if (self.humidity > self.highHumidity):
+                self.highHumidity = self.humidity
+            
+            if (self.humidity < self.lowHumidity):
+                self.lowHumidity = self.humidity
+            
+        except:
+            print('measureIt error')   
+            raise HardwareError("DDS18B20 Probe", 100)            
+
+
+        
 class TemperatureProbe(object):
   
     # Temperature probe
@@ -432,25 +499,24 @@ class Lcd(object):
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    async def showData(self, ddsProbe, rtc, ip):
+    async def showData(self, probe, rtc, ip):
                 
         # Display time & temp on the LCD screen
         # print("SCREEN: " + str(self.screen))
         
-        if (self.screen == 0):
-            timeNow = rtc.getTimeStr()    
-            timeStr = "Time: " + timeNow ;
-            temperatureStr = "Temp: " + str(ddsProbe.temperature) + "C"
-        
+        if (self.screen == 0): 
+            temperatureStr = "T: " + str(probe.temperature) + "C"
+            humidityStr    = "H: " + str(probe.humidity) + "%"
+            
             self.lcd.clear()
-            self.lcd.putstr(timeStr)
+            self.lcd.putstr(temperatureStr)
             self.lcd.putstr("\n")
-            self.lcd.putstr(temperatureStr)         
+            self.lcd.putstr(humidityStr)         
             self.screen = 1
             
         elif (self.screen == 1):
-            highStr = "Hi: " + str(ddsProbe.highTemp) + "C"
-            lowStr =  "Lo: " + str(ddsProbe.lowTemp) + "C"
+            highStr = "Hi: " + str(probe.highTemp) + "C"
+            lowStr =  "Lo: " + str(probe.lowTemp) + "C"
             
             self.lcd.clear()
             self.lcd.putstr(highStr)
@@ -459,12 +525,18 @@ class Lcd(object):
             self.screen = 2
             
         elif (self.screen == 2):
-            timeStr = rtc.getDateTimeStr()[:10]  
+            timeStr = rtc.getTimeStr()   
+            dateStr = rtc.getDateTimeStr()[:10]
             self.lcd.clear()
             self.lcd.putstr(timeStr)
             self.lcd.putstr("\n")
+            self.lcd.putstr(dateStr)               
+            self.screen = 3
+            
+        elif (self.screen == 3):
+            self.lcd.clear()
             self.lcd.putstr(ip)               
-            self.screen = 0
+            self.screen = 0            
             
         
     def showError(self, code, message):
@@ -487,12 +559,12 @@ class PlantCare(object):
 
         ## Creat the objects to be controlled
         self.light = LightSwitch()
-        self.ddsProbe = TemperatureProbe()
+        self.probe = TemperatureHumidityProbe()
         self.pump = Pump()
         self.windows = LinearActuator()
         self.lcd = Lcd()
 
-        self.lcd.showData(self.ddsProbe, self.rtc, self.ip)
+        self.lcd.showData(self.probe, self.rtc, self.ip)
                 
         # Startup check
         self.windows.setState(WindowState.OPEN)
@@ -502,12 +574,17 @@ class PlantCare(object):
 
         time.sleep_ms(500)
 
-        # Turn off everything before starting loop
+        # Turn off everything and then set to AUTO before starting loop
         #self.pump.fanOff()
         self.windows.setState(WindowState.CLOSED)
+        self.windows.setState(WindowState.AUTO)
+        
         self.pump.setState(OnOffState.OFF)
+        self.pump.setState(OnOffState.AUTO)
+        
         self.light.setState(OnOffState.OFF)
-            
+        self.light.setState(OnOffState.AUTO)
+        
     def setWindow(self, state):      
         self.windows.setState(state)
         
@@ -530,7 +607,10 @@ class PlantCare(object):
         self.pump.toggleState()        
         
     def getTemperatureData(self):
-        return [self.ddsProbe.temperature, self.ddsProbe.highTemp, self.ddsProbe.lowTemp]
+        return [self.probe.temperature, self.probe.highTemp, self.probe.lowTemp]
+    
+    def getHumidityData(self):
+        return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
     
     def getSystemTime(self):
         return self.rtc.getDateTimeStr()
@@ -548,13 +628,19 @@ class PlantCare(object):
         return self.windows.angle()
     
     def getWindowSettings(self):
-        return self.windows.settings()    
+        return self.windows.settings()
+    
+    def setWindowTemperatureRange(self, upper, lower):
+        return self.windows.setRange(upper, lower)        
         
     def getPumpStatus(self):
         return self.pump.status()
     
     def getPumpSettings(self):
         return self.pump.settings()
+    
+    def setWateringTimes(self, wateringTimes):
+        self.pump.setTimes(wateringTimes)
     
     def displayError(self, code, message):
         self.lcd.showError(code, message)
@@ -576,13 +662,13 @@ class PlantCare(object):
             self.light.controlLights(self.rtc)        
             
             print("controlTemperature...")
-            temperature = await self.windows.control(self.ddsProbe, self.rtc)
+            temperature = await self.windows.control(self.probe, self.rtc)
             
             print("controlWatering...")
             await self.pump.controlWatering(temperature, self.rtc)
             
             print("display data...")
-            await self.lcd.showData(self.ddsProbe, self.rtc, self.ip)        
+            await self.lcd.showData(self.probe, self.rtc, self.ip)        
 
         except HardwareError as e:
             print(e)            
