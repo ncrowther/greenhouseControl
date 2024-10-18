@@ -13,45 +13,51 @@ class PlantServer(object):
     
     ssid = 'TALKTALKE0F9AF_EXT'
     #ssid = 'TALKTALKE0F9AF'
-    password = 'H6K8EK9M'
+    password = 'H6K8EK9M'  
+    ipAddress = "IP"
         
     def __init__(self):
         
         self.wlan = network.WLAN(network.STA_IF)
-        ipAddress = self.connect_to_network()
+        self.ipAddress = self.connect_to_network()
         
         datetime = self.getDateTime()
         
-        self.plantCare = PlantCare(datetime, ipAddress)
+        self.plantCare = PlantCare(datetime, self.ipAddress)
             
     
     def connect_to_network(self):
 
-        print('Connecting to Network...')
+        print('Connecting to Network...')    
         
-        ip = "ERROR"
-        self.wlan.active(True)
-        self.wlan.config(pm = 0xa11140) # Disable power-save mode
-        self.wlan.connect(self.ssid, self.password)
-
-        max_wait = 10
-        while max_wait > 0:
-            if self.wlan.status() < 0 or self.wlan.status() >= 3:
-                break
-            max_wait -= 1
-            print('waiting for connection...')
-            time.sleep(2)
-
+        # Check if already connected
         if self.wlan.status() != 3:
-            print('Network connection failed')
-            raise OSError('Network connection failed')
-        else:
-            print('connected')
-            status = self.wlan.ifconfig()
-            ip = status[0]
-            print('ip = ' + ip)
-     
-        return ip
+            print("Connecting to Wi-Fi...")
+            
+            self.wlan.active(True)
+            self.wlan.config(pm = 0xa11140) # Disable power-save mode
+            self.wlan.connect(self.ssid, self.password)
+
+            max_wait = 10
+            while max_wait > 0:
+                if self.wlan.status() < 0 or self.wlan.status() >= 3:
+                    break
+                max_wait -= 1
+                print('waiting for connection...')
+                time.sleep(2)
+
+            if self.wlan.status() != 3:
+                print('Network connection failed')
+                raise OSError('Network connection failed')
+            else:
+                print('WIFI CONNECTED')
+                status = self.wlan.ifconfig()
+                ip = status[0]
+                print('ip = ' + ip)
+                self.ipAddress = ip
+                
+        status = self.wlan.ifconfig()
+        return status[0]     
             
     async def getBearerToken(self):
 
@@ -213,6 +219,8 @@ class PlantServer(object):
    
         await asyncio.sleep(15) # Give 15 seconds for the first temperature reading
         while True:
+            self.connect_to_network()
+            
             tok = await self.getBearerToken()
             
             if (tok):
@@ -222,6 +230,7 @@ class PlantServer(object):
                 await self.logData(tok, time, temperatureData[0], humidityData[0])
             
             await asyncio.sleep(FIFTEEN_MINUTES)
+
             
 
     async def serve_client(self, reader, writer):
@@ -374,3 +383,4 @@ if __name__ == "__main__":
     
     doit()
     
+

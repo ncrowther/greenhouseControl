@@ -505,8 +505,8 @@ class Lcd(object):
         # print("SCREEN: " + str(self.screen))
         
         if (self.screen == 0): 
-            temperatureStr = "T: " + str(probe.temperature) + "C"
-            humidityStr    = "H: " + str(probe.humidity) + "%"
+            temperatureStr = str(probe.temperature) + "C"
+            humidityStr    = str(probe.humidity) + "%"
             
             self.lcd.clear()
             self.lcd.putstr(temperatureStr)
