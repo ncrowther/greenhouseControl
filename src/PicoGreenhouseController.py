@@ -24,37 +24,39 @@ class PlantServer(object):
         datetime = self.getDateTime()
         
         self.plantCare = PlantCare(datetime, self.ipAddress)
+        
+        self.configurePlantParams()
             
     
     def connect_to_network(self):
 
-        print('Connecting to Network...')    
+        print('Check Network...')    
         
         # Check if already connected
+        #if self.wlan.status() != 3:
+        print("Connecting to Wi-Fi...")
+        
+        self.wlan.active(True)
+        self.wlan.config(pm = 0xa11140) # Disable power-save mode
+        self.wlan.connect(self.ssid, self.password)
+
+        max_wait = 10
+        while max_wait > 0:
+            if self.wlan.status() < 0 or self.wlan.status() >= 3:
+                break
+            max_wait -= 1
+            print('waiting for connection...')
+            time.sleep(2)
+
         if self.wlan.status() != 3:
-            print("Connecting to Wi-Fi...")
-            
-            self.wlan.active(True)
-            self.wlan.config(pm = 0xa11140) # Disable power-save mode
-            self.wlan.connect(self.ssid, self.password)
-
-            max_wait = 10
-            while max_wait > 0:
-                if self.wlan.status() < 0 or self.wlan.status() >= 3:
-                    break
-                max_wait -= 1
-                print('waiting for connection...')
-                time.sleep(2)
-
-            if self.wlan.status() != 3:
-                print('Network connection failed')
-                raise OSError('Network connection failed')
-            else:
-                print('WIFI CONNECTED')
-                status = self.wlan.ifconfig()
-                ip = status[0]
-                print('ip = ' + ip)
-                self.ipAddress = ip
+            print('Network connection failed')
+            raise OSError('Network connection failed')
+        else:
+            print('********************************************WIFI CONNECTED')
+            status = self.wlan.ifconfig()
+            ip = status[0]
+            print('ip = ' + ip)
+            self.ipAddress = ip
                 
         status = self.wlan.ifconfig()
         return status[0]     
@@ -195,42 +197,51 @@ class PlantServer(object):
         self.plantCare.displayError(code, message)
         
     async def care(self):
-        
         print('Start care...')
         
+        SLEEP_TIME = 10
+        LOG_TIME = 90 # fifteen mins
+        
+        count = 0
+        
         while True:
-           await self.plantCare.careforplants()
-           await asyncio.sleep(10)                 
+            
+            count = count + 1
+            
+            await self.plantCare.careforplants() 
+            
+            if (count % LOG_TIME == 0):
+                await self.logger()
+                
+            await asyncio.sleep(SLEEP_TIME)      
+                       
 
+    async def configurePlantParams(self):  
         
-    async def logger(self):  
-        
-        print('Start logger...')
-        
+        print('Get Configuration...')
+                 
         # Set the config from cloudant on startup 
         tok = await self.getBearerToken()
             
         if (tok):
             # Set config data
-            await self.setConfig(self.plantCare, tok)
+            await self.setConfig(self.plantCare, tok)      
         
         
-        FIFTEEN_MINUTES = 900 #900 secs
-   
-        await asyncio.sleep(15) # Give 15 seconds for the first temperature reading
-        while True:
-            self.connect_to_network()
+    async def logger(self):  
+        
+        print('Start logger...')
+        
+        self.connect_to_network()
+                    
+        # Set the config from cloudant on startup 
+        tok = await self.getBearerToken()
             
-            tok = await self.getBearerToken()
-            
-            if (tok):
-                time = self.plantCare.getSystemTime()
-                temperatureData = self.plantCare.getTemperatureData()
-                humidityData = self.plantCare.getHumidityData()                
-                await self.logData(tok, time, temperatureData[0], humidityData[0])
-            
-            await asyncio.sleep(FIFTEEN_MINUTES)
-
+        if (tok):       
+            time = self.plantCare.getSystemTime()
+            temperatureData = self.plantCare.getTemperatureData()
+            humidityData = self.plantCare.getHumidityData()                
+            await self.logData(tok, time, temperatureData[0], humidityData[0])
             
 
     async def serve_client(self, reader, writer):
@@ -352,25 +363,23 @@ class PlantServer(object):
         await writer.wait_closed()
         print("Client disconnected")
 
-async def main():
-    
+async def main():   
+               
     try: 
         plantServer = PlantServer()
 
         tasks = await asyncio.gather(
             asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
-            plantServer.care(),
-            plantServer.logger())
+            plantServer.care())
         
         print(tasks)
-        
+
+
     except Exception as err:
         sys.print_exception(err)
         errMsg = '{}: {}'.format(type(err).__name__, err)
         print(errMsg)
-        plantServer.displayError(999, errMsg)
-        time.sleep(60)
-        doit()
+        #doit()
 
 def doit():
     try: 
@@ -383,4 +392,6 @@ if __name__ == "__main__":
     
     doit()
     
+
+
 
