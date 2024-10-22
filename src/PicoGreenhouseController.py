@@ -18,6 +18,7 @@ class PlantServer(object):
         
     def __init__(self):
         
+        # https://docs.pycom.io/tutorials/networks/wlan/
         self.wlan = network.WLAN(network.STA_IF)
         self.ipAddress = self.connect_to_network()
         
@@ -40,7 +41,7 @@ class PlantServer(object):
         self.wlan.config(pm = 0xa11140) # Disable power-save mode
         self.wlan.connect(self.ssid, self.password)
 
-        max_wait = 10
+        max_wait = 100
         while max_wait > 0:
             if self.wlan.status() < 0 or self.wlan.status() >= 3:
                 break
@@ -49,7 +50,7 @@ class PlantServer(object):
             time.sleep(2)
 
         if self.wlan.status() != 3:
-            print('Network connection failed')
+            print('Network connection failed') 
             raise OSError('Network connection failed')
         else:
             print('********************************************WIFI CONNECTED')
@@ -232,16 +233,24 @@ class PlantServer(object):
         
         print('Start logger...')
         
-        self.connect_to_network()
-                    
-        # Set the config from cloudant on startup 
-        tok = await self.getBearerToken()
-            
-        if (tok):       
-            time = self.plantCare.getSystemTime()
-            temperatureData = self.plantCare.getTemperatureData()
-            humidityData = self.plantCare.getHumidityData()                
-            await self.logData(tok, time, temperatureData[0], humidityData[0])
+        try: 
+            asyncio.run(main())
+        
+            self.connect_to_network()
+                        
+            # Set the config from cloudant on startup 
+            tok = await self.getBearerToken()
+                
+            if (tok):       
+                time = self.plantCare.getSystemTime()
+                temperatureData = self.plantCare.getTemperatureData()
+                humidityData = self.plantCare.getHumidityData()                
+                await self.logData(tok, time, temperatureData[0], humidityData[0])
+                
+        except Exception as err:
+            sys.print_exception(err)
+            print(f"Unexpected {err=}, {type(err)=}")
+            machine.reset() 
             
 
     async def serve_client(self, reader, writer):
