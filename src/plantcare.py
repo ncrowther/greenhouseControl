@@ -204,6 +204,71 @@ class LinearActuator(object):
     def settings(self):
         return str(self.CLOSE_WINDOW_TEMPERATURE) + " - " + str(self.OPEN_WINDOW_TEMPERATURE) + "C"      
 
+class Fan(object):
+    # PWM dual power switch
+    
+    ### DEFINE FAN ON TEMPERATURE
+    FAN_ON_TEMPERATURE = 25
+
+    ### DEFINE FAN OFF TEMPERATURE
+    FAN_OFF_TEMPERATURE = 24
+    
+    def __init__(self):
+        # Define pins for Fan
+        PWM_IN = 18
+        PWM_OUT = 19        
+        self.fan_a = PWM(Pin(PWM_IN), freq=1000)
+        self.fan_b = PWM(Pin(PWM_OUT), freq=1000)
+        
+        self.state = OnOffState.AUTO        
+        
+    async def on(self):
+        print("Fan ON")
+        MAX_FAN_SPEED = 65535
+        self.fan_a.duty_u16(0)
+        self.fan_b.duty_u16(MAX_FAN_SPEED)  # speed(0-65535)
+            
+    async def off(self):   
+        # Stop fan
+        self.fan_a.duty_u16(0)
+        self.fan_b.duty_u16(0)
+        
+    def setState(self, state):
+        
+        print('Set fan state:' + str(state))
+        
+        if (state == OnOffState.ON) and (OnOffState.ON != self.state):
+            self.on()
+        elif (state == OnOffState.OFF) and (OnOffState.ON == self.state):
+            self.off()
+            
+        self.state = state
+        
+    def toggleState(self):         
+        if (self.state == OnOffState.ON):
+            self.setState(OnOffState.OFF)
+        elif (self.state == OnOffState.OFF):
+            self.setState(OnOffState.AUTO)
+        elif (self.state == OnOffState.AUTO):
+            self.setState(OnOffState.ON)                     
+     
+    def status(self):   
+        return self.state        
+        
+    async def control(self, temperatureSensor, rtc):
+
+        await temperatureSensor.measureIt(rtc)
+        temperature = temperatureSensor.temperature
+        
+        # Too hot
+        if (OnOffState.AUTO == self.status()) and  (temperature >= self.FAN_ON_TEMPERATURE):
+            await self.on()      
+
+        # Cool enough
+        if (OnOffState.AUTO == self.status()) and (temperature < self.FAN_OFF_TEMPERATURE):
+            await self.off()  
+            
+        return temperature             
     
 class Pump(object):
     # PWM dual power switch
@@ -221,7 +286,7 @@ class Pump(object):
         self.state = OnOffState.AUTO
         
     def setState(self, state):
-           
+        
         print('Set pump state:' + str(state))
         
         if (state == OnOffState.ON) and (OnOffState.ON != self.state):
@@ -563,6 +628,7 @@ class PlantCare(object):
         self.light = LightSwitch()
         self.probe = TemperatureHumidityProbe()
         self.pump = Pump()
+        self.fan = Fan()
         self.windows = LinearActuator()
         self.lcd = Lcd()
 
@@ -572,6 +638,7 @@ class PlantCare(object):
         self.windows.setState(WindowState.OPEN)
         #self.pump.fanOn()
         self.pump.setState(OnOffState.ON)
+        self.fan.setState(OnOffState.ON)
         self.light.setState(OnOffState.ON)
 
         time.sleep_ms(500)
@@ -583,6 +650,9 @@ class PlantCare(object):
         
         self.pump.setState(OnOffState.OFF)
         self.pump.setState(OnOffState.AUTO)
+        
+        self.fan.setState(OnOffState.OFF)
+        self.fan.setState(OnOffState.AUTO)        
         
         self.light.setState(OnOffState.OFF)
         self.light.setState(OnOffState.AUTO)
@@ -664,7 +734,8 @@ class PlantCare(object):
             self.light.controlLights(self.rtc)        
             
             print("controlTemperature...")
-            temperature = await self.windows.control(self.probe, self.rtc)
+            #temperature = await self.windows.control(self.probe, self.rtc)
+            temperature = await self.fan.control(self.probe, self.rtc)
             
             print("controlWatering...")
             await self.pump.controlWatering(temperature, self.rtc)
@@ -697,3 +768,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+

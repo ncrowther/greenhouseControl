@@ -6,13 +6,14 @@ import asyncio
 import urequests
 import json
 import gc
+import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
 class PlantServer(object):
     
-    ssid = 'TALKTALKE0F9AF_EXT'
-    #ssid = 'TALKTALKE0F9AF'
+    #ssid = 'TALKTALKE0F9AF_EXT'
+    ssid = 'TALKTALKE0F9AF'
     password = 'H6K8EK9M'  
     ipAddress = "IP"
         
@@ -22,11 +23,15 @@ class PlantServer(object):
         self.wlan = network.WLAN(network.STA_IF)
         self.ipAddress = self.connect_to_network()
         
-        datetime = self.getDateTime()
-        
-        self.plantCare = PlantCare(datetime, self.ipAddress)
-        
-        self.configurePlantParams()
+        if self.ipAddress == None:
+            self.plantCare = PlantCare(None, None)
+            self.displayError(99, "No WIFI")
+        else:
+            datetime = self.getDateTime()
+            
+            self.plantCare = PlantCare(datetime, self.ipAddress)
+            
+            self.configurePlantParams()
             
     
     def connect_to_network(self):
@@ -51,7 +56,7 @@ class PlantServer(object):
 
         if self.wlan.status() != 3:
             print('Network connection failed') 
-            raise OSError('Network connection failed')
+            return None
         else:
             print('********************************************WIFI CONNECTED')
             status = self.wlan.ifconfig()
@@ -207,14 +212,14 @@ class PlantServer(object):
         
         while True:
             
-            count = count + 1
-            
             await self.plantCare.careforplants() 
             
             if (count % LOG_TIME == 0):
                 await self.logger()
                 
-            await asyncio.sleep(SLEEP_TIME)      
+            await asyncio.sleep(SLEEP_TIME)
+            
+            count = count + 1
                        
 
     async def configurePlantParams(self):  
@@ -234,7 +239,6 @@ class PlantServer(object):
         print('Start logger...')
         
         try: 
-            asyncio.run(main())
         
             self.connect_to_network()
                         
@@ -250,6 +254,7 @@ class PlantServer(object):
         except Exception as err:
             sys.print_exception(err)
             print(f"Unexpected {err=}, {type(err)=}")
+            self.displayError(123, "WIFI ERROR")
             machine.reset() 
             
 
@@ -378,7 +383,7 @@ async def main():
         plantServer = PlantServer()
 
         tasks = await asyncio.gather(
-            asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
+            #asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
             plantServer.care())
         
         print(tasks)
@@ -388,7 +393,8 @@ async def main():
         sys.print_exception(err)
         errMsg = '{}: {}'.format(type(err).__name__, err)
         print(errMsg)
-        #doit()
+        self.displayError(123, "WIFI ERROR")
+        machine.reset()
 
 def doit():
     try: 
@@ -400,7 +406,3 @@ def doit():
 if __name__ == "__main__":
     
     doit()
-    
-
-
-
