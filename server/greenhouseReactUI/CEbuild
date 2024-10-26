@@ -10,14 +10,14 @@
 # into that registry before you run it.
 
 set -ex
-export REGISTRY=${REGISTRY:-docker.io/cloudcapped}
+export REGISTRY=${REGISTRY:-docker.io/ncrowthe}
 
 # Build the image
-docker build ${NOCACHE} -t ${REGISTRY}/fineui . --platform linux/amd64
+docker build ${NOCACHE} -t ${REGISTRY}/greenhouse . --platform linux/amd64
 
 # And push it
-docker push ${REGISTRY}/fineui
+docker push ${REGISTRY}/greenhouse
 
 # Copy the image so it's also called ${REGISTRY}/codeengine, and push it
-docker tag ${REGISTRY}/fineui ${REGISTRY}/codeengine
-docker push ${REGISTRY}/codeengine
+#docker tag ${REGISTRY}/greenhouse ${REGISTRY}/codeengine
+#docker push ${REGISTRY}/codeengine

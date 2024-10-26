@@ -50,6 +50,8 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 5.	Start Docker Desktop
 
+    docker login -u ncrowthe -p C****!
+
 7.	Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
 
 8.	Using the same bash shell, deploy the sample application to your docker repo:

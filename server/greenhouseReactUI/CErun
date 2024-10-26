@@ -8,7 +8,7 @@ function clean() {
   set +ex
   echo Cleaning...
   (
-  ibmcloud ce app delete -n fineui -f
+  ibmcloud ce app delete -n greenhouse -f
   rm -f out
   ) > /dev/null 2>&1
 }
@@ -17,13 +17,13 @@ clean
 [[ "$1" == "clean" ]] && exit 0
 
 set -ex
-export REGISTRY=${REGISTRY:-docker.io/cloudcapped}
+export REGISTRY=${REGISTRY:-docker.io/ncrowthe}
 
 # Create the app
-ibmcloud ce app create -n fineui --image ${REGISTRY}/fineui
+ibmcloud ce app create -n greenhouse --image ${REGISTRY}/greenhouse
 
 # Get the URL of the app for later use
-URL=$(ibmcloud ce app get -n fineui -o url)
+URL=$(ibmcloud ce app get -n greenhouse -o url)
 
 # Now call it
 curl --location $URL | tee out

@@ -18,7 +18,8 @@ const IndustrialController = () => {
   //  fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(
   const { data, isLoading, error } = useQuery({
     queryFn: () =>
-      fetch('http://localhost:3000/docs', { mode: 'cors' }).then(
+      fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(
+      // fetch('http://localhost:3000/docs', { mode: 'cors' }).then(
         (res) => res.json()
       ),
     queryKey: [''],
