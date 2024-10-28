@@ -102,6 +102,57 @@ class LightSwitch(object):
     def settings(self):
         return str(self.LIGHT_ON_HOUR) + ":00 - " +  str(self.LIGHT_OFF_HOUR) + ":00"     
 
+class Heater(object):
+    # Relay heater
+
+    # Define heater on/off temperature
+    HEATER_ON_TEMPERATURE = 18
+    HEATER_OFF_TEMPERATURE = 20
+    
+    def __init__(self):
+        # GPIO pin number  relay is connected to
+        RELAY_PIN = 0
+        self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
+        self.state = OnOffState.AUTO   
+
+    def setState(self, state):
+        
+        self.state = state
+            
+        if (state == OnOffState.ON):
+            self.relay_pin.value(1)  # Set relay to ON state
+            print("*****Heater ON")
+        elif (state == OnOffState.OFF):
+            self.relay_pin.value(0)  # Set relay to OFF state
+            print("*****Heater OFF")
+            
+    def toggleState(self):
+            
+        if (self.state == OnOffState.ON):
+            self.setState(OnOffState.OFF)
+        elif (self.state == OnOffState.OFF):
+            self.setState(OnOffState.AUTO)
+        elif (self.state == OnOffState.AUTO):
+            self.setState(OnOffState.ON)                
+            
+            
+    async def control(self, temperature):
+        
+        # Heater on      
+        if (OnOffState.AUTO == self.status()) and (temperature <= self.HEATER_ON_TEMPERATURE):
+            self.setState(OnOffState.ON)    
+
+        # Heater off 
+        if (OnOffState.AUTO == self.status()) and (temperature > self.HEATER_OFF_TEMPERATURE):
+            self.setState(OnOffState.OFF)    
+     
+    def status(self):
+        return self.state
+        
+    def settings(self):
+        return str(self.HEATER_ON_TEMPERATURE) + " - " +  str(self.HEATER_OFF_TEMPERATURE)   
+
+
 
 class LinearActuator(object):
     # Linear Actuator for window
@@ -630,6 +681,7 @@ class PlantCare(object):
         self.pump = Pump()
         self.fan = Fan()
         self.windows = LinearActuator()
+        self.heater = Heater()
         self.lcd = Lcd()
 
         self.lcd.showData(self.probe, self.rtc, self.ip)
@@ -640,6 +692,7 @@ class PlantCare(object):
         self.pump.setState(OnOffState.ON)
         self.fan.setState(OnOffState.ON)
         self.light.setState(OnOffState.ON)
+        self.heater.setState(OnOffState.ON)
 
         time.sleep_ms(500)
 
@@ -656,6 +709,9 @@ class PlantCare(object):
         
         self.light.setState(OnOffState.OFF)
         self.light.setState(OnOffState.AUTO)
+        
+        self.heater.setState(OnOffState.OFF)
+        self.heater.setState(OnOffState.AUTO)
         
     def setWindow(self, state):      
         self.windows.setState(state)
@@ -737,6 +793,8 @@ class PlantCare(object):
             #temperature = await self.windows.control(self.probe, self.rtc)
             temperature = await self.fan.control(self.probe, self.rtc)
             
+            await self.heater.control(temperature)
+            
             print("controlWatering...")
             await self.pump.controlWatering(temperature, self.rtc)
             
@@ -760,7 +818,7 @@ async def count():
             
 async def main():
     
-    datetime = '10:00:00,Sunday,2024-09-29' 
+    datetime = '10:01:00,Sunday,2024-09-29' 
     plantCare = PlantCare(datetime, "192.168.1.1")
     
     while True:
@@ -768,5 +826,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
