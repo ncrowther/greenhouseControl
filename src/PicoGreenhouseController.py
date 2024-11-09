@@ -269,18 +269,32 @@ class PlantServer(object):
             pass
 
         request = str(request_line)
+        
         windowOpen = request.find('/window/open')
         windowClosed = request.find('/window/close')
         windowAuto = request.find('/window/auto')
-        windowToggle = request.find('/window/toggle')        
+        windowToggle = request.find('/window/toggle')
+        
         lightOn = request.find('/light/on')
         lightOff = request.find('/light/off')
         lightAuto = request.find('/light/auto')
-        lightToggle = request.find('/light/toggle')           
+        lightToggle = request.find('/light/toggle')
+        
         pumpOn = request.find('/pump/on')
         pumpOff = request.find('/pump/off')
         pumpAuto = request.find('/pump/auto')
-        pumpToggle = request.find('/pump/toggle')            
+        pumpToggle = request.find('/pump/toggle')
+        
+        fanOn = request.find('/fan/on')
+        fanOff = request.find('/fan/off')
+        fanAuto = request.find('/fan/auto')
+        fanToggle = request.find('/fan/toggle')
+        
+        heaterOn = request.find('/heater/on')
+        heaterOff = request.find('/heater/off')
+        heaterAuto = request.find('/heater/auto')
+        heaterToggle = request.find('/heater/toggle')
+        
         FOUND = 6
        
         # Window
@@ -311,7 +325,27 @@ class PlantServer(object):
         if pumpAuto == FOUND:
             self.plantCare.setPump(OnOffState.AUTO)
         if pumpToggle == FOUND:
-            self.plantCare.togglePump()                  
+            self.plantCare.togglePump()
+            
+        # Fan
+        if fanOn == FOUND:
+            self.plantCare.setFan(OnOffState.ON)          
+        if fanOff == FOUND:
+            self.plantCare.setFan(OnOffState.OFF)       
+        if fanAuto == FOUND:
+            self.plantCare.setFan(OnOffState.AUTO)
+        if fanToggle == FOUND:
+            self.plantCare.toggleFan()             
+            
+        # Heater
+        if heaterOn == FOUND:
+            self.plantCare.setHeater(OnOffState.ON)          
+        if heaterOff == FOUND:
+            self.plantCare.setHeater(OnOffState.OFF)       
+        if heaterAuto == FOUND:
+            self.plantCare.setHeater(OnOffState.AUTO)
+        if heaterToggle == FOUND:
+            self.plantCare.toggleHeater()            
 
         time = self.plantCare.getSystemTime()
         light = self.plantCare.getLightStatus()
@@ -319,8 +353,12 @@ class PlantServer(object):
         windowStatus = self.plantCare.getWindowStatus()    
         windowAngle = self.plantCare.getWindowAngle()
         windowSettings = self.plantCare.getWindowSettings()
+        fan = self.plantCare.getFanStatus()
+        fanSettings = self.plantCare.getFanSettings()        
         pump = self.plantCare.getPumpStatus()
         pumpSettings = self.plantCare.getPumpSettings()
+        heater = self.plantCare.getHeaterStatus()
+        heaterSettings = self.plantCare.getHeaterSettings()
         
         temperatureData = self.plantCare.getTemperatureData()
         humidityData = self.plantCare.getHumidityData()
@@ -336,7 +374,11 @@ class PlantServer(object):
                 <p>Window Angle: {} Degrees</p>
                 <p>Window Temperature Range: {}</p>                
                 <p>Pump: {}</p>
-                <p>Pump Times: {}</p>                   
+                <p>Pump Times: {}</p>
+                <p>Fan: {}</p>
+                <p>Fan Temperature Range: {}</p>                    
+                <p>Heater: {}</p>
+                <p>Heater Temperature Range: {}</p>                     
                 <p>Temperature: {:.2f}C High: {:.2f}C Low: {:.2f}C</p>
                 <p>Humidity: {:.2f}% High: {:.2f}% Low: {:.2f}%</p>                
                 
@@ -350,7 +392,15 @@ class PlantServer(object):
                 
                 <form action="/pump/toggle" method="put" target="_blank">
                 <input type="submit" value="Pump">
-                </form>                
+                </form>
+                
+                <form action="/fan/toggle" method="put" target="_blank">
+                <input type="submit" value="Fan">
+                </form>                       
+                
+                <form action="/heater/toggle" method="put" target="_blank">
+                <input type="submit" value="Heater">
+                </form>                  
                 
             </body>
         </html>
@@ -363,6 +413,10 @@ class PlantServer(object):
                                windowSettings,
                                pump,
                                pumpSettings,
+                               fan,
+                               fanSettings,                               
+                               heater,
+                               heaterSettings,
                                temperatureData[0],
                                temperatureData[1],
                                temperatureData[2],
@@ -383,7 +437,7 @@ async def main():
         plantServer = PlantServer()
 
         tasks = await asyncio.gather(
-            #asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
+            asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
             plantServer.care())
         
         print(tasks)

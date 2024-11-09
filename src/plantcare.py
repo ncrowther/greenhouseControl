@@ -42,6 +42,113 @@ class HardwareError(Exception):
         self.error_code = error_code
         self.message = message
         
+# Abtract class for temperature controller devices
+class TemperatureController:
+    
+    # Define on/off temperature
+    ON_TEMPERATURE = 19
+    OFF_TEMPERATURE = 20
+    state = OnOffState.AUTO
+        
+        
+    def setState(self, state):
+        
+        print('**Set state:' + str(self.state) + "->" + str(state))
+        
+        if (state == OnOffState.ON):
+            self.on()
+        elif (state == OnOffState.OFF):
+            self.off()            
+   
+        self.state = state        
+            
+    def toggleState(self):
+            
+        if (self.state == OnOffState.ON):
+            self.setState(OnOffState.OFF)
+        elif (self.state == OnOffState.OFF):
+            self.setState(OnOffState.AUTO)
+        elif (self.state == OnOffState.AUTO):
+            self.setState(OnOffState.ON)                
+        
+    def settings(self):
+        return str(self.ON_TEMPERATURE) + " - " +  str(self.OFF_TEMPERATURE)  + "C"
+    
+    def status(self):
+        return self.state
+    
+class Heater(TemperatureController):
+    # Relay heater
+    
+    ### DEFINE HEATER ON/OFF TEMPERATURE
+    ON_TEMPERATURE = 18
+    OFF_TEMPERATURE = 20
+    
+    def __init__(self):
+        # GPIO pin number  relay is connected to
+        RELAY_PIN = 0
+        self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
+        
+    def on(self):
+        print("Heater ON")
+        self.relay_pin.value(1)  # Set relay to ON state
+            
+    def off(self):   
+        print("Heater OFF")
+        self.relay_pin.value(0)  # Set relay to OFF state
+        
+    async def control(self, temperature):
+        
+        # On      
+        if (OnOffState.AUTO == self.status()) and (temperature <= self.ON_TEMPERATURE):
+            self.setState(OnOffState.ON)
+            self.setState(OnOffState.AUTO) 
+
+        # Off 
+        if (OnOffState.AUTO == self.status()) and (temperature > self.OFF_TEMPERATURE):
+            self.setState(OnOffState.OFF)
+            self.setState(OnOffState.AUTO)         
+
+            
+class Fan(TemperatureController):
+    # PWM dual power switch
+    
+    ### DEFINE FAN ON/OFF TEMPERATURE
+    ON_TEMPERATURE = 25
+    OFF_TEMPERATURE = 24
+    
+    def __init__(self):
+        # Define pins for Fan
+        PWM_IN = 18
+        PWM_OUT = 19        
+        self.fan_a = PWM(Pin(PWM_IN), freq=1000)
+        self.fan_b = PWM(Pin(PWM_OUT), freq=1000)       
+        
+    def on(self):
+        print("Fan ON")
+        MAX_FAN_SPEED = 65535
+        self.fan_a.duty_u16(0)
+        self.fan_b.duty_u16(MAX_FAN_SPEED)  # speed(0-65535)
+            
+    def off(self):   
+        # Stop fan
+        print("Fan OFF")        
+        self.fan_a.duty_u16(0)
+        self.fan_b.duty_u16(0)
+        
+    async def control(self, temperature):
+        
+        # On      
+        if (OnOffState.AUTO == self.status()) and (temperature >= self.ON_TEMPERATURE):
+            self.setState(OnOffState.ON)
+            self.setState(OnOffState.AUTO) 
+
+        # Off 
+        if (OnOffState.AUTO == self.status()) and (temperature < self.OFF_TEMPERATURE):
+            self.setState(OnOffState.OFF)
+            self.setState(OnOffState.AUTO)         
+        
+
 class LightSwitch(object):
     # Relay light switch
 
@@ -100,7 +207,7 @@ class LightSwitch(object):
         return self.state
         
     def settings(self):
-        return str(self.LIGHT_ON_HOUR) + ":00 - " +  str(self.LIGHT_OFF_HOUR) + ":00"     
+        return str(self.LIGHT_ON_HOUR) + ":00 - " +  str(self.LIGHT_OFF_HOUR) + ":00"              
 
 
 class LinearActuator(object):
@@ -202,73 +309,8 @@ class LinearActuator(object):
         return self.state
     
     def settings(self):
-        return str(self.CLOSE_WINDOW_TEMPERATURE) + " - " + str(self.OPEN_WINDOW_TEMPERATURE) + "C"      
-
-class Fan(object):
-    # PWM dual power switch
+        return str(self.CLOSE_WINDOW_TEMPERATURE) + " - " + str(self.OPEN_WINDOW_TEMPERATURE) + "C"
     
-    ### DEFINE FAN ON TEMPERATURE
-    FAN_ON_TEMPERATURE = 25
-
-    ### DEFINE FAN OFF TEMPERATURE
-    FAN_OFF_TEMPERATURE = 24
-    
-    def __init__(self):
-        # Define pins for Fan
-        PWM_IN = 18
-        PWM_OUT = 19        
-        self.fan_a = PWM(Pin(PWM_IN), freq=1000)
-        self.fan_b = PWM(Pin(PWM_OUT), freq=1000)
-        
-        self.state = OnOffState.AUTO        
-        
-    async def on(self):
-        print("Fan ON")
-        MAX_FAN_SPEED = 65535
-        self.fan_a.duty_u16(0)
-        self.fan_b.duty_u16(MAX_FAN_SPEED)  # speed(0-65535)
-            
-    async def off(self):   
-        # Stop fan
-        self.fan_a.duty_u16(0)
-        self.fan_b.duty_u16(0)
-        
-    def setState(self, state):
-        
-        print('Set fan state:' + str(state))
-        
-        if (state == OnOffState.ON) and (OnOffState.ON != self.state):
-            self.on()
-        elif (state == OnOffState.OFF) and (OnOffState.ON == self.state):
-            self.off()
-            
-        self.state = state
-        
-    def toggleState(self):         
-        if (self.state == OnOffState.ON):
-            self.setState(OnOffState.OFF)
-        elif (self.state == OnOffState.OFF):
-            self.setState(OnOffState.AUTO)
-        elif (self.state == OnOffState.AUTO):
-            self.setState(OnOffState.ON)                     
-     
-    def status(self):   
-        return self.state        
-        
-    async def control(self, temperatureSensor, rtc):
-
-        await temperatureSensor.measureIt(rtc)
-        temperature = temperatureSensor.temperature
-        
-        # Too hot
-        if (OnOffState.AUTO == self.status()) and  (temperature >= self.FAN_ON_TEMPERATURE):
-            await self.on()      
-
-        # Cool enough
-        if (OnOffState.AUTO == self.status()) and (temperature < self.FAN_OFF_TEMPERATURE):
-            await self.off()  
-            
-        return temperature             
     
 class Pump(object):
     # PWM dual power switch
@@ -403,52 +445,6 @@ class TemperatureHumidityProbe(object):
             print('measureIt error')   
             raise HardwareError("DDS18B20 Probe", 100)            
 
-
-        
-class TemperatureProbe(object):
-  
-    # Temperature probe
-    # DHT temp sensor  
-    def __init__(self):
-        #Define pin for Temperature sensor
-        SENSOR_PIN = 28    
-    
-        ds_pin = machine.Pin(SENSOR_PIN)
-        self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
-        self.temperature = 0
-        self.highTemp = 0
-        self.lowTemp = 100
-        
-        # get sensors 
-        self.roms = self.ds_sensor.scan()
-        print('Found DS devices: ', self.roms)
-        
-    async def measureIt(self, rtc):   
-        try:
-            print('measureIt')
-            self.ds_sensor.convert_temp()      
-            await asyncio.sleep_ms(750)        
-            for rom in self.roms:
-                self.temperature = self.ds_sensor.read_temp(rom)
-                print('temperature (ºC):', "{:.2f}".format(self.temperature))
-            
-            # Reset stats at midnight
-            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
-                print("Reset temperature stats")
-                self.highTemp = 0
-                self.lowTemp = 100
-             
-            # Set high score
-            if (self.temperature > self.highTemp):
-                self.highTemp = self.temperature
-            
-            if (self.temperature < self.lowTemp):
-                self.lowTemp = self.temperature
-
-        except:
-            print('measureIt error')   
-            raise HardwareError("DDS18B20 Probe", 100)
-        
 
 class Clock(object):
 #            13:45:00 Mon 24 May 2021
@@ -630,21 +626,21 @@ class PlantCare(object):
         self.pump = Pump()
         self.fan = Fan()
         self.windows = LinearActuator()
+        self.heater = Heater()
         self.lcd = Lcd()
 
         self.lcd.showData(self.probe, self.rtc, self.ip)
                 
         # Startup check
         self.windows.setState(WindowState.OPEN)
-        #self.pump.fanOn()
-        self.pump.setState(OnOffState.ON)
-        self.fan.setState(OnOffState.ON)
-        self.light.setState(OnOffState.ON)
-
-        time.sleep_ms(500)
+        #self.pump.setState(OnOffState.ON)
+        #self.light.setState(OnOffState.ON)
+        self.fan.setState(OnOffState.OFF)
+        #self.heater.setState(OnOffState.ON)
+        #self.fan.off()     
+        time.sleep_ms(5000)
 
         # Turn off everything and then set to AUTO before starting loop
-        #self.pump.fanOff()
         self.windows.setState(WindowState.CLOSED)
         self.windows.setState(WindowState.AUTO)
         
@@ -656,6 +652,9 @@ class PlantCare(object):
         
         self.light.setState(OnOffState.OFF)
         self.light.setState(OnOffState.AUTO)
+        
+        self.heater.setState(OnOffState.OFF)
+        self.heater.setState(OnOffState.AUTO)
         
     def setWindow(self, state):      
         self.windows.setState(state)
@@ -672,11 +671,35 @@ class PlantCare(object):
     def toggleLight(self):
         self.light.toggleState()
         
+    def getPumpStatus(self):
+        return self.pump.status()
+    
+    def getPumpSettings(self):
+        return self.pump.settings()
+    
     def setPump(self, state):
         self.pump.setState(state)
         
     def togglePump(self):
-        self.pump.toggleState()        
+        self.pump.toggleState()
+        
+    def toggleFan(self):
+        self.fan.toggleState()
+        
+    def getFanStatus(self):
+        return self.fan.status()
+    
+    def getFanSettings(self):
+        return self.fan.settings()         
+        
+    def toggleHeater(self):
+        self.heater.toggleState()
+        
+    def getHeaterStatus(self):
+        return self.heater.status()
+    
+    def getHeaterSettings(self):
+        return self.heater.settings()        
         
     def getTemperatureData(self):
         return [self.probe.temperature, self.probe.highTemp, self.probe.lowTemp]
@@ -704,12 +727,6 @@ class PlantCare(object):
     
     def setWindowTemperatureRange(self, upper, lower):
         return self.windows.setRange(upper, lower)        
-        
-    def getPumpStatus(self):
-        return self.pump.status()
-    
-    def getPumpSettings(self):
-        return self.pump.settings()
     
     def setWateringTimes(self, wateringTimes):
         self.pump.setTimes(wateringTimes)
@@ -734,8 +751,11 @@ class PlantCare(object):
             self.light.controlLights(self.rtc)        
             
             print("controlTemperature...")
+            await self.probe.measureIt(self.rtc)
+            temperature = self.probe.temperature            
             #temperature = await self.windows.control(self.probe, self.rtc)
-            temperature = await self.fan.control(self.probe, self.rtc)
+            await self.fan.control(temperature)
+            await self.heater.control(temperature)
             
             print("controlWatering...")
             await self.pump.controlWatering(temperature, self.rtc)
@@ -760,7 +780,7 @@ async def count():
             
 async def main():
     
-    datetime = '10:00:00,Sunday,2024-09-29' 
+    datetime = '10:01:00,Sunday,2024-09-29' 
     plantCare = PlantCare(datetime, "192.168.1.1")
     
     while True:
