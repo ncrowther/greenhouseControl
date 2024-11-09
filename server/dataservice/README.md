@@ -1,7 +1,7 @@
-# Cloudant Facade for WXO
+# Cloudant Facade for GreenhouseController
 
 This package creates a datafacade into a Cloudant database.  
-The facade is exposed as an OpenAPI where it can be ingested by WatsonxOrchestrate. 
+The facade is exposed as an OpenAPI 
 See:
 
  [OpenApi](\openapi\dataApi.yaml)
@@ -10,7 +10,7 @@ See:
 
  * Create IBM Cloud account with Cloudant.  See https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-getting-started-with-cloudant 
  
- * Create a Cloudant database with name wxodb
+ * Create a Cloudant database with name Greenhouselog
 
  * Create credentials for next step
 
@@ -37,7 +37,7 @@ See:
 
  * Create a code engine project (eg name sample)
 
- * Create a code engine configmap configuration containing Cloudant credentials: CLOUDANT_APIKEY=XXX, CLOUDANT_URL=XXX, DBNAME=wxodb
+ * Create a code engine configmap configuration containing Cloudant credentials: CLOUDANT_APIKEY=XXX, CLOUDANT_URL=XXX, DBNAME=GreenhouseControllerdb
 
  * Assign the config map to the Code Engine project
 

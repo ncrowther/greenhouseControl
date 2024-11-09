@@ -11,11 +11,10 @@ import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
 
 const IndustrialController = () => {
 
-  // Get params from URL
+  // Get customer id from URL (not currently used)
   const queryStringParams = queryString.parse(window.location.search);
-  console.log("***queryStringParams.id: " + queryStringParams.driverId)
-
-  //  fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(
+  console.log("***queryStringParams.id: " + queryStringParams.id)
+  
   const { data, isLoading, error } = useQuery({
     queryFn: () =>
       fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(

@@ -12,6 +12,12 @@ import {
 
 import { Bar } from 'react-chartjs-2';
 
+
+/**
+ * A chart to display humidity data.
+ * @param {HumidityChartProps} data - The data for the chart.
+ * @returns {JSX.Element} The component.
+ */
 const HumidityChart = ({ data}) => {
 
   ChartJS.register(
@@ -36,10 +42,10 @@ const HumidityChart = ({ data}) => {
     },
   };
 
-  const labels = data.Docs.reduce((humidity, obj) => {
-    humidity.push(obj.timestamp)
-    return humidity;
-  }, []); // 
+  const labels = data.Docs.reduce((labels, obj) => {
+    labels.push(obj._id)
+    return labels;
+  }, []); 
 
   const Readings = data.Docs.reduce((humidity, obj) => {
     humidity.push(obj.humidity)

@@ -3,12 +3,10 @@ import { Chart } from 'primereact/chart';
 
 export default function HumidityTempChart({ data }) {
 
-  var timeStr = ""
-  const labels = data.Docs.reduce((labelList, obj) => {
-    var timeStr = obj.timestamp
-    labelList.push(timeStr)
-    return labelList;
-  }, []); 
+  const labels = data.Docs.reduce((labels, obj) => {
+    labels.push(obj._id)
+    return labels;
+  }, []);   
 
   const temperatureReadings = data.Docs.reduce((temperature, obj) => {
     temperature.push(obj.temperature)

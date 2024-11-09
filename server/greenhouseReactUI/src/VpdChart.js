@@ -12,7 +12,13 @@ import {
 
 import { Bar } from 'react-chartjs-2';
 
-const TemperatureChart = ({ data}) => {
+
+/**
+ * A chart to display humidity data.
+ * @param {VpdChartProps} data - The data for the chart.
+ * @returns {JSX.Element} The component.
+ */
+const VpdChart = ({ data}) => {
 
   ChartJS.register(
     CategoryScale,
@@ -36,25 +42,25 @@ const TemperatureChart = ({ data}) => {
     },
   };
 
-  const labels = data.Docs.reduce((labels, obj) => {
-    labels.push(obj._id)
-    return labels;
+  const labels = data.Docs.reduce((humidity, obj) => {
+    humidity.push(obj.timestamp)
+    return humidity;
+  }, []); // 
+
+  const Readings = data.Docs.reduce((humidity, obj) => {
+    humidity.push(obj.humidity)
+    return humidity;
   }, []); 
 
-  const readings = data.Docs.reduce((temperature, obj) => {
-    temperature.push(obj.temperature)
-    return temperature;
-  }, []); 
-
-  console.log("Readings: " + JSON.stringify(readings))
+  console.log("Readings: " + JSON.stringify(Readings))
 
   const datax = {
     labels,
     datasets: [
       {
-        label: 'Temperature',
-        data: readings, 
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        label: 'Humidity',
+        data: Readings, 
+        backgroundColor: 'rgba(30, 262, 135, 0.5)',
         borderWidth: 1
       },
     ],
@@ -63,4 +69,4 @@ const TemperatureChart = ({ data}) => {
   return <Bar options={options} data={datax} />;
 }
 
-export default TemperatureChart;
+export default VpdChart;

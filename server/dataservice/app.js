@@ -49,18 +49,16 @@ app.post('/doc', async (req, res) => {
   const newDoc = req.body;
 
   const doc = {
-    "driverId": newDoc.driverId,
-    "date": newDoc.date,
-    "offenceType": newDoc.offenceType,
-    "speedLimit": newDoc.speedLimit,
-    "actualSpeed": newDoc.actualSpeed,
-    "fine": newDoc.fine,
-    "points": newDoc.points
+    "_id": newDoc.timestamp,
+    "temperature": newDoc.temperature,
+    "humidity": newDoc.humidity,
+    "co2": newDoc.co2,
+    "vpd": newDoc.vpd
   }
 
   await cloudantLib.createDoc(service, dbname, doc).then(function (ret) {
 
-    console.error('[App] Created doc: ' + newDoc.driverId);
+    console.error('[App] Created doc');
 
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
@@ -68,67 +66,6 @@ app.post('/doc', async (req, res) => {
 
   }, function (err) {
     console.error('[App] Cloudant DB Failure in create doc: ' + err)
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  })
-
-})
-
-// //////////////// Update Doc ////////////////////////
-app.post('/updateDoc', async (req, res) => {
-
-  const docId = req.query.driverId;
-
-  const updateDoc = req.body;
-
-  console.log('Update doc: ' + docId)
-
-  await cloudantLib.findById(service, dbname, docId).then(function (doc) {
-
-    console.log('***Found ' + doc)
-
-    doc.date = updateDoc.date,
-    doc.offenceType = updateDoc.offenceType,
-    doc.speedLimit = updateDoc.speedLimit,
-    doc.actualSpeed = updateDoc.actualSpeed,
-    doc.fine = updateDoc.fine,
-    doc.points = updateDoc.points
-
-    console.log('Updating: ' + JSON.stringify(doc));
-
-    cloudantLib.updateDoc(service, dbname, doc)
-
-    res.status(200);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(doc);
-
-  }, function (err) {
-    console.error('[App] Cloudant DB Failure in update: ' + err)
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  })
-
-})
-
-// //////////////// Get Single Doc ////////////////////////
-app.get('/doc', async (req, res) => {
-
-  const docId = req.query.driverId;
-
-  console.log('Get doc: ' + docId)
-
-  await cloudantLib.findById(service, dbname, docId).then(function (doc) {
-
-    console.log('***Found ' + doc)
-
-    res.status(200);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(doc);
-
-  }, function (err) {
-    console.error('[App] Cloudant DB Failure in get doc: ' + err)
     res.status(500);
     res.set('Access-Control-Allow-Origin', '*');
     res.send(err);
