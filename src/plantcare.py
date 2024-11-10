@@ -1,4 +1,5 @@
 import sys
+import traceback
 from machine import Pin, PWM, ADC, I2C
 import dht
 from micropython_sht20 import sht20
@@ -9,6 +10,8 @@ import onewire
 import ds18x20
 from machine_i2c_lcd import I2cLcd
 import asyncio
+import breakout_scd41
+from pimoroni_i2c import PimoroniI2C
 
 #################################################
 ### Greenouse controller for Rasberry Pi Pico ###
@@ -191,7 +194,7 @@ class LightSwitch(object):
         elif (self.state == OnOffState.AUTO):
             self.setState(OnOffState.ON)                
             
-    def controlLights(self, rtc):
+    async def controlLights(self, rtc):
 
         print("Light state %s" %self.status())
         
@@ -388,45 +391,63 @@ class Pump(object):
     def setTimes(self, wateringTimes):
         self.WATERING_TIMES = wateringTimes
     
-class TemperatureHumidityProbe(object):
+        
+class Co2TemperatureHumidityProbe(object):
   
     def __init__(self):
-        # setup the I2C communication for the SHT20 sensor
+        # setup the I2C communication for the Co2 sensor
         #  I2C Pins
-        I2C_PORT = 1
-        I2C_SDA = 6
-        I2C_SCL = 7        
-        i2c = I2C(1, sda=Pin(I2C_SDA), scl=Pin(I2C_SCL))  # Correct I2C pins for RP2040
+        I2C_PORT = 0
+        I2C_SDA = 20
+        I2C_SCL = 21        
 
-        self.sht = sht20.SHT20(i2c)
-        
+        self.i2c = PimoroniI2C(sda=(I2C_SDA), scl=(I2C_SCL))  
+ 
         self.temperature = 0        
         self.highTemp = 0
         self.lowTemp = 100
         
         self.humidity = 0        
         self.highHumidity = 0
-        self.lowHumidity = 100        
+        self.lowHumidity = 100
+        
+        self.co2 = 0        
+        self.highCo2 = 0
+        self.lowCo2 = 100           
         
     async def measureIt(self, rtc):   
     
         try:
             print('measureIt')
-            self.temperature = self.sht.temperature
+            
+            breakout_scd41.init(self.i2c)
+            breakout_scd41.start()
+            while not breakout_scd41.ready():
+                print("Waiting for sensor")
+                time.sleep_ms(5000)
+                
+            self.co2, self.temperature, self.humidity = breakout_scd41.measure()
+  
             self.temperature = round(self.temperature, 2)
-                    
-            self.humidity = self.sht.humidity
             self.humidity = round(self.humidity, 2)
+            self.co2 = round(self.co2, 0)
                  
             print("Temperature (C): " + str(self.temperature))
             print("Humidity (%RH): " + str(self.humidity))
+            print("Co2 (ppm): " + str(self.co2))
             
             # Reset stats at midnight
             if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
-                print("Reset temperature stats")
+                print("Reset stats")
                 self.highTemp = 0
                 self.lowTemp = 100
-             
+                
+                self.highHumidity = 100
+                self.lowHumidity = 0
+                
+                self.highCo2 = 20000
+                self.lowCo2 = 0
+                
             # Set temperature high score
             if (self.temperature > self.highTemp):
                 self.highTemp = self.temperature
@@ -440,10 +461,27 @@ class TemperatureHumidityProbe(object):
             
             if (self.humidity < self.lowHumidity):
                 self.lowHumidity = self.humidity
+                
+            # Set co2 high score
+            if (self.co2 > self.highCo2):
+                self.highCo2 = self.co2
             
-        except:
-            print('measureIt error')   
-            raise HardwareError("DDS18B20 Probe", 100)            
+            if (self.co2 < self.lowCo2):
+                self.lowCo2 = self.co2
+                
+            
+        except Exception as e:
+            print(e)
+            
+            I2C_PORT = 0
+            I2C_SDA = 20
+            I2C_SCL = 21        
+
+            i2c = PimoroniI2C(sda=(I2C_SDA), scl=(I2C_SCL))              
+            breakout_scd41.init(i2c)
+            breakout_scd41.start()
+            #print('measureIt error: ' + e)   
+            #raise HardwareError("Pimoroni C02 Probe", 100)
 
 
 class Clock(object):
@@ -566,7 +604,9 @@ class Lcd(object):
                 
         # Display time & temp on the LCD screen
         # print("SCREEN: " + str(self.screen))
-        
+        TOTAL_SCREENS = 5
+        self.screen = 0
+                
         if (self.screen == 0): 
             temperatureStr = str(probe.temperature) + "C"
             humidityStr    = str(probe.humidity) + "%"
@@ -578,6 +618,14 @@ class Lcd(object):
             self.screen = 1
             
         elif (self.screen == 1):
+            co2Str = str(probe.co2) + " ppm"
+            
+            self.lcd.clear()
+            self.lcd.putstr(co2Str)
+            self.lcd.putstr("\n")            
+            self.screen = 2
+            
+        elif (self.screen == 2):
             highStr = "Hi: " + str(probe.highTemp) + "C"
             lowStr =  "Lo: " + str(probe.lowTemp) + "C"
             
@@ -585,21 +633,22 @@ class Lcd(object):
             self.lcd.putstr(highStr)
             self.lcd.putstr("\n")
             self.lcd.putstr(lowStr)                               
-            self.screen = 2
+            self.screen = 3
             
-        elif (self.screen == 2):
+        elif (self.screen == 3):
             timeStr = rtc.getTimeStr()   
             dateStr = rtc.getDateTimeStr()[:10]
             self.lcd.clear()
             self.lcd.putstr(timeStr)
             self.lcd.putstr("\n")
             self.lcd.putstr(dateStr)               
-            self.screen = 3
+            self.screen = 4
             
-        elif (self.screen == 3):
+        elif (self.screen == 4):
             self.lcd.clear()
             self.lcd.putstr(ip)               
-            self.screen = 0            
+            self.screen = 5
+                
             
         
     def showError(self, code, message):
@@ -619,10 +668,10 @@ class PlantCare(object):
                 
         # Set internal clock     
         self.rtc.set_time(datetime)
-
+        
         ## Creat the objects to be controlled
         self.light = LightSwitch()
-        self.probe = TemperatureHumidityProbe()
+        self.probe = Co2TemperatureHumidityProbe()
         self.pump = Pump()
         self.fan = Fan()
         self.windows = LinearActuator()
@@ -706,7 +755,10 @@ class PlantCare(object):
     
     def getHumidityData(self):
         return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
-    
+ 
+    def getCo2Data(self):
+        return [self.probe.co2, self.probe.highCo2, self.probe.lowCo2]    
+
     def getSystemTime(self):
         return self.rtc.getDateTimeStr()
     
@@ -748,13 +800,16 @@ class PlantCare(object):
             print(timestamp)
             
             print("controlLights...")
-            self.light.controlLights(self.rtc)        
+            await self.light.controlLights(self.rtc)        
             
             print("controlTemperature...")
             await self.probe.measureIt(self.rtc)
+            print("controlTemperature1...")
             temperature = self.probe.temperature            
             #temperature = await self.windows.control(self.probe, self.rtc)
+            print("controlTemperature2...")
             await self.fan.control(temperature)
+            print("controlTemperature3...")
             await self.heater.control(temperature)
             
             print("controlWatering...")
@@ -788,5 +843,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
 

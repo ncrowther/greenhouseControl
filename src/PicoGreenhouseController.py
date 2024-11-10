@@ -4,6 +4,7 @@ import socket
 import time
 import asyncio
 import urequests
+from requests_2 import post
 import json
 import gc
 import machine
@@ -31,7 +32,7 @@ class PlantServer(object):
             
             self.plantCare = PlantCare(datetime, self.ipAddress)
             
-            self.configurePlantParams()
+            #self.configurePlantParams()
             
     
     def connect_to_network(self):
@@ -67,39 +68,7 @@ class PlantServer(object):
         status = self.wlan.ifconfig()
         return status[0]     
             
-    async def getBearerToken(self):
-
-        payload = 'grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&response_type=cloud_iam&apikey=2cyXLlh7LNgB7Z_s3acLW7RiPmQXZs05Samh65FRZA1A'
-        header = {
-          'ibm-service-instance-id': 'pico',
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        
-        request_url = 'https://iam.cloud.ibm.com/identity/token'
-        
-        gc.collect() 
-        resp = None
-        bearerToken = None
-        try:
-            resp = urequests.post(request_url, headers = header, data = payload)
-            
-            jsonData = resp.json()
-            accessToken = jsonData["access_token"]
-            
-            bearerToken = 'Bearer ' + accessToken         
-            
-        except Exception as e: # Here it catches any error.
-            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
-                resp.close()
-            print("Error: " +  e)
-        finally:
-            if resp:
-                resp.close()
-            gc.collect()
-            print(bearerToken)
-            return bearerToken
-
-
+ 
     async def setConfig(self, plantCare, bearerToken):
                     
         resp = None                    
@@ -135,6 +104,7 @@ class PlantServer(object):
             
             windowState = doc["windowState"]
             plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
+            
             temperatureRange = doc["temperatureRange"]            
             plantCare.setWindowTemperatureRange(temperatureRange[0], temperatureRange[1])            
             
@@ -149,64 +119,18 @@ class PlantServer(object):
 
     def getDateTime(self):
 
-        formatedTime = '00:00:00,Saturday,2000-01-01' 
-        resp = None
-        try:
-            r = urequests.get("http://worldtimeapi.org/api/timezone/Europe/London")
-            datetime = r.json()
-            print(datetime)
-            # 2024-09-27T19:55:53.468676+01:0
-            formatedTime = datetime["datetime"]
-            formatedDate = formatedTime[0:10]
-            formatedTime = formatedTime[11:19]
-            formatedTime = formatedTime + ',Sunday,' + formatedDate
-            print("Formatted time: " + formatedTime)
-            r.close()
-            
-        except Exception as e: # Here it catches any error.
-            print(e)
-            if isinstance(e, OSError) and r: # If the error is an OSError the socket has to be closed.
-                r.close()
-        finally:   
-            gc.collect()    
-            return formatedTime
-    
-    async def logData(self, bearerToken, timestamp, temperature, humidity):
-        
-        header = {
-          'Content-Type': 'application/json',
-          'Authorization': bearerToken
-          }
-        
-        payload = json.dumps({
-          "timestamp": timestamp,
-          "temperature": temperature,
-          "humidity": humidity
-        })
-        
-        request_url = 'https://724c8e7f-5faa-49e1-8dc0-7a39ffd871ad-bluemix.cloudantnosqldb.appdomain.cloud/greenhouselog'
-     
-        gc.collect() 
-        resp = None
-        try:
-            resp = urequests.post(request_url, headers = header, data = payload)
-            resp.close()
-            
-        except Exception as e: # Here it catches any error.
-            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
-                resp.close()
-        finally:   
-            gc.collect()
-        
-        
+        formatedTime = '10:33:00,Sunday,2000-01-01' 
+ 
+        return formatedTime
+           
     def displayError(self, code, message):
         self.plantCare.displayError(code, message)
         
     async def care(self):
         print('Start care...')
         
-        SLEEP_TIME = 10
-        LOG_TIME = 90 # fifteen mins
+        SLEEP_TIME = 15
+        LOG_TIME = 30 # fifteen mins
         
         count = 0
         
@@ -225,13 +149,10 @@ class PlantServer(object):
     async def configurePlantParams(self):  
         
         print('Get Configuration...')
-                 
-        # Set the config from cloudant on startup 
-        tok = await self.getBearerToken()
+
             
-        if (tok):
-            # Set config data
-            await self.setConfig(self.plantCare, tok)      
+        # get config data
+        #await self.setConfig(self.plantCare, tok)      
         
         
     async def logger(self):  
@@ -241,15 +162,13 @@ class PlantServer(object):
         try: 
         
             self.connect_to_network()
-                        
-            # Set the config from cloudant on startup 
-            tok = await self.getBearerToken()
-                
-            if (tok):       
-                time = self.plantCare.getSystemTime()
-                temperatureData = self.plantCare.getTemperatureData()
-                humidityData = self.plantCare.getHumidityData()                
-                await self.logData(tok, time, temperatureData[0], humidityData[0])
+                             
+            time = self.plantCare.getSystemTime()
+            temperatureData = self.plantCare.getTemperatureData()
+            humidityData = self.plantCare.getHumidityData()
+            co2Data = self.plantCare.getCo2Data()
+            vpd = 0
+            await self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
                 
         except Exception as err:
             sys.print_exception(err)
@@ -257,7 +176,39 @@ class PlantServer(object):
             self.displayError(123, "WIFI ERROR")
             machine.reset() 
             
-
+    async def logData(self, timestamp, temperature, humidity, co2, vpd):
+        
+        header = {
+          'Content-Type': 'application/json',
+          }
+        
+        payload = json.dumps({
+          "timestamp": timestamp,
+          "temperature": temperature,
+          "humidity": humidity,
+          "co2": co2,
+          "vpd": vpd
+        })
+        
+        request_url = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/doc'
+     
+        gc.collect() 
+        resp = None
+        try:
+            print("POST")
+            resp = post( request_url, headers=header, data=payload, timeout=10)
+            print("RESPONSE:" + resp.text)
+            #resp = urequests.post(request_url, headers = header, data = payload)
+            resp.close()
+            
+        except Exception as e: # Here it catches any error.
+            print(e)
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                resp.close()
+        finally:   
+            gc.collect()
+            
+            
     async def serve_client(self, reader, writer):
         
         print("Client connected")
@@ -437,7 +388,7 @@ async def main():
         plantServer = PlantServer()
 
         tasks = await asyncio.gather(
-            asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
+            #asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
             plantServer.care())
         
         print(tasks)
