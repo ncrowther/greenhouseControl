@@ -605,7 +605,6 @@ class Lcd(object):
         # Display time & temp on the LCD screen
         # print("SCREEN: " + str(self.screen))
         TOTAL_SCREENS = 5
-        self.screen = 0
                 
         if (self.screen == 0): 
             temperatureStr = str(probe.temperature) + "C"
@@ -647,7 +646,7 @@ class Lcd(object):
         elif (self.screen == 4):
             self.lcd.clear()
             self.lcd.putstr(ip)               
-            self.screen = 5
+            self.screen = 0
                 
             
         
@@ -660,14 +659,11 @@ class Lcd(object):
     
 class PlantCare(object):
     
-    def __init__(self, datetime, ip):
+    def __init__(self, ip):
         
         self.ip = ip
         
         self.rtc = Clock()
-                
-        # Set internal clock     
-        self.rtc.set_time(datetime)
         
         ## Creat the objects to be controlled
         self.light = LightSwitch()
@@ -677,8 +673,6 @@ class PlantCare(object):
         self.windows = LinearActuator()
         self.heater = Heater()
         self.lcd = Lcd()
-
-        self.lcd.showData(self.probe, self.rtc, self.ip)
                 
         # Startup check
         self.windows.setState(WindowState.OPEN)
@@ -704,6 +698,24 @@ class PlantCare(object):
         
         self.heater.setState(OnOffState.OFF)
         self.heater.setState(OnOffState.AUTO)
+        
+    def setDateTime(self, datetime):              
+        # Set internal clock
+        # datetime "2024-11-10T19:26:35.927Z"
+        
+        #12th character to the 20th character
+        time = datetime[12:20] 
+
+        # First 10 chars
+        date = datetime[1:11]
+
+        # '10:00:00,Sunday,2024-09-29' 
+        formatedDateTime = time + ',Sunday,' + date
+        
+        print("SET INTERNAL CLOCK TO: " + formatedDateTime)
+ 
+        self.rtc.set_time(formatedDateTime)
+        
         
     def setWindow(self, state):      
         self.windows.setState(state)
@@ -843,6 +855,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
 

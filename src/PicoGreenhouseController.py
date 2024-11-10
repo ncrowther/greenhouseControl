@@ -27,10 +27,8 @@ class PlantServer(object):
         if self.ipAddress == None:
             self.plantCare = PlantCare(None, None)
             self.displayError(99, "No WIFI")
-        else:
-            datetime = self.getDateTime()
-            
-            self.plantCare = PlantCare(datetime, self.ipAddress)
+        else:            
+            self.plantCare = PlantCare(self.ipAddress)
             
             #self.configurePlantParams()
             
@@ -70,13 +68,14 @@ class PlantServer(object):
             
  
     async def setConfig(self, plantCare, bearerToken):
-                    
+            
+        GREENHOUSE_DATASERVICE = 'https://724c8e7f-5faa-49e1-8dc0-7a39ffd871ad-bluemix.cloudantnosqldb.appdomain.cloud/greenhouse'
         resp = None                    
         payload = ''
         header = {
           'Authorization': bearerToken }
         
-        request_url = 'https://724c8e7f-5faa-49e1-8dc0-7a39ffd871ad-bluemix.cloudantnosqldb.appdomain.cloud/greenhouse/_all_docs?include_docs=true'
+        request_url = GREENHOUSE_DATASERVICE + '/_all_docs?include_docs=true'
 
         try: 
             resp = urequests.get(request_url, headers = header)
@@ -116,12 +115,6 @@ class PlantServer(object):
             if resp:
                 resp.close()
             gc.collect()
-
-    def getDateTime(self):
-
-        formatedTime = '10:33:00,Sunday,2000-01-01' 
- 
-        return formatedTime
            
     def displayError(self, code, message):
         self.plantCare.displayError(code, message)
@@ -129,17 +122,19 @@ class PlantServer(object):
     async def care(self):
         print('Start care...')
         
-        SLEEP_TIME = 15
+        SLEEP_TIME = 10
         LOG_TIME = 30 # fifteen mins
         
         count = 0
         
         while True:
             
-            await self.plantCare.careforplants() 
+            await self.plantCare.careforplants()
             
             if (count % LOG_TIME == 0):
-                await self.logger()
+                datetime = await self.logger()
+                if (count == 0):  # First time aroud use timestamp to set pico clock
+                    self.plantCare.setDateTime(datetime)
                 
             await asyncio.sleep(SLEEP_TIME)
             
@@ -159,6 +154,7 @@ class PlantServer(object):
         
         print('Start logger...')
         
+        timestamp = "DATA SERVICE ERROR"
         try: 
         
             self.connect_to_network()
@@ -168,15 +164,20 @@ class PlantServer(object):
             humidityData = self.plantCare.getHumidityData()
             co2Data = self.plantCare.getCo2Data()
             vpd = 0
-            await self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
+            timestamp = await self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
                 
         except Exception as err:
             sys.print_exception(err)
             print(f"Unexpected {err=}, {type(err)=}")
             self.displayError(123, "WIFI ERROR")
-            machine.reset() 
+            machine.reset()
+            
+        finally:
+            return timestamp
             
     async def logData(self, timestamp, temperature, humidity, co2, vpd):
+        
+        GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
         
         header = {
           'Content-Type': 'application/json',
@@ -190,15 +191,16 @@ class PlantServer(object):
           "vpd": vpd
         })
         
-        request_url = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/doc'
+        request_url = GREENHOUSE_DATASERVICE + '/doc'
      
         gc.collect() 
         resp = None
+        response = "ERROR"
         try:
             print("POST")
             resp = post( request_url, headers=header, data=payload, timeout=10)
             print("RESPONSE:" + resp.text)
-            #resp = urequests.post(request_url, headers = header, data = payload)
+            response = resp.text
             resp.close()
             
         except Exception as e: # Here it catches any error.
@@ -206,7 +208,8 @@ class PlantServer(object):
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
                 resp.close()
         finally:   
-            gc.collect()
+            gc.collect()          
+            return response
             
             
     async def serve_client(self, reader, writer):
@@ -388,7 +391,7 @@ async def main():
         plantServer = PlantServer()
 
         tasks = await asyncio.gather(
-            #asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
+            asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
             plantServer.care())
         
         print(tasks)
