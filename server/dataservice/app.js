@@ -48,8 +48,10 @@ app.post('/doc', async (req, res) => {
 
   const newDoc = req.body;
 
+  var timestamp = new Date();
+
   const doc = {
-    "_id": newDoc.timestamp,
+    "_id": timestamp,
     "temperature": newDoc.temperature,
     "humidity": newDoc.humidity,
     "co2": newDoc.co2,
@@ -62,7 +64,7 @@ app.post('/doc', async (req, res) => {
 
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
-    res.send(doc);
+    res.send(timestamp);
 
   }, function (err) {
     console.error('[App] Cloudant DB Failure in create doc: ' + err)

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Chart } from 'primereact/chart';
 
-export default function HumidityTempChart({ data }) {
+export default function HumidityTempCo2Chart({ data }) {
 
   const labels = data.Docs.reduce((labels, obj) => {
     labels.push(obj._id)
@@ -17,6 +17,11 @@ export default function HumidityTempChart({ data }) {
     humidity.push(obj.humidity)
     return humidity;
   }, []);
+
+  const co2Readings = data.Docs.reduce((co2, obj) => {
+    co2.push(obj.co2)
+    return co2;
+  }, []);  
 
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
@@ -40,7 +45,14 @@ export default function HumidityTempChart({ data }) {
           label: 'Humidity',
           data: humidityReadings,
           fill: false,
-          borderColor: documentStyle.getPropertyValue('--pink-500'),
+          borderColor: documentStyle.getPropertyValue('--red-500'),
+          tension: 0.4
+        },
+        {
+          label: 'Co2',
+          data: co2Readings,
+          fill: false,
+          borderColor: documentStyle.getPropertyValue('--gray-500'),
           tension: 0.4
         }
       ]

@@ -15,10 +15,10 @@ import { Bar } from 'react-chartjs-2';
 
 /**
  * A chart to display humidity data.
- * @param {HumidityChartProps} data - The data for the chart.
+ * @param {Co2ChartProps} data - The data for the chart.
  * @returns {JSX.Element} The component.
  */
-const HumidityChart = ({ data}) => {
+const Co2Chart = ({ data}) => {
 
   ChartJS.register(
     CategoryScale,
@@ -47,10 +47,10 @@ const HumidityChart = ({ data}) => {
     return labels;
   }, []); 
 
-  const Readings = data.Docs.reduce((humidity, obj) => {
-    humidity.push(obj.humidity)
-    return humidity;
-  }, []); 
+  const Readings = data.Docs.reduce((co2, obj) => {
+    co2.push(obj.co2)
+    return co2;
+  }, []);    
 
   console.log("Readings: " + JSON.stringify(Readings))
 
@@ -58,9 +58,9 @@ const HumidityChart = ({ data}) => {
     labels,
     datasets: [
       {
-        label: 'Humidity',
+        label: 'Co2',
         data: Readings, 
-        backgroundColor: 'red',
+        backgroundColor: '--gray-500',
         borderWidth: 1
       },
     ],
@@ -69,4 +69,4 @@ const HumidityChart = ({ data}) => {
   return <Bar options={options} data={datax} />;
 }
 
-export default HumidityChart;
+export default Co2Chart;

@@ -54,7 +54,7 @@ const TemperatureChart = ({ data}) => {
       {
         label: 'Temperature',
         data: readings, 
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        backgroundColor: 'blue',
         borderWidth: 1
       },
     ],

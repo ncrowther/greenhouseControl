@@ -7,6 +7,7 @@ const GreenhouseDetails = ({ data }) => {
   var timestamp = data.Docs[totalRecords]._id
   var temperature = data.Docs[totalRecords].temperature
   var humidity = data.Docs[totalRecords].humidity
+  var co2 = data.Docs[totalRecords].co2
 
   console.log("totalCount: " + totalRecords)
   console.log("temperature: " + temperature)
@@ -19,6 +20,8 @@ const GreenhouseDetails = ({ data }) => {
       <b>Current Temperature: {temperature} C</b>
       <br /> <br />
       <b>Current Humidity: {humidity} %</b>
+      <br /> <br />
+      <b>Current Co2: {co2} ppm</b>      
   </>;
 
 

@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import GreenhouseDetails from './GreenhouseDetails.js';
+import HumidityTempCo2Chart from './HumidityTempCo2Chart.js';
 import HumidityChart from './HumidityChart.js';
 import TemperatureChart from './TemperatureChart.js';
-import HumidityTempChart from './HumidityTempChart.js';
+import Co2Chart from './Co2Chart.js';
 import { Panel } from 'primereact/panel';
 import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
@@ -14,7 +15,7 @@ const IndustrialController = () => {
   // Get customer id from URL (not currently used)
   const queryStringParams = queryString.parse(window.location.search);
   console.log("***queryStringParams.id: " + queryStringParams.id)
-  
+
   const { data, isLoading, error } = useQuery({
     queryFn: () =>
       fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(
@@ -42,8 +43,8 @@ const IndustrialController = () => {
           <GreenhouseDetails data={data} />
         </Card>
 
-        <Card title="Humidity Temperature" className="md:w-25rem" style={{ color: 'black' }}>
-          <HumidityTempChart data={data} />
+        <Card title="Humidity Temperature Co2" className="md:w-25rem" style={{ color: 'black' }}>
+          <HumidityTempCo2Chart data={data} />
         </Card>
 
         <Card title="Temperature" className="md:w-25rem" style={{ color: 'black' }}>
@@ -53,6 +54,10 @@ const IndustrialController = () => {
         <Card title="Humidity" className="md:w-25rem" style={{ color: 'black' }}>
           <HumidityChart data={data} />
         </Card>
+
+        <Card title="Co2" className="md:w-25rem" style={{ color: 'black' }}>
+          <Co2Chart data={data} />
+        </Card>        
 
 
       </Panel>
