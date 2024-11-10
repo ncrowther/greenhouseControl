@@ -1,5 +1,5 @@
 {
-  "name": "CloudantDataservice",
+  "name": "cloudantdataservice",
   "version": "1.0.0",
   "description": "Cloudant Dataservice",
   "main": "app.js",
@@ -10,14 +10,10 @@
   "dependencies": {
     "@ibm-cloud/cloudant": "^0.11.0",
     "cfenv": "^1.0.3",
-    "cloudant": "^1.10.0-NOTICE",
-    "CloudantDataservice": "file:",
+    "cloudantdataservice": "file:",
     "express": "^4.13.4",
     "express-session": "^1.15.1",
     "https": "^1.0.0",
-    "ibmcloud-appid": "^6.1.1",
-    "jquery.json-viewer": "^1.1.0",
-    "passport": "^0.3.2",
-    "pug": "^3.0.2"
+    "jquery.json-viewer": "^1.1.0"
   }
 }
