@@ -11,7 +11,7 @@
  limitations under the License.
  */
 
- // IMPORTANT: Start  DOS command, execute setenv.bat then run 'npm start'
+// IMPORTANT: Start  DOS command, execute setenv.bat then run 'npm start'
 
 const express = require('express')
 var https = require('https');
@@ -80,6 +80,8 @@ app.get('/docs', async (req, res) => {
 
   console.log('Get docs')
 
+  await purge(res);
+
   await cloudantLib.findAllDocs(service, dbname).then(function (docs) {
 
     res.status(200);
@@ -92,8 +94,25 @@ app.get('/docs', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.send(err);
   })
+
 })
+
+
+async function purge(res) {
+  console.log('Purge docs');
+
+  await cloudantLib.getExpiredDocs(service, dbname).then(function (docs) {
+    cloudantLib.deleteDocs(service, dbname, docs);
+
+  }, function (err) {
+    console.error('[App] Cloudant DB Failure in purge docs: ' + err);
+    res.status(500);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(err);
+  });
+}
 
 app.listen(port, () => {
   console.info('[App] Listening on http://localhost:' + port)
 })
+
