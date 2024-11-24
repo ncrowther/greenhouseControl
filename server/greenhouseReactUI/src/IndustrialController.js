@@ -6,10 +6,15 @@ import TemperatureChart from './TemperatureChart.js';
 import Co2Chart from './Co2Chart.js';
 import { Panel } from 'primereact/panel';
 import { Card } from 'primereact/card';
-import { Divider } from 'primereact/divider';
 import queryString from 'query-string';
 import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
 
+/**
+ * This function is responsible for rendering the IndustrialController React UI.
+ * It fetches data from a Cloudant database and displays it in various charts.
+ * 
+ * @returns {JSX.Element} - The JSX element representing the IndustrialController component.
+ */
 const IndustrialController = () => {
 
   // Get customer id from URL (not currently used)

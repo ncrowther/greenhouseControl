@@ -15,11 +15,14 @@
 
 const express = require('express')
 var https = require('https');
+const querystring = require('querystring');
 const cloudantLib = require('./database/cloudantDb.js')
 const session = require('express-session')
 const { CloudantV1 } = require('@ibm-cloud/cloudant')
 const service = CloudantV1.newInstance()
-const dbname = process.env.dbname
+
+const logDbName = process.env.LOG_DB_NAME
+const configDbName = process.env.CONFIG_DB_NAME
 const fs = require('fs');
 
 const app = express()
@@ -33,7 +36,8 @@ const port = process.env.PORT || 3000 //8080
 
 // ////////////// Cloudant Setup //////////////////////
 
-console.log('Connected to ' + dbname);
+console.log('Log DB: ' + logDbName);
+console.log('Config DB: ' + configDbName);
 
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.urlencoded({ extended: true }))
@@ -58,7 +62,7 @@ app.post('/doc', async (req, res) => {
     "vpd": newDoc.vpd
   }
 
-  await cloudantLib.createDoc(service, dbname, doc).then(function (ret) {
+  await cloudantLib.createDoc(service, logDbName, doc).then(function (ret) {
 
     console.error('[App] Created doc');
 
@@ -82,7 +86,7 @@ app.get('/docs', async (req, res) => {
 
   await purge(res);
 
-  await cloudantLib.findAllDocs(service, dbname).then(function (docs) {
+  await cloudantLib.findAllDocs(service, logDbName).then(function (docs) {
 
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
@@ -97,12 +101,44 @@ app.get('/docs', async (req, res) => {
 
 })
 
+// //////////////// Get Config ////////////////////////
+app.get('/config', async (req, res) => {
 
+  var query = require('url').parse(req.url,true).query;
+
+  const id = query.id
+  console.log('Get config for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (doc) {
+
+    const config = {
+      doc: doc,
+      timestamp: new Date()
+    }
+    
+    res.status(200);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(config);
+
+  }, function (err) {
+    console.error('[App] Cloudant DB Failure in get config: ' + err)
+    res.status(500);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(err);
+  })
+
+})
+
+/**
+ * Purge expired documents from Cloudant database.
+ * @param {Object} res - The response object.
+ * @returns {void}
+ */
 async function purge(res) {
   console.log('Purge docs');
 
-  await cloudantLib.getExpiredDocs(service, dbname).then(function (docs) {
-    cloudantLib.deleteDocs(service, dbname, docs);
+  await cloudantLib.getExpiredDocs(service, logDbName).then(function (docs) {
+    cloudantLib.deleteDocs(service, logDbName, docs);
 
   }, function (err) {
     console.error('[App] Cloudant DB Failure in purge docs: ' + err);

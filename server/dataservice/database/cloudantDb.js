@@ -122,8 +122,6 @@ exports.getExpiredDocs = function getExpiredDocs(service, dbName) {
 }
 
 exports.deleteDocs = function deleteDocs(service, dbName, docs) {
-
-  //const bulkDocs: CloudantV1.BulkDocs = {  docs: docs  }
   
   return new Promise((resolve, reject) => {
       service.postBulkDocs({
