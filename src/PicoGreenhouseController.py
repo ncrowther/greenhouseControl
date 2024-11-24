@@ -3,8 +3,7 @@ import network
 import socket
 import time
 import asyncio
-import urequests
-from requests_2 import post
+from requests_2 import post, get
 import json
 import gc
 import machine
@@ -25,29 +24,7 @@ class PlantServer(object):
         self.ipAddress = self.connect_to_network()
         
         if self.ipAddress == None:
-            self.plantCare = PlantCare(None, None)
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+            self.plantCare = PlantCare(None, None)         
             self.displayError(99, "No WIFI")
         else:            
             self.plantCare = PlantCare(self.ipAddress)
@@ -91,25 +68,24 @@ class PlantServer(object):
             
         GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
         
-        header = {
-          'Content-Type': 'application/json',
-          }
+        request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
+        resp = None
+        timestamp = "2024-09-01T00:00:00.000Z"
         
-        request_url = GREENHOUSE_DATASERVICE + '/config'
-        resp = None                    
-        payload = ''
-        header = {
-          'Authorization': bearerToken }
-        
-        try: 
-            resp = urequests.get(request_url, headers = header)
-     
-            jsonData = resp.json()
-            print(jsonData)
-
-            docs = jsonData["rows"][0]
-            doc = docs["doc"]
-            print(doc)
+        gc.collect() 
+        resp = None
+        response = "ERROR"
+        try:
+            resp = get( request_url, timeout=10)
+            response = resp.text
+            resp.close()
+            
+            jsonData = json.loads(response)
+            
+            timestamp = jsonData["timestamp"]
+            
+            # Config stored inside doc          
+            doc = jsonData["doc"]
 
             lightOnOff = doc["lightOnOff"]
             onTime = lightOnOff[0]
@@ -123,14 +99,20 @@ class PlantServer(object):
             plantCare.setWateringTimes(wateringTimes)            
             
             pumpState = doc["pumpState"]
-            plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState     
+            plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
+            
+            fanState = doc["fanState"]
+            plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState
+            
+            heaterState = doc["heaterState"]
+            plantCare.setHeater(heaterState)  # must be same as PlantCare.OnOffState                
             
             windowState = doc["windowState"]
             plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
             
             temperatureRange = doc["temperatureRange"]            
             plantCare.setWindowTemperatureRange(temperatureRange[0], temperatureRange[1])            
-            
+        
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
                 resp.close()
@@ -139,6 +121,8 @@ class PlantServer(object):
             if resp:
                 resp.close()
             gc.collect()
+            
+            return timestamp
            
     def displayError(self, code, message):
         self.plantCare.displayError(code, message)
@@ -154,14 +138,14 @@ class PlantServer(object):
         while True:
 
             # get config data
-            await self.configure(self.plantCare) 
+            timestamp = await self.configure(self.plantCare)
             
             await self.plantCare.careforplants()
             
             if (count % LOG_TIME == 0):
-                datetime = await self.logger()
+                await self.logger()
                 if (count == 0):  # First time aroud use timestamp to set pico clock
-                    self.plantCare.setDateTime(datetime)
+                    self.plantCare.setDateTime(timestamp)
                 
             await asyncio.sleep(SLEEP_TIME)
             
@@ -182,7 +166,7 @@ class PlantServer(object):
             humidityData = self.plantCare.getHumidityData()
             co2Data = self.plantCare.getCo2Data()
             vpd = 0
-            timestamp = await self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
+            await self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
                 
         except Exception as err:
             sys.print_exception(err)
@@ -190,8 +174,6 @@ class PlantServer(object):
             self.displayError(123, "WIFI ERROR")
             machine.reset()
             
-        finally:
-            return timestamp
             
     async def logData(self, timestamp, temperature, humidity, co2, vpd):
         
@@ -215,9 +197,7 @@ class PlantServer(object):
         resp = None
         response = "ERROR"
         try:
-            print("POST")
             resp = post( request_url, headers=header, data=payload, timeout=10)
-            print("RESPONSE:" + resp.text)
             response = resp.text
             resp.close()
             
@@ -432,3 +412,5 @@ def doit():
 if __name__ == "__main__":
     
     doit()
+
+

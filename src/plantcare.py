@@ -704,10 +704,10 @@ class PlantCare(object):
         # datetime "2024-11-10T19:26:35.927Z"
         
         #12th character to the 20th character
-        time = datetime[12:20] 
+        time = datetime[11:20] 
 
         # First 10 chars
-        date = datetime[1:11]
+        date = datetime[0:11]
 
         # '10:00:00,Sunday,2024-09-29' 
         formatedDateTime = time + ',Sunday,' + date
@@ -744,6 +744,9 @@ class PlantCare(object):
     def togglePump(self):
         self.pump.toggleState()
         
+    def setFan(self, state):
+        self.fan.setState(state)
+        
     def toggleFan(self):
         self.fan.toggleState()
         
@@ -752,6 +755,9 @@ class PlantCare(object):
     
     def getFanSettings(self):
         return self.fan.settings()         
+        
+    def setHeater(self, state):
+        self.heater.setState(state)
         
     def toggleHeater(self):
         self.heater.toggleState()
@@ -816,12 +822,12 @@ class PlantCare(object):
             
             print("controlTemperature...")
             await self.probe.measureIt(self.rtc)
-            print("controlTemperature1...")
+
             temperature = self.probe.temperature            
             #temperature = await self.windows.control(self.probe, self.rtc)
-            print("controlTemperature2...")
+
             await self.fan.control(temperature)
-            print("controlTemperature3...")
+
             await self.heater.control(temperature)
             
             print("controlWatering...")
@@ -855,4 +861,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
 
