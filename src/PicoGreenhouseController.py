@@ -26,11 +26,31 @@ class PlantServer(object):
         
         if self.ipAddress == None:
             self.plantCare = PlantCare(None, None)
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             self.displayError(99, "No WIFI")
         else:            
             self.plantCare = PlantCare(self.ipAddress)
-            
-            #self.configurePlantParams()
             
     
     def connect_to_network(self):
@@ -67,16 +87,20 @@ class PlantServer(object):
         return status[0]     
             
  
-    async def setConfig(self, plantCare, bearerToken):
+    async def configure(self, plantCare):
             
-        GREENHOUSE_DATASERVICE = 'https://724c8e7f-5faa-49e1-8dc0-7a39ffd871ad-bluemix.cloudantnosqldb.appdomain.cloud/greenhouse'
+        GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
+        
+        header = {
+          'Content-Type': 'application/json',
+          }
+        
+        request_url = GREENHOUSE_DATASERVICE + '/config'
         resp = None                    
         payload = ''
         header = {
           'Authorization': bearerToken }
         
-        request_url = GREENHOUSE_DATASERVICE + '/_all_docs?include_docs=true'
-
         try: 
             resp = urequests.get(request_url, headers = header)
      
@@ -107,7 +131,7 @@ class PlantServer(object):
             temperatureRange = doc["temperatureRange"]            
             plantCare.setWindowTemperatureRange(temperatureRange[0], temperatureRange[1])            
             
-        except Exception as e: # Here it catches any error.
+        except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
                 resp.close()
             print(e)
@@ -128,6 +152,9 @@ class PlantServer(object):
         count = 0
         
         while True:
+
+            # get config data
+            await self.configure(self.plantCare) 
             
             await self.plantCare.careforplants()
             
@@ -139,16 +166,7 @@ class PlantServer(object):
             await asyncio.sleep(SLEEP_TIME)
             
             count = count + 1
-                       
-
-    async def configurePlantParams(self):  
-        
-        print('Get Configuration...')
-
-            
-        # get config data
-        #await self.setConfig(self.plantCare, tok)      
-        
+                            
         
     async def logger(self):  
         

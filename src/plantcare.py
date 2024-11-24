@@ -442,11 +442,11 @@ class Co2TemperatureHumidityProbe(object):
                 self.highTemp = 0
                 self.lowTemp = 100
                 
-                self.highHumidity = 100
-                self.lowHumidity = 0
+                self.highHumidity = 0
+                self.lowHumidity = 100
                 
-                self.highCo2 = 20000
-                self.lowCo2 = 0
+                self.highCo2 = 0
+                self.lowCo2 = 2000
                 
             # Set temperature high score
             if (self.temperature > self.highTemp):

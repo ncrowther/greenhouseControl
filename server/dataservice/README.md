@@ -37,7 +37,8 @@ See:
 
  * Create a code engine project (eg name sample)
 
- * Create a code engine configmap configuration containing Cloudant credentials: CLOUDANT_APIKEY=XXX, CLOUDANT_URL=XXX, DBNAME=GreenhouseControllerdb
+ * Create a code engine configmap configuration containing Cloudant credentials: CLOUDANT_APIKEY=XXX, CLOUDANT_URL=XXX, CONFIG_DB_NAME=greenhouseconfig
+ LOG_DB_NAME=greenhouselog
 
  * Assign the config map to the Code Engine project
 

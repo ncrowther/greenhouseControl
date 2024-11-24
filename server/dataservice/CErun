@@ -27,7 +27,7 @@ ibmcloud ce app create -n dataservice --env-from-configmap greenhousedataservice
 URL=$(ibmcloud ce app get -n dataservice -o url)
 
 # Now call it
-curl --location $URL | tee out
+curl --location $URL 
 #if ! [[ "${PIPESTATUS[200]}" == "0" ]] ; then
 #  echo "Expected 200 return code"
 #  cat out
