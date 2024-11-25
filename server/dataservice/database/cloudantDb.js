@@ -121,6 +121,28 @@ exports.getExpiredDocs = function getExpiredDocs(service, dbName) {
   })
 }
 
+exports.updateDoc = function updateDoc(service, dbName, doc, newDoc) {
+  return new Promise((resolve, reject) => {
+
+    // Upate old doc with new doc
+    newDoc._id = doc._id
+    newDoc._rev = doc._rev
+
+    // Update the document in Cloudant
+    service.postDocument({
+      db: dbName,
+      document: newDoc
+    }).then(response => {
+      console.log(response.result);
+      resolve(response.result);
+    });
+
+  }).catch((err) => {
+    console.error('Error occurred: ' + err.message, 'updateDoc()');
+    reject(err);
+  });
+}
+
 exports.deleteDocs = function deleteDocs(service, dbName, docs) {
   
   return new Promise((resolve, reject) => {

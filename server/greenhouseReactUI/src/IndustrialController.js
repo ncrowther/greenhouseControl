@@ -1,9 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import GreenhouseConfig from './GreenhouseConfig.js';
 import GreenhouseDetails from './GreenhouseDetails.js';
 import HumidityTempCo2Chart from './HumidityTempCo2Chart.js';
 import HumidityChart from './HumidityChart.js';
 import TemperatureChart from './TemperatureChart.js';
 import Co2Chart from './Co2Chart.js';
+import VpdChart from './VpdChart.js';
 import { Panel } from 'primereact/panel';
 import { Card } from 'primereact/card';
 import queryString from 'query-string';
@@ -24,11 +26,13 @@ const IndustrialController = () => {
   const { data, isLoading, error } = useQuery({
     queryFn: () =>
       fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(
-      // fetch('http://localhost:3000/docs', { mode: 'cors' }).then(
+        // fetch('http://localhost:3000/docs', { mode: 'cors' }).then(
         (res) => res.json()
       ),
     queryKey: [''],
   });
+
+ 
 
   // Show a loading message while data is fetching
   if (isLoading) {
@@ -42,32 +46,40 @@ const IndustrialController = () => {
 
   return (
 
-      <Panel header="" class="p-panel-title ml-2 text-primary">
-        <img style={{ width: 600, height: 260 }} align="center" src="greenhouse.jpg" alt="Greenhouse" />
-        <Card title="Pico Industrial Controller" className="md:w-25rem" style={{ color: 'black' }}>
-          <GreenhouseDetails data={data} />
-        </Card>
+    <Panel header="" className="p-panel-title ml-2 text-primary" >
+      <img style={{ width: 600, height: 260 }} align="center" src="greenhouse.jpg" alt="Greenhouse" />
+      <Card title="Pico Industrial Controller" className="md:w-25rem" style={{ color: 'black' }}>
+        <GreenhouseDetails data={data} />
+      </Card>
 
-        <Card title="Humidity Temperature Co2" className="md:w-25rem" style={{ color: 'black' }}>
-          <HumidityTempCo2Chart data={data} />
-        </Card>
+      <Card title="Configuration" className="md:w-25rem" style={{ color: 'black' }}>
+        <GreenhouseConfig data={data} />
+      </Card>      
 
-        <Card title="Temperature" className="md:w-25rem" style={{ color: 'black' }}>
-          <TemperatureChart data={data} />
-        </Card>
+      <Card title="Humidity Temperature Co2" className="md:w-25rem" style={{ color: 'black' }}>
+        <HumidityTempCo2Chart data={data} />
+      </Card>
 
-        <Card title="Humidity" className="md:w-25rem" style={{ color: 'black' }}>
-          <HumidityChart data={data} />
-        </Card>
+      <Card title="Temperature" className="md:w-25rem" style={{ color: 'black' }}>
+        <TemperatureChart data={data} />
+      </Card>
 
-        <Card title="Co2" className="md:w-25rem" style={{ color: 'black' }}>
-          <Co2Chart data={data} />
-        </Card>        
+      <Card title="Humidity" className="md:w-25rem" style={{ color: 'black' }}>
+        <HumidityChart data={data} />
+      </Card>
+
+      <Card title="Co2" className="md:w-25rem" style={{ color: 'black' }}>
+        <Co2Chart data={data} />
+      </Card>
+
+      <Card title="Vpd" className="md:w-25rem" style={{ color: 'black' }}>
+        <VpdChart data={data} />
+      </Card>
 
 
-      </Panel>
-   
- 
+    </Panel >
+
+
 
   );
 };

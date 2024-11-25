@@ -66,7 +66,13 @@ const HumidityChart = ({ data}) => {
     ],
   };
 
-  return <Bar options={options} data={datax} />;
+  return (
+    <div className="card" align="center"> 
+      <b>Danger zones: Below 10 or over 90</b> 
+      <Bar options={options} data={datax} />
+    </div>
+  )
+
 }
 
 export default HumidityChart;

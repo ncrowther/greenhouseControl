@@ -104,9 +104,9 @@ app.get('/docs', async (req, res) => {
 // //////////////// Get Config ////////////////////////
 app.get('/config', async (req, res) => {
 
-  var query = require('url').parse(req.url,true).query;
+  //var query = require('url').parse(req.url,true).query;
 
-  const id = query.id
+  const id = req.query.id;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (doc) {
@@ -124,6 +124,34 @@ app.get('/config', async (req, res) => {
     console.error('[App] Cloudant DB Failure in get config: ' + err)
     res.status(500);
     res.set('Access-Control-Allow-Origin', '*');
+    res.send(err);
+  })
+
+})
+
+// ///////////////////// Set Config ////////////////////
+app.post('/config', async (req, res) => {
+
+  const id = req.query.id;
+  const newDoc = req.body;
+
+  console.log('Set Config: ' + JSON.stringify(newDoc))
+
+  await cloudantLib.findById(service, configDbName, id).then(function (doc) {
+
+    console.log('***Found ' + doc)
+
+    console.log('Updating: ' + JSON.stringify(doc));
+
+    cloudantLib.updateDoc(service, configDbName, doc, newDoc)
+
+    res.status(200);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.send(doc);
+
+  }, function (err) {
+    console.error('[App] Cloudant DB Failure in calculateCommission: ' + err)
+    res.status(500);
     res.send(err);
   })
 

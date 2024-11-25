@@ -66,7 +66,12 @@ const Co2Chart = ({ data}) => {
     ],
   };
 
-  return <Bar options={options} data={datax} />;
+  return (
+    <div className="card" align="center"> 
+      <b>Daytime optimal for plants: 600 - 1200 ppm</b> 
+      <Bar options={options} data={datax} />
+    </div>
+  )  
 }
 
 export default Co2Chart;

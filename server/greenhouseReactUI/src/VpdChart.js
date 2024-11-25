@@ -42,31 +42,41 @@ const VpdChart = ({ data}) => {
     },
   };
 
-  const labels = data.Docs.reduce((humidity, obj) => {
-    humidity.push(obj.timestamp)
-    return humidity;
-  }, []); // 
-
-  const Readings = data.Docs.reduce((humidity, obj) => {
-    humidity.push(obj.humidity)
-    return humidity;
+  const labels = data.Docs.reduce((labels, obj) => {
+    labels.push(obj._id)
+    return labels;
   }, []); 
 
-  console.log("Readings: " + JSON.stringify(Readings))
+  const vpdReadings = data.Docs.reduce((vpdReadings, obj) => {
+
+    var leafTemperature = obj.temperature - 2.8
+    var leafVp = 0.61078 * Math.exp(17.27 * leafTemperature / (leafTemperature + 237.3))
+    var airVp = 0.61078 * Math.exp(17.27 * obj.temperature / (obj.temperature + 237.3)) * (obj.humidity / 100)
+    var vpd = (leafVp - airVp).toFixed(2)
+
+    vpdReadings.push(vpd)
+    return vpdReadings;
+  }, []); 
 
   const datax = {
     labels,
     datasets: [
       {
-        label: 'Humidity',
-        data: Readings, 
+        label: 'VPD',
+        data: vpdReadings, 
         backgroundColor: 'rgba(30, 262, 135, 0.5)',
         borderWidth: 1
       },
     ],
   };
 
-  return <Bar options={options} data={datax} />;
+  return (
+    <div className="card" align="center"> 
+      <b>Danger zones: Below 0.4 or over 1.6</b> 
+      <Bar options={options} data={datax} />
+    </div>
+  )
+
 }
 
 export default VpdChart;
