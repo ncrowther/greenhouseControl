@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { InputText } from 'primereact/inputtext';
-import { RadioButton } from "primereact/radiobutton";
 import { Button } from 'primereact/button';
 
 /**
@@ -47,8 +45,8 @@ const GreenhouseConfig = () => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-    // fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-    fetch('http://localhost:3000/config?id=default', {
+    fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
+    // fetch('http://localhost:3000/config?id=default', {
       method: 'POST',
       headers: myHeaders,
       body: jsonData // body data type must match "Content-Type" header
