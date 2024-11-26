@@ -19,6 +19,8 @@ const querystring = require('querystring');
 const cloudantLib = require('./database/cloudantDb.js')
 const session = require('express-session')
 const { CloudantV1 } = require('@ibm-cloud/cloudant')
+const cors = require('cors');
+
 const service = CloudantV1.newInstance()
 
 const logDbName = process.env.LOG_DB_NAME
@@ -26,6 +28,9 @@ const configDbName = process.env.CONFIG_DB_NAME
 const fs = require('fs');
 
 const app = express()
+
+// Enable CORS for all routes
+app.use(cors());
 
 const bodyParser = require('body-parser')
 
@@ -115,7 +120,7 @@ app.get('/config', async (req, res) => {
       doc: doc,
       timestamp: new Date()
     }
-    
+
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
     res.send(config);
@@ -137,25 +142,49 @@ app.post('/config', async (req, res) => {
 
   console.log('Set Config: ' + JSON.stringify(newDoc))
 
-  await cloudantLib.findById(service, configDbName, id).then(function (doc) {
+  findDoc(res, id, newDoc)
 
-    console.log('***Found ' + doc)
+})
+
+/**
+ * Find document from Cloudant database.
+ * @param {Object} res - The response object.
+ * @returns {void}
+ */
+async function findDoc(res, id, newDoc) {
+  console.log('Update doc');
+
+  await cloudantLib.findById(service, configDbName, id).then(function (doc) {
 
     console.log('Updating: ' + JSON.stringify(doc));
 
-    cloudantLib.updateDoc(service, configDbName, doc, newDoc)
+    cloudantLib.updateDoc(service, configDbName, doc, newDoc).then(function (doc) {
 
-    res.status(200);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.send(doc);
+      res.status(200);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+      //res.header('Access-Control-Allow-Origin', 'Origin, X-Requested-With, Content-Type, Accept');
+      //res.header('Access-Control-Allow-Header', 'Origin, X-Requested-With, Content-Type, Accept');
+
+      res.send(doc);
+
+    }, function (err) {
+      console.error('[App] Cloudant DB Failure in post config: ' + err)
+      res.status(500);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.send(err);
+    })
+
 
   }, function (err) {
-    console.error('[App] Cloudant DB Failure in calculateCommission: ' + err)
+    console.error('[App] Cloudant DB Failure in find doc: ' + err)
     res.status(500);
+    res.set('Access-Control-Allow-Origin', '*');
     res.send(err);
   })
 
-})
+}
 
 /**
  * Purge expired documents from Cloudant database.
