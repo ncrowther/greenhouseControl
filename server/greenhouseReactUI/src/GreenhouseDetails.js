@@ -1,7 +1,11 @@
 import React from 'react';
 import { Card } from 'primereact/card';
 import { Chip } from 'primereact/chip';
-import { FaTemperatureHigh } from "react-icons/fa6";
+import { MdOutlineAccessTime } from "react-icons/md";
+import { FaTemperatureEmpty  } from "react-icons/fa6";
+import { WiHumidity } from "react-icons/wi"
+import { MdOutlineCo2 } from "react-icons/md";
+import { MdEnergySavingsLeaf } from "react-icons/md";
 
 const GreenhouseDetails = ({ data }) => {
 
@@ -17,53 +21,53 @@ const GreenhouseDetails = ({ data }) => {
   var airVp = 0.61078 * Math.exp(17.27 * airTemperature / (airTemperature + 237.3)) * (humidity / 100)
   var vpd = (leafVp - airVp).toFixed(2)
 
-  const timeText = <b> Time: {timestamp} </b>
+  const timeText = <b>&nbsp;{timestamp} </b>
 
   // Set humidity color
-  let humidityText = <b style={{ color: 'green' }}>Humidity: {humidity} %</b>
+  let humidityText = <b style={{ color: 'green' }}>&nbsp;{humidity} %</b>
   if (humidityText < 35) {
-    humidityText = <b style={{ color: 'red' }}>Humidity: {humidity} %</b>
+    humidityText = <b style={{ color: 'red' }}>&nbsp;{humidity} %</b>
   }
   else if (humidityText > 70) {
-    humidityText = <b style={{ color: 'blue' }}>Humidity: {humidity} %</b>
+    humidityText = <b style={{ color: 'blue' }}>&nbsp;{humidity} %</b>
   }
 
   // Set air temp color
-  let temperatureText = <b style={{ color: 'green' }}>Temp: {airTemperature} C </b>
+  let temperatureText = <b style={{ color: 'green' }}>&nbsp;{airTemperature} C </b>
   if (airTemperature < 20) {
-    temperatureText = <b style={{ color: 'blue' }}>Temp: {airTemperature} C </b>
+    temperatureText = <b style={{ color: 'blue' }}>&nbsp;{airTemperature} C </b>
   }
   else if (airTemperature > 30) {
-    temperatureText = <b style={{ color: 'red' }}>Temp: {airTemperature} C </b>
+    temperatureText = <b style={{ color: 'red' }}>&nbsp;{airTemperature} C </b>
   }
 
   // Set co2 color
-  let co2Text = <b style={{ color: 'green' }}>Co2: {co2} ppm</b>
+  let co2Text = <b style={{ color: 'green' }}>&nbsp;{co2} ppm</b>
   if (co2 < 400) {
-    co2Text = <b style={{ color: 'blue' }}>Co2: {co2} ppm</b>
+    co2Text = <b style={{ color: 'blue' }}>&nbsp;{co2} ppm</b>
   }
   else if (co2 > 1200) {
-    co2Text = <b style={{ color: 'red' }}>Co2: {co2} ppm</b>
+    co2Text = <b style={{ color: 'red' }}>&nbsp;{co2} ppm</b>
   }
 
   // Set vpd color
-  let vpdText = <b style={{ color: 'green' }}>VPD: {vpd} </b>
+  let vpdText = <b style={{ color: 'green' }}>&nbsp;{vpd} </b>
   if (vpd < 0.4) {
-    vpdText = <b style={{ color: 'blue' }}>VPD: {vpd} </b>
+    vpdText = <b style={{ color: 'blue' }}>&nbsp;{vpd} </b>
   }
   else if (vpd > 1.6) {
-    vpdText = <b style={{ color: 'red' }}>VPD: {vpd} </b>
+    vpdText = <b style={{ color: 'red' }}>&nbsp;{vpd} </b>
   }
 
   return (
 
 
     <Card>
-      <Chip label={timeText} /> <br></br>
-      <Chip label={temperatureText} image={FaTemperatureHigh}/> <br></br>
-      <Chip label={humidityText} /> <br></br>
-      <Chip label={co2Text} /> <br></br>
-      <Chip label={vpdText} />
+      <Chip label={timeText} icon={MdOutlineAccessTime}/> <br></br>
+      <Chip label={temperatureText} icon={FaTemperatureEmpty }/> <br></br>
+      <Chip label={humidityText} icon={WiHumidity}/> <br></br>
+      <Chip label={co2Text} icon={MdOutlineCo2}/> <br></br>
+      <Chip label={vpdText} icon={MdEnergySavingsLeaf}/>
     </Card>
   );
 };

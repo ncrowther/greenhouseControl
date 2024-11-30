@@ -1,0 +1,55 @@
+FOR i = 1 to 10
+    x = x + 6.5
+NEXT  && Instead of "NEXT" can also use "ENDFOR"
+
+IF i = 25
+    i = i + 1
+ELSE
+    i = i + 3
+ENDIF
+
+x = 1
+DO WHILE x < 50
+    x =  x + 1
+ENDDO
+
+x = 1
+DO WHILE .T.
+    x = x + 1
+    IF x < 50
+        LOOP
+    ELSE
+        EXIT
+    ENDIF
+ENDDO
+
+nMonth = MONTH(DATE())
+DO CASE
+    CASE nMonth <= 3
+        MESSAGEBOX("Q1")
+
+    CASE nMonth <= 6
+        MESSAGEBOX("Q2")
+
+    CASE nMonth <= 9
+        MESSAGEBOX("Q3")
+
+    OTHERWISE
+        MESSAGEBOX("Q4")
+ENDCASE
+
+FOR EACH oControl IN THISFORM.Controls
+    MESSAGEBOX(oControl.Name)
+ENDFOR
+
+f = Factorial(10)
+
+FUNCTION Factorial(n)
+LOCAL i, r
+
+    r = 1
+    FOR i = n TO 1 STEP -1
+        r = r * i
+    NEXT  && Can also use "ENDFOR" here instead of "NEXT"
+    RETURN r
+ENDFUNC

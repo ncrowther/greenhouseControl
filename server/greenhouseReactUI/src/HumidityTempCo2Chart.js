@@ -47,13 +47,6 @@ export default function HumidityTempCo2Chart({ data }) {
           fill: false,
           borderColor: documentStyle.getPropertyValue('--red-500'),
           tension: 0.4
-        },
-        {
-          label: 'Co2',
-          data: co2Readings,
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--gray-500'),
-          tension: 0.4
         }
       ]
     };

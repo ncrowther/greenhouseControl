@@ -64,7 +64,7 @@ class PlantServer(object):
         return status[0]     
             
  
-    async def configure(self, plantCare):
+    def configure(self, plantCare):
             
         GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
         
@@ -127,7 +127,7 @@ class PlantServer(object):
     def displayError(self, code, message):
         self.plantCare.displayError(code, message)
         
-    async def care(self):
+    def care(self):
         print('Start care...')
         
         SLEEP_TIME = 10
@@ -138,21 +138,21 @@ class PlantServer(object):
         while True:
 
             # get config data
-            timestamp = await self.configure(self.plantCare)
+            timestamp = self.configure(self.plantCare)
             
-            await self.plantCare.careforplants()
+            self.plantCare.careforplants()
             
             if (count % LOG_TIME == 0):
-                await self.logger()
+                self.logger()
                 if (count == 0):  # First time aroud use timestamp to set pico clock
                     self.plantCare.setDateTime(timestamp)
                 
-            await asyncio.sleep(SLEEP_TIME)
+            asyncio.sleep(SLEEP_TIME)
             
             count = count + 1
                             
         
-    async def logger(self):  
+    def logger(self):  
         
         print('Start logger...')
         
@@ -166,7 +166,7 @@ class PlantServer(object):
             humidityData = self.plantCare.getHumidityData()
             co2Data = self.plantCare.getCo2Data()
             vpd = 0
-            await self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
+            self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
                 
         except Exception as err:
             sys.print_exception(err)
@@ -175,7 +175,7 @@ class PlantServer(object):
             machine.reset()
             
             
-    async def logData(self, timestamp, temperature, humidity, co2, vpd):
+    def logData(self, timestamp, temperature, humidity, co2, vpd):
         
         GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
         
@@ -209,208 +209,21 @@ class PlantServer(object):
             gc.collect()          
             return response
             
-            
-    async def serve_client(self, reader, writer):
-        
-        print("Client connected")
-                    
-        request_line = await reader.readline()
-        print("Request:", request_line)
-        # We are not interested in HTTP request headers, skip them
-        while await reader.readline() != b"\r\n":
-            pass
 
-        request = str(request_line)
-        
-        windowOpen = request.find('/window/open')
-        windowClosed = request.find('/window/close')
-        windowAuto = request.find('/window/auto')
-        windowToggle = request.find('/window/toggle')
-        
-        lightOn = request.find('/light/on')
-        lightOff = request.find('/light/off')
-        lightAuto = request.find('/light/auto')
-        lightToggle = request.find('/light/toggle')
-        
-        pumpOn = request.find('/pump/on')
-        pumpOff = request.find('/pump/off')
-        pumpAuto = request.find('/pump/auto')
-        pumpToggle = request.find('/pump/toggle')
-        
-        fanOn = request.find('/fan/on')
-        fanOff = request.find('/fan/off')
-        fanAuto = request.find('/fan/auto')
-        fanToggle = request.find('/fan/toggle')
-        
-        heaterOn = request.find('/heater/on')
-        heaterOff = request.find('/heater/off')
-        heaterAuto = request.find('/heater/auto')
-        heaterToggle = request.find('/heater/toggle')
-        
-        FOUND = 6
-       
-        # Window
-        if windowOpen == FOUND:
-            self.plantCare.setWindow(WindowState.OPEN)  
-        if windowClosed == FOUND:
-            self.plantCare.setWindow(WindowState.CLOSED)         
-        if windowAuto == FOUND:
-            self.plantCare.setWindow(WindowState.AUTO)
-        if windowToggle == FOUND:
-            self.plantCare.toggleWindow()       
-        
-        # Light
-        if lightOn == FOUND:
-            self.plantCare.setLight(OnOffState.ON)    
-        if lightOff == FOUND:
-            self.plantCare.setLight(OnOffState.OFF)
-        if lightAuto == FOUND:
-            self.plantCare.setLight(OnOffState.AUTO)
-        if lightToggle == FOUND:
-            self.plantCare.toggleLight()            
-        
-        # Pump
-        if pumpOn == FOUND:
-            self.plantCare.setPump(OnOffState.ON)          
-        if pumpOff == FOUND:
-            self.plantCare.setPump(OnOffState.OFF)       
-        if pumpAuto == FOUND:
-            self.plantCare.setPump(OnOffState.AUTO)
-        if pumpToggle == FOUND:
-            self.plantCare.togglePump()
-            
-        # Fan
-        if fanOn == FOUND:
-            self.plantCare.setFan(OnOffState.ON)          
-        if fanOff == FOUND:
-            self.plantCare.setFan(OnOffState.OFF)       
-        if fanAuto == FOUND:
-            self.plantCare.setFan(OnOffState.AUTO)
-        if fanToggle == FOUND:
-            self.plantCare.toggleFan()             
-            
-        # Heater
-        if heaterOn == FOUND:
-            self.plantCare.setHeater(OnOffState.ON)          
-        if heaterOff == FOUND:
-            self.plantCare.setHeater(OnOffState.OFF)       
-        if heaterAuto == FOUND:
-            self.plantCare.setHeater(OnOffState.AUTO)
-        if heaterToggle == FOUND:
-            self.plantCare.toggleHeater()            
-
-        time = self.plantCare.getSystemTime()
-        light = self.plantCare.getLightStatus()
-        lightSettings = self.plantCare.getLightSettings()        
-        windowStatus = self.plantCare.getWindowStatus()    
-        windowAngle = self.plantCare.getWindowAngle()
-        windowSettings = self.plantCare.getWindowSettings()
-        fan = self.plantCare.getFanStatus()
-        fanSettings = self.plantCare.getFanSettings()        
-        pump = self.plantCare.getPumpStatus()
-        pumpSettings = self.plantCare.getPumpSettings()
-        heater = self.plantCare.getHeaterStatus()
-        heaterSettings = self.plantCare.getHeaterSettings()
-        
-        temperatureData = self.plantCare.getTemperatureData()
-        humidityData = self.plantCare.getHumidityData()
-        
-        html = """<!DOCTYPE html>
-        <html>
-            <head> <title>Pico Greenhouse Controller</title> </head>
-            <body> <h1 style="color:green;">Pico Greenhouse Controller</h1>
-                <p>DateTime: {}</p>            
-                <p>Light: {}</p>
-                <p>Light Times: {}</p>                
-                <p>Window Status: {} </p>                
-                <p>Window Angle: {} Degrees</p>
-                <p>Window Temperature Range: {}</p>                
-                <p>Pump: {}</p>
-                <p>Pump Times: {}</p>
-                <p>Fan: {}</p>
-                <p>Fan Temperature Range: {}</p>                    
-                <p>Heater: {}</p>
-                <p>Heater Temperature Range: {}</p>                     
-                <p>Temperature: {:.2f}C High: {:.2f}C Low: {:.2f}C</p>
-                <p>Humidity: {:.2f}% High: {:.2f}% Low: {:.2f}%</p>                
-                
-                <form action="/light/toggle" method="put" target="_blank">
-                <input type="submit" value="Light">
-                </form>
-                
-                <form action="/window/toggle" method="put" target="_blank">
-                <input type="submit" value="Window">
-                </form>             
-                
-                <form action="/pump/toggle" method="put" target="_blank">
-                <input type="submit" value="Pump">
-                </form>
-                
-                <form action="/fan/toggle" method="put" target="_blank">
-                <input type="submit" value="Fan">
-                </form>                       
-                
-                <form action="/heater/toggle" method="put" target="_blank">
-                <input type="submit" value="Heater">
-                </form>                  
-                
-            </body>
-        </html>
-        """  
-        response = html.format(time,
-                               light,
-                               lightSettings,
-                               windowStatus,
-                               windowAngle,
-                               windowSettings,
-                               pump,
-                               pumpSettings,
-                               fan,
-                               fanSettings,                               
-                               heater,
-                               heaterSettings,
-                               temperatureData[0],
-                               temperatureData[1],
-                               temperatureData[2],
-                               humidityData[0],
-                               humidityData[1],
-                               humidityData[2])
-        
-        writer.write('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-        writer.write(response)
-
-        await writer.drain()
-        await writer.wait_closed()
-        print("Client disconnected")
-
-async def main():   
+def main():   
                
     try: 
-        plantServer = PlantServer()
-
-        tasks = await asyncio.gather(
-            asyncio.start_server(plantServer.serve_client, "0.0.0.0", 80),
-            plantServer.care())
+        plantServer = PlantServer()    
+        plantServer.care()
         
-        print(tasks)
-
 
     except Exception as err:
         sys.print_exception(err)
         errMsg = '{}: {}'.format(type(err).__name__, err)
         print(errMsg)
-        self.displayError(123, "WIFI ERROR")
         machine.reset()
 
-def doit():
-    try: 
-        asyncio.run(main())
-    except Exception as err:
-        sys.print_exception(err)
-        print(f"Unexpected {err=}, {type(err)=}")
+main()
 
-if __name__ == "__main__":
-    
-    doit()
 
 

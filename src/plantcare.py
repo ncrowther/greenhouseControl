@@ -100,7 +100,7 @@ class Heater(TemperatureController):
         print("Heater OFF")
         self.relay_pin.value(0)  # Set relay to OFF state
         
-    async def control(self, temperature):
+    def control(self, temperature):
         
         # On      
         if (OnOffState.AUTO == self.status()) and (temperature <= self.ON_TEMPERATURE):
@@ -139,7 +139,7 @@ class Fan(TemperatureController):
         self.fan_a.duty_u16(0)
         self.fan_b.duty_u16(0)
         
-    async def control(self, temperature):
+    def control(self, temperature):
         
         # On      
         if (OnOffState.AUTO == self.status()) and (temperature >= self.ON_TEMPERATURE):
@@ -194,7 +194,7 @@ class LightSwitch(object):
         elif (self.state == OnOffState.AUTO):
             self.setState(OnOffState.ON)                
             
-    async def controlLights(self, rtc):
+    def controlLights(self, rtc):
 
         print("Light state %s" %self.status())
         
@@ -268,40 +268,40 @@ class LinearActuator(object):
         elif (self.state == WindowState.AUTO):
             self.setState(WindowState.OPEN)               
         
-    async def up(self):
+    def up(self):
         
         if (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
             self.down_pin.value(0)  # Set down to OFF state
             self.up_pin.value(1)  # Set up to ON state
-            await asyncio.sleep_ms(self.PULSE_TIME)
+            asyncio.sleep_ms(self.PULSE_TIME)
             self.up_pin.value(0)  # Set up to OFF state
             
             # Increment degrees incline
             self.windowAngle = self.windowAngle + self.PULSE_DEGREE_CHANGE
         
-    async def down(self):
+    def down(self):
         
         if (self.windowAngle > 0):        
             self.up_pin.value(0)  # Set up to OFF state   
             self.down_pin.value(1)  # Set down to ON state
-            await asyncio.sleep_ms(self.PULSE_TIME)
+            asyncio.sleep_ms(self.PULSE_TIME)
             self.down_pin.value(0)  # Set down  to OFF state
             
             # Decrement degrees incline
             self.windowAngle = self.windowAngle - self.PULSE_DEGREE_CHANGE
             
-    async def control(self, temperatureSensor, rtc):
+    def control(self, temperatureSensor, rtc):
 
-        await temperatureSensor.measureIt(rtc)
+        temperatureSensor.measureIt(rtc)
         temperature = temperatureSensor.temperature
         
         # Open window      
         if (WindowState.AUTO == self.status()) and (temperature >= self.OPEN_WINDOW_TEMPERATURE):
-            await self.up()      
+            self.up()      
 
         # Close window 
         if (WindowState.AUTO == self.status()) and (temperature < self.CLOSE_WINDOW_TEMPERATURE):
-            await self.down()  
+            self.down()  
             
         return temperature            
 
@@ -356,19 +356,19 @@ class Pump(object):
         elif (self.state == OnOffState.AUTO):
             self.setState(OnOffState.ON)           
         
-    async def watering(self, wateringPeriod):
+    def watering(self, wateringPeriod):
         print("Watering Period %s seconds " %wateringPeriod )    
-        await asyncio.sleep(wateringPeriod)
+        asyncio.sleep(wateringPeriod)
         print("Watering Period OFF ")
         self.setState(OnOffState.OFF)
         
         # Sleep for a minute before turning back to AUTO mode so that we dont run again in the same time period
-        await asyncio.sleep_ms(ONE_MINUTE)
+        asyncio.sleep_ms(ONE_MINUTE)
         print("Watering sleep Period OFF ")
         self.setState(OnOffState.AUTO)
        
                
-    async def controlWatering(self, temperature, rtc):
+    def controlWatering(self, temperature, rtc):
         
         MIN_WATERING_TEMP = 10
         timeNow = rtc.getTimeStr()
@@ -380,7 +380,7 @@ class Pump(object):
             wateringPeriod = int(t/1000)
                             
             self.setState(OnOffState.ON)                          
-            await self.watering(wateringPeriod)         
+            self.watering(wateringPeriod)         
      
     def status(self):   
         return self.state
@@ -415,7 +415,7 @@ class Co2TemperatureHumidityProbe(object):
         self.highCo2 = 0
         self.lowCo2 = 100           
         
-    async def measureIt(self, rtc):   
+    def measureIt(self, rtc):   
     
         try:
             print('measureIt')
@@ -600,7 +600,7 @@ class Lcd(object):
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    async def showData(self, probe, rtc, ip):
+    def showData(self, probe, rtc, ip):
                 
         # Display time & temp on the LCD screen
         # print("SCREEN: " + str(self.screen))
@@ -809,7 +809,7 @@ class PlantCare(object):
         self.pump.setState(OnOffState.OFF)
         self.light.setState(OnOffState.OFF)
     
-    async def careforplants(self):
+    def careforplants(self):
           
         print("careforplants...")
         # Look after plants
@@ -818,23 +818,23 @@ class PlantCare(object):
             print(timestamp)
             
             print("controlLights...")
-            await self.light.controlLights(self.rtc)        
+            self.light.controlLights(self.rtc)        
             
             print("controlTemperature...")
-            await self.probe.measureIt(self.rtc)
+            self.probe.measureIt(self.rtc)
 
             temperature = self.probe.temperature            
-            #temperature = await self.windows.control(self.probe, self.rtc)
+            #temperature = self.windows.control(self.probe, self.rtc)
 
-            await self.fan.control(temperature)
+            self.fan.control(temperature)
 
-            await self.heater.control(temperature)
+            self.heater.control(temperature)
             
             print("controlWatering...")
-            await self.pump.controlWatering(temperature, self.rtc)
+            self.pump.controlWatering(temperature, self.rtc)
             
             print("display data...")
-            await self.lcd.showData(self.probe, self.rtc, self.ip)        
+            self.lcd.showData(self.probe, self.rtc, self.ip)        
 
         except HardwareError as e:
             print(e)            
@@ -847,20 +847,17 @@ class PlantCare(object):
             self.cleanUp()
             self.lcd.showError(101, "General error")
             sys.exit("Terminated")
+                   
             
-async def count():
-    print(".")         
-            
-async def main():
+def main():
     
     datetime = '10:01:00,Sunday,2024-09-29' 
     plantCare = PlantCare(datetime, "192.168.1.1")
     
-    while True:
-        await asyncio.gather(plantCare.careforplants(), count())
+    plantCare.careforplants()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 
 
 
