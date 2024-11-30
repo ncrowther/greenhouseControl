@@ -111,7 +111,7 @@ class PlantServer(object):
             plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
             
             temperatureRange = doc["temperatureRange"]            
-            plantCare.setWindowTemperatureRange(temperatureRange[0], temperatureRange[1])            
+            plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])            
         
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.

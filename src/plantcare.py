@@ -9,7 +9,6 @@ import machine
 import onewire
 import ds18x20
 from machine_i2c_lcd import I2cLcd
-import asyncio
 import breakout_scd41
 from pimoroni_i2c import PimoroniI2C
 
@@ -45,14 +44,10 @@ class HardwareError(Exception):
         self.error_code = error_code
         self.message = message
         
-# Abtract class for temperature controller devices
-class TemperatureController:
+# Abtract class for controller devices
+class OnOFFAutoController:
     
-    # Define on/off temperature
-    ON_TEMPERATURE = 19
-    OFF_TEMPERATURE = 20
     state = OnOffState.AUTO
-        
         
     def setState(self, state):
         
@@ -73,19 +68,12 @@ class TemperatureController:
             self.setState(OnOffState.AUTO)
         elif (self.state == OnOffState.AUTO):
             self.setState(OnOffState.ON)                
-        
-    def settings(self):
-        return str(self.ON_TEMPERATURE) + " - " +  str(self.OFF_TEMPERATURE)  + "C"
-    
+            
     def status(self):
         return self.state
     
-class Heater(TemperatureController):
+class Heater(OnOFFAutoController):
     # Relay heater
-    
-    ### DEFINE HEATER ON/OFF TEMPERATURE
-    ON_TEMPERATURE = 18
-    OFF_TEMPERATURE = 20
     
     def __init__(self):
         # GPIO pin number  relay is connected to
@@ -100,25 +88,27 @@ class Heater(TemperatureController):
         print("Heater OFF")
         self.relay_pin.value(0)  # Set relay to OFF state
         
-    def control(self, temperature):
+    def control(self, temperature, minTemperature):
         
-        # On      
-        if (OnOffState.AUTO == self.status()) and (temperature <= self.ON_TEMPERATURE):
+        # Degrees in which the temp must rise before turning off
+        DEAD_ZONE = 1
+        
+        # On
+        if (OnOffState.AUTO == self.status()) and (temperature <= minTemperature):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO) 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (temperature > self.OFF_TEMPERATURE):
+        if (OnOffState.AUTO == self.status()) and (temperature > (minTemperature + DEAD_ZONE)):
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)         
 
             
-class Fan(TemperatureController):
+class Fan(OnOFFAutoController):
     # PWM dual power switch
     
-    ### DEFINE FAN ON/OFF TEMPERATURE
-    ON_TEMPERATURE = 25
-    OFF_TEMPERATURE = 24
+    # Degrees in which the temp must cool before turning off
+    DEAD_ZONE = 1
     
     def __init__(self):
         # Define pins for Fan
@@ -139,15 +129,18 @@ class Fan(TemperatureController):
         self.fan_a.duty_u16(0)
         self.fan_b.duty_u16(0)
         
-    def control(self, temperature):
+    def control(self, temperature, maxTemperature):
         
-        # On      
-        if (OnOffState.AUTO == self.status()) and (temperature >= self.ON_TEMPERATURE):
+        # Degrees in which the temp must rise before turning off
+        DEAD_ZONE = 1
+        
+        # On
+        if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO) 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (temperature < self.OFF_TEMPERATURE):
+        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature + DEAD_ZONE)):        
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)         
         
@@ -215,10 +208,6 @@ class LightSwitch(object):
 
 class LinearActuator(object):
     # Linear Actuator for window
-    
-    # Define window open/close temperature
-    OPEN_WINDOW_TEMPERATURE = 25
-    CLOSE_WINDOW_TEMPERATURE = 22
 
     # Define window pulse count and length
     MAX_ACTUATOR_ANGLE = 90
@@ -238,11 +227,7 @@ class LinearActuator(object):
         self.windowAngle = 0
     
         self.state = WindowState.AUTO
-        
-    def setRange(self, upperTemperature, lowerTemperature):
-        # refine window open/close range
-        self.OPEN_WINDOW_TEMPERATURE  = int(upperTemperature) 
-        self.CLOSE_WINDOW_TEMPERATURE = int(lowerTemperature)         
+                
 
     def setState(self, state):
         
@@ -273,7 +258,7 @@ class LinearActuator(object):
         if (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
             self.down_pin.value(0)  # Set down to OFF state
             self.up_pin.value(1)  # Set up to ON state
-            asyncio.sleep_ms(self.PULSE_TIME)
+            time.sleep_ms(self.PULSE_TIME)
             self.up_pin.value(0)  # Set up to OFF state
             
             # Increment degrees incline
@@ -284,36 +269,31 @@ class LinearActuator(object):
         if (self.windowAngle > 0):        
             self.up_pin.value(0)  # Set up to OFF state   
             self.down_pin.value(1)  # Set down to ON state
-            asyncio.sleep_ms(self.PULSE_TIME)
+            time.sleep_ms(self.PULSE_TIME)
             self.down_pin.value(0)  # Set down  to OFF state
             
             # Decrement degrees incline
             self.windowAngle = self.windowAngle - self.PULSE_DEGREE_CHANGE
             
-    def control(self, temperatureSensor, rtc):
-
-        temperatureSensor.measureIt(rtc)
-        temperature = temperatureSensor.temperature
+    def control(self, temperature, maxTemperature):
         
-        # Open window      
-        if (WindowState.AUTO == self.status()) and (temperature >= self.OPEN_WINDOW_TEMPERATURE):
-            self.up()      
+        # Degrees in which the temp must rise before turning off
+        DEAD_ZONE = 1
+        
+        # On
+        if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
+            self.up() 
 
-        # Close window 
-        if (WindowState.AUTO == self.status()) and (temperature < self.CLOSE_WINDOW_TEMPERATURE):
-            self.down()  
-            
-        return temperature            
+        # Off 
+        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature + DEAD_ZONE)):        
+            self.down()     
 
     def angle(self):
         return self.windowAngle  
 
     def status(self):
         return self.state
-    
-    def settings(self):
-        return str(self.CLOSE_WINDOW_TEMPERATURE) + " - " + str(self.OPEN_WINDOW_TEMPERATURE) + "C"
-    
+        
     
 class Pump(object):
     # PWM dual power switch
@@ -358,12 +338,12 @@ class Pump(object):
         
     def watering(self, wateringPeriod):
         print("Watering Period %s seconds " %wateringPeriod )    
-        asyncio.sleep(wateringPeriod)
+        time.sleep(wateringPeriod)
         print("Watering Period OFF ")
         self.setState(OnOffState.OFF)
         
         # Sleep for a minute before turning back to AUTO mode so that we dont run again in the same time period
-        asyncio.sleep_ms(ONE_MINUTE)
+        time.sleep_ms(ONE_MINUTE)
         print("Watering sleep Period OFF ")
         self.setState(OnOffState.AUTO)
        
@@ -659,6 +639,11 @@ class Lcd(object):
     
 class PlantCare(object):
     
+
+    # define temperature range
+    MIN_TEMPERATURE  = 20
+    MAX_TEMPERATURE = 40
+        
     def __init__(self, ip):
         
         self.ip = ip
@@ -795,8 +780,9 @@ class PlantCare(object):
     def getWindowSettings(self):
         return self.windows.settings()
     
-    def setWindowTemperatureRange(self, upper, lower):
-        return self.windows.setRange(upper, lower)        
+    def setTemperatureRange(self, min, max):
+        self.MIN_TEMPERATURE = min
+        self.MAX_TEMPERATURE = max        
     
     def setWateringTimes(self, wateringTimes):
         self.pump.setTimes(wateringTimes)
@@ -824,11 +810,11 @@ class PlantCare(object):
             self.probe.measureIt(self.rtc)
 
             temperature = self.probe.temperature            
-            #temperature = self.windows.control(self.probe, self.rtc)
+            #temperature = self.windows.control(temperature, self.MAX_TEMPERATURE)
 
-            self.fan.control(temperature)
+            self.fan.control(temperature, self.MAX_TEMPERATURE)
 
-            self.heater.control(temperature)
+            self.heater.control(temperature, self.MIN_TEMPERATURE)
             
             print("controlWatering...")
             self.pump.controlWatering(temperature, self.rtc)
@@ -848,16 +834,3 @@ class PlantCare(object):
             self.lcd.showError(101, "General error")
             sys.exit("Terminated")
                    
-            
-def main():
-    
-    datetime = '10:01:00,Sunday,2024-09-29' 
-    plantCare = PlantCare(datetime, "192.168.1.1")
-    
-    plantCare.careforplants()
-
-if __name__ == "__main__":
-    main()
-
-
-

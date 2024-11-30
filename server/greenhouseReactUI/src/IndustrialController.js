@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import GreenhouseConfig from './GreenhouseConfig.js';
+import GreenhouseTemperature from './GreenhouseTemperature.js';
 import GreenhouseDetails from './GreenhouseDetails.js';
-import HumidityTempCo2Chart from './HumidityTempCo2Chart.js';
-import HumidityChart from './HumidityChart.js';
-import TemperatureChart from './TemperatureChart.js';
+import HumidityTempChart from './HumidityTempChart.js';
 import Co2Chart from './Co2Chart.js';
 import VpdChart from './VpdChart.js';
 import { Panel } from 'primereact/panel';
@@ -67,8 +66,12 @@ const IndustrialController = () => {
         <GreenhouseConfig jsonConfig={jsonConfig} />
       </Card>
 
+      <Card title="Temperature Range" className="md:w-25rem" style={{ color: 'black' }}>
+        <GreenhouseTemperature jsonConfig={jsonConfig} />
+      </Card>      
+
       <Card title="Humidity Temperature" className="md:w-25rem" style={{ color: 'black' }}>
-        <HumidityTempCo2Chart data={logData} />
+        <HumidityTempChart data={logData} />
       </Card>
 
       <Card title="Co2" className="md:w-25rem" style={{ color: 'black' }}>

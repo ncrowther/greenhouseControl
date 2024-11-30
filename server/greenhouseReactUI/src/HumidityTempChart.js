@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Chart } from 'primereact/chart';
 
-export default function HumidityTempCo2Chart({ data }) {
+export default function HumidityTempChart({ data }) {
 
   const labels = data.Docs.reduce((labels, obj) => {
     labels.push(obj._id)

@@ -1,8 +1,6 @@
 //import { useQuery } from '@tanstack/react-query';
 import React, { useState } from "react";
 import { Button } from 'primereact/button';
-import { Slider } from "primereact/slider";
-import { InputText } from "primereact/inputtext";
 import { FaFireFlameSimple } from "react-icons/fa6";
 import { CiLight } from "react-icons/ci";
 import { PiFanFill } from "react-icons/pi";
@@ -18,9 +16,8 @@ const GreenhouseConfig = ({ jsonConfig }) => {
   const [heater, setHeater] = useState(jsonConfig.doc.heaterState);
   const [fan, setFan] = useState(jsonConfig.doc.fanState);
   const [pump, setPump] = useState(jsonConfig.doc.pumpState);
-  const [temperature, setTemperature] = useState([jsonConfig.doc.temperatureRange[0] * 3, jsonConfig.doc.temperatureRange[1] * 3]);
-  //const [temperature, setTemperature] = useState([10, 20]);
 
+  const temperatureRange = jsonConfig.doc.temperatureRange;
 
   const handleOnSubmit = (event, jsonConfig) => {
 
@@ -28,17 +25,13 @@ const GreenhouseConfig = ({ jsonConfig }) => {
 
     console.log("Got: " + JSON.stringify(jsonConfig))
 
-
     var lightState = { light }.light
     var heaterState = { heater }.heater
     var fanState = { fan }.fan
     var pumpState = { pump }.pump
 
-    var lowTemp = Math.trunc(temperature[0] / 3)
-    var highTemp = Math.trunc(temperature[1] / 3)
-
-    console.log("***********Hi:", highTemp);
-    console.log("***********Lo:", lowTemp);
+    var lowTemp = temperatureRange[0]
+    var highTemp =temperatureRange[1]
 
     jsonConfig = JSON.stringify({
       "lightState": lightState,
@@ -197,25 +190,9 @@ const GreenhouseConfig = ({ jsonConfig }) => {
 
         {pumpButton}
 
-        <br></br>
-
-      </div>
-
-      <div className="card flex flex-column md:flex-row gap-3">
-        Min Temperature:
-        <InputText value={Math.trunc(temperature[0] / 3)} onChange={(e) => setTemperature(e.target.value)} className="w-full" />
-        &nbsp;&nbsp;Max Temperature:
-        <InputText value={Math.trunc(temperature[1] / 3)} onChange={(e) => setTemperature(e.target.value)} className="w-full" />
-        <br></br> <br></br>
-        0 - 33
-        <Slider value={temperature} onChange={(e) => setTemperature(e.value)} className="w-14rem" range />
-        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { jsonConfig })} />
-
       </div>
 
     </form>
-
-
 
   );
 
