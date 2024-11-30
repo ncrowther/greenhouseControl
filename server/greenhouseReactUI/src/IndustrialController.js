@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import GreenhouseConfig from './GreenhouseConfig.js';
 import GreenhouseTemperature from './GreenhouseTemperature.js';
+import GreenhouseLight from './GreenhouseLight.js';
 import GreenhouseDetails from './GreenhouseDetails.js';
 import HumidityTempChart from './HumidityTempChart.js';
 import Co2Chart from './Co2Chart.js';
@@ -69,6 +70,10 @@ const IndustrialController = () => {
       <Card title="Temperature Range" className="md:w-25rem" style={{ color: 'black' }}>
         <GreenhouseTemperature jsonConfig={jsonConfig} />
       </Card>      
+
+      <Card title="Light" className="md:w-25rem" style={{ color: 'black' }}>
+        <GreenhouseLight jsonConfig={jsonConfig} />
+      </Card>       
 
       <Card title="Humidity Temperature" className="md:w-25rem" style={{ color: 'black' }}>
         <HumidityTempChart data={logData} />

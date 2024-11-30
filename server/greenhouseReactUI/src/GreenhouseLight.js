@@ -8,15 +8,17 @@ import { InputText } from "primereact/inputtext";
  * Set the greenhouse config
  * @returns {JSX.Element} The component.
  */
-const GreenhouseTemperature = ({ jsonConfig }) => {
+const GreenhouseLight = ({ jsonConfig }) => {
 
-  const SLIDER_100_RANGE = 2.5
+  const SLIDER_100_RANGE = 4.1666
   const lightState  = jsonConfig.doc.lightState;
   const heaterState = jsonConfig.doc.heaterState;
   const fanState = jsonConfig.doc.fanState;
   const pumpState = jsonConfig.doc.pumpState;
+  const lowTemp = jsonConfig.doc.temperatureRange[0];
+  const highTemp = jsonConfig.doc.temperatureRange[1];
 
-  const [temperature, setTemperature] = useState([jsonConfig.doc.temperatureRange[0] * SLIDER_100_RANGE, jsonConfig.doc.temperatureRange[1] * SLIDER_100_RANGE]);
+  const [lightOnOff, setlightOnOff] = useState([jsonConfig.doc.lightOnOff[0] * SLIDER_100_RANGE, jsonConfig.doc.lightOnOff[1] * SLIDER_100_RANGE]);
 
   const handleOnSubmit = (event, jsonConfig) => {
 
@@ -24,17 +26,17 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
 
     console.log("Got: " + JSON.stringify(jsonConfig))
 
-    var lowTemp = Math.trunc(temperature[0] / SLIDER_100_RANGE)
-    var highTemp = Math.trunc(temperature[1] / SLIDER_100_RANGE)
+    var lightOn = Math.trunc(lightOnOff[0] / SLIDER_100_RANGE)
+    var lightOff = Math.trunc(lightOnOff[1] / SLIDER_100_RANGE)
 
-    console.log("***********Hi:", highTemp);
-    console.log("***********Lo:", lowTemp);
+    console.log("***********lightOn:", lightOn);
+    console.log("***********lightOff:", lightOff);
 
     jsonConfig = JSON.stringify({
       "lightState": lightState,
       "lightOnOff": [
-        "08",
-        "21"
+        lightOn,
+        lightOff
       ],
       "pumpState": pumpState,
       "fanState": fanState,
@@ -74,13 +76,13 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
   return (
 
       <div className="card flex flex-column md:flex-row gap-3">
-        Min:
-        <InputText value={Math.trunc(temperature[0] / SLIDER_100_RANGE)} onChange={(e) => setTemperature(e.target.value)} className="w-full" disabled/>
-        &nbsp;&nbsp;Max:
-        <InputText value={Math.trunc(temperature[1] / SLIDER_100_RANGE)} onChange={(e) => setTemperature(e.target.value)} className="w-full" disabled/>
+        On:
+        <InputText value={Math.trunc(lightOnOff[0] / SLIDER_100_RANGE)} onChange={(e) => setlightOnOff(e.target.value)} className="w-full" disabled/>
+        &nbsp;&nbsp;Off:
+        <InputText value={Math.trunc(lightOnOff[1] / SLIDER_100_RANGE)} onChange={(e) => setlightOnOff(e.target.value)} className="w-full" disabled/>
         <br></br> <br></br>
         <Slider
-         value={temperature} onChange={(e) => setTemperature(e.value)} className="w-14rem" range />
+         value={lightOnOff} onChange={(e) => setlightOnOff(e.value)} className="w-14rem" range />
         <br></br> 
         <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { jsonConfig })} />
 
@@ -91,4 +93,4 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
 
 };
 
-export default GreenhouseTemperature;
+export default GreenhouseLight;
