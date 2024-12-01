@@ -21,7 +21,7 @@ const GreenhouseDetails = ({ data }) => {
   var airVp = 0.61078 * Math.exp(17.27 * airTemperature / (airTemperature + 237.3)) * (humidity / 100)
   var vpd = (leafVp - airVp).toFixed(2)
 
-  const timeText = <b>&nbsp;{timestamp} </b>
+  const timeText = <b style={{ color: 'green' }}>&nbsp;{timestamp} </b>
 
   // Set humidity color
   let humidityText = <b style={{ color: 'green' }}>&nbsp;{humidity} %</b>
@@ -60,15 +60,13 @@ const GreenhouseDetails = ({ data }) => {
   }
 
   return (
-
-
-    <Card>
+    <div className="card flex flex-wrap gap-2">
       <Chip label={timeText} icon={MdOutlineAccessTime}/> <br></br>
       <Chip label={temperatureText} icon={FaTemperatureEmpty }/> <br></br>
       <Chip label={humidityText} icon={WiHumidity}/> <br></br>
       <Chip label={co2Text} icon={MdOutlineCo2}/> <br></br>
       <Chip label={vpdText} icon={MdEnergySavingsLeaf}/>
-    </Card>
+    </div>
   );
 };
 

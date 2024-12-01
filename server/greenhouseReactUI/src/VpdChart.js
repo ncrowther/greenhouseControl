@@ -1,46 +1,12 @@
-import React from 'react';
-
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-import { Bar } from 'react-chartjs-2';
-
+import React, { useState, useEffect } from 'react';
+import { Chart } from 'primereact/chart';
 
 /**
  * A chart to display humidity data.
- * @param {VpdChartProps} data - The data for the chart.
+ * @param {Co2ChartProps} data - The data for the chart.
  * @returns {JSX.Element} The component.
  */
 const VpdChart = ({ data}) => {
-
-  ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-  );
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: '',
-      },
-    },
-  };
 
   const labels = data.Docs.reduce((labels, obj) => {
     labels.push(obj._id)
@@ -58,22 +24,63 @@ const VpdChart = ({ data}) => {
     return vpdReadings;
   }, []); 
 
-  const datax = {
-    labels,
-    datasets: [
-      {
-        label: 'VPD',
-        data: vpdReadings, 
-        backgroundColor: 'rgba(30, 262, 135, 0.5)',
-        borderWidth: 1
+  const [chartData, setChartData] = useState({});
+  const [chartOptions, setChartOptions] = useState({});
+
+  useEffect(() => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
+    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
+    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+    const data = {
+      labels: labels, 
+      datasets: [
+        {
+          label: 'Virtual Pressure Deficit.  Plant stress below 0.4 or over 1.6',
+          data: vpdReadings,
+          fill: false,
+          borderColor: documentStyle.getPropertyValue('--green-500'),
+          tension: 0.4
+        }
+      ]
+    };
+    const options = {
+      maintainAspectRatio: false,
+      aspectRatio: 0.6,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor
+          }
+        }
       },
-    ],
-  };
+      scales: {
+        x: {
+          ticks: {
+            color: textColorSecondary
+          },
+          grid: {
+            color: surfaceBorder
+          }
+        },
+        y: {
+          ticks: {
+            color: textColorSecondary
+          },
+          grid: {
+            color: surfaceBorder
+          }
+        }
+      }
+    };
+
+    setChartData(data);
+    setChartOptions(options);
+  }, []);
 
   return (
-    <div className="card" align="center"> 
-      <b>Danger zones: Below 0.4 or over 1.6</b> 
-      <Bar options={options} data={datax} />
+    <div className="card">
+      <Chart type="line" data={chartData} options={chartOptions} />
     </div>
   )
 

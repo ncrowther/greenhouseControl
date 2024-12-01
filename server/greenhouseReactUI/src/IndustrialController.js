@@ -8,7 +8,8 @@ import Co2Chart from './Co2Chart.js';
 import VpdChart from './VpdChart.js';
 import { Panel } from 'primereact/panel';
 import { Card } from 'primereact/card';
-import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
+
+import 'primereact/resources/themes/vela-green/theme.css';
 
 /**
  * This function is responsible for rendering the IndustrialController React UI.
@@ -58,32 +59,34 @@ const IndustrialController = () => {
   return (
 
     <Panel header="" className="p-panel-title ml-2 text-primary" >
-      <img style={{ width: 600, height: 260 }} align="center" src="greenhouse.jpg" alt="Greenhouse" />
-      <Card title="Pico Industrial Controller" className="md:w-25rem" style={{ color: 'black' }}>
+      <img style={{ width: 800, height: 260 }} align="center" src="greenhouse.jpg" alt="Greenhouse" />
+      <h1>Plant Growth Controller</h1>
+      <br></br>
+      <Card title="Status" className="md:w-25rem">
         <GreenhouseDetails data={logData} />
       </Card>
 
-      <Card title="Configuration" className="md:w-25rem" style={{ color: 'black' }}>
+      <Card title="Configuration" className="md:w-25rem">
         <GreenhouseConfig jsonConfig={jsonConfig} />
       </Card>
 
-      <Card title="Temperature Range" className="md:w-25rem" style={{ color: 'black' }}>
+      <Card title="Temperature" className="md:w-25rem" >
         <GreenhouseTemperature jsonConfig={jsonConfig} />
       </Card>      
 
-      <Card title="Light" className="md:w-25rem" style={{ color: 'black' }}>
+      <Card title="Light" className="md:w-25rem">
         <GreenhouseLight jsonConfig={jsonConfig} />
       </Card>       
 
-      <Card title="Humidity Temperature" className="md:w-25rem" style={{ color: 'black' }}>
+      <Card title="Climate" className="md:w-25rem">
         <HumidityTempChart data={logData} />
       </Card>
 
-      <Card title="Co2" className="md:w-25rem" style={{ color: 'black' }}>
+      <Card title="Co2" className="md:w-25rem">
         <Co2Chart data={logData} />
       </Card>
 
-      <Card title="Vpd" className="md:w-25rem" style={{ color: 'black' }}>
+      <Card title="Vpd" className="md:w-25rem">
         <VpdChart data={logData} />
       </Card>
 

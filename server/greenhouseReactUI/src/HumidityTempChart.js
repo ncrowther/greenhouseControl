@@ -18,11 +18,6 @@ export default function HumidityTempChart({ data }) {
     return humidity;
   }, []);
 
-  const co2Readings = data.Docs.reduce((co2, obj) => {
-    co2.push(obj.co2)
-    return co2;
-  }, []);  
-
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
 
@@ -35,14 +30,14 @@ export default function HumidityTempChart({ data }) {
       labels: labels, 
       datasets: [
         {
-          label: 'Temperature',
+          label: 'Degrees C',
           data: temperatureReadings,
           fill: false,
           borderColor: documentStyle.getPropertyValue('--blue-500'),
           tension: 0.4
         },
         {
-          label: 'Humidity',
+          label: 'Humidity %',
           data: humidityReadings,
           fill: false,
           borderColor: documentStyle.getPropertyValue('--red-500'),

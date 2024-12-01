@@ -1,8 +1,6 @@
-//import { useQuery } from '@tanstack/react-query';
 import React, { useState } from "react";
 import { Button } from 'primereact/button';
-import { Slider } from "primereact/slider";
-import { InputText } from "primereact/inputtext";
+import { Knob } from 'primereact/knob';
 
 /**
  * Set the greenhouse config
@@ -10,27 +8,21 @@ import { InputText } from "primereact/inputtext";
  */
 const GreenhouseLight = ({ jsonConfig }) => {
 
-  const SLIDER_100_RANGE = 4.1666
-  const lightState  = jsonConfig.doc.lightState;
+  const lightState = jsonConfig.doc.lightState;
   const heaterState = jsonConfig.doc.heaterState;
   const fanState = jsonConfig.doc.fanState;
   const pumpState = jsonConfig.doc.pumpState;
   const lowTemp = jsonConfig.doc.temperatureRange[0];
   const highTemp = jsonConfig.doc.temperatureRange[1];
 
-  const [lightOnOff, setlightOnOff] = useState([jsonConfig.doc.lightOnOff[0] * SLIDER_100_RANGE, jsonConfig.doc.lightOnOff[1] * SLIDER_100_RANGE]);
+  const [lightOn, setLightOn] = useState(jsonConfig.doc.lightOnOff[0]);
+  const [lightOff, setLightOff] = useState(jsonConfig.doc.lightOnOff[1]);
 
   const handleOnSubmit = (event, jsonConfig) => {
 
     event.preventDefault();
 
     console.log("Got: " + JSON.stringify(jsonConfig))
-
-    var lightOn = Math.trunc(lightOnOff[0] / SLIDER_100_RANGE)
-    var lightOff = Math.trunc(lightOnOff[1] / SLIDER_100_RANGE)
-
-    console.log("***********lightOn:", lightOn);
-    console.log("***********lightOff:", lightOff);
 
     jsonConfig = JSON.stringify({
       "lightState": lightState,
@@ -58,8 +50,8 @@ const GreenhouseLight = ({ jsonConfig }) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-     fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-    //fetch('http://localhost:3000/config?id=default', {
+    fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
+      //fetch('http://localhost:3000/config?id=default', {
       method: 'POST',
       headers: myHeaders,
       body: jsonConfig // body data type must match "Content-Type" header
@@ -67,30 +59,44 @@ const GreenhouseLight = ({ jsonConfig }) => {
     })
 
     setTimeout(() => {
-      window.location.reload(true);;
+      window.location.reload(true);
     }, 500);
-
 
   };
 
   return (
 
-      <div className="card flex flex-column md:flex-row gap-3">
-        On:
-        <InputText value={Math.trunc(lightOnOff[0] / SLIDER_100_RANGE)} onChange={(e) => setlightOnOff(e.target.value)} className="w-full" disabled/>
-        &nbsp;&nbsp;Off:
-        <InputText value={Math.trunc(lightOnOff[1] / SLIDER_100_RANGE)} onChange={(e) => setlightOnOff(e.target.value)} className="w-full" disabled/>
-        <br></br> <br></br>
-        <Slider
-         value={lightOnOff} onChange={(e) => setlightOnOff(e.value)} className="w-14rem" range />
-        <br></br> 
-        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { jsonConfig })} />
+    <div>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'left',
+        alignItems: 'center'
+      }}>
+
+        <h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On:&nbsp;</h3>
+        <Knob value={lightOn} onChange={(e) => setLightOn(e.value)} min={0} max={24} valueColor="orange" rangeColor="lightgray" />
+
+        <h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Off:&nbsp;</h3>
+        <Knob value={lightOff} onChange={(e) => setLightOff(e.value)} min={0} max={24} valueColor="gray" rangeColor="lightgray" />
 
       </div>
 
+      <div></div>
+
+      <div style={{
+        display: 'flex',
+        justifyContent: 'left',
+        alignItems: 'center'
+      }}>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { jsonConfig })} tooltip="Select light on off time" />
+      </div>
+
+    </div>
 
   );
 
 };
+
 
 export default GreenhouseLight;

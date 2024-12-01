@@ -1,8 +1,7 @@
 //import { useQuery } from '@tanstack/react-query';
 import React, { useState } from "react";
 import { Button } from 'primereact/button';
-import { Slider } from "primereact/slider";
-import { InputText } from "primereact/inputtext";
+import { Knob } from 'primereact/knob';
 
 /**
  * Set the greenhouse config
@@ -10,13 +9,13 @@ import { InputText } from "primereact/inputtext";
  */
 const GreenhouseTemperature = ({ jsonConfig }) => {
 
-  const SLIDER_100_RANGE = 2.5
-  const lightState  = jsonConfig.doc.lightState;
+  const lightState = jsonConfig.doc.lightState;
   const heaterState = jsonConfig.doc.heaterState;
   const fanState = jsonConfig.doc.fanState;
   const pumpState = jsonConfig.doc.pumpState;
 
-  const [temperature, setTemperature] = useState([jsonConfig.doc.temperatureRange[0] * SLIDER_100_RANGE, jsonConfig.doc.temperatureRange[1] * SLIDER_100_RANGE]);
+  const [minTemperature, setMinTemperature] = useState(jsonConfig.doc.temperatureRange[0]);
+  const [maxTemperature, setMaxTemperature] = useState(jsonConfig.doc.temperatureRange[1]);
 
   const handleOnSubmit = (event, jsonConfig) => {
 
@@ -24,11 +23,8 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
 
     console.log("Got: " + JSON.stringify(jsonConfig))
 
-    var lowTemp = Math.trunc(temperature[0] / SLIDER_100_RANGE)
-    var highTemp = Math.trunc(temperature[1] / SLIDER_100_RANGE)
-
-    console.log("***********Hi:", highTemp);
-    console.log("***********Lo:", lowTemp);
+    var lowTemp = Math.trunc(minTemperature )
+    var highTemp = Math.trunc(maxTemperature )
 
     jsonConfig = JSON.stringify({
       "lightState": lightState,
@@ -56,8 +52,8 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-     fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-    //fetch('http://localhost:3000/config?id=default', {
+    fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
+      //fetch('http://localhost:3000/config?id=default', {
       method: 'POST',
       headers: myHeaders,
       body: jsonConfig // body data type must match "Content-Type" header
@@ -73,19 +69,33 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
 
   return (
 
-      <div className="card flex flex-column md:flex-row gap-3">
-        Min:
-        <InputText value={Math.trunc(temperature[0] / SLIDER_100_RANGE)} onChange={(e) => setTemperature(e.target.value)} className="w-full" disabled/>
-        &nbsp;&nbsp;Max:
-        <InputText value={Math.trunc(temperature[1] / SLIDER_100_RANGE)} onChange={(e) => setTemperature(e.target.value)} className="w-full" disabled/>
-        <br></br> <br></br>
-        <Slider
-         value={temperature} onChange={(e) => setTemperature(e.value)} className="w-14rem" range />
-        <br></br> 
-        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { jsonConfig })} />
+    <div>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'left',
+        alignItems: 'center'
+      }}>
+
+        <h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Min:&nbsp;</h3>
+        <Knob value={minTemperature} onChange={(e) => setMinTemperature(e.value)} min={0} max={30}  />
+
+        <h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max:&nbsp;</h3>
+        <Knob value={maxTemperature} onChange={(e) => setMaxTemperature(e.value)} min={5} max={50} valueColor="red" rangeColor="lightgray"/>
 
       </div>
 
+      <div></div>
+
+      <div style={{
+        display: 'flex',
+        justifyContent: 'left',
+        alignItems: 'center'
+      }}>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { jsonConfig })} tooltip="Select min and max temperature" />
+      </div>
+
+    </div>
 
   );
 
