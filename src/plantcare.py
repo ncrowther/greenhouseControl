@@ -58,16 +58,7 @@ class OnOFFAutoController:
         elif (state == OnOffState.OFF):
             self.off()            
    
-        self.state = state        
-            
-    def toggleState(self):
-            
-        if (self.state == OnOffState.ON):
-            self.setState(OnOffState.OFF)
-        elif (self.state == OnOffState.OFF):
-            self.setState(OnOffState.AUTO)
-        elif (self.state == OnOffState.AUTO):
-            self.setState(OnOffState.ON)                
+        self.state = state                    
             
     def status(self):
         return self.state
@@ -145,7 +136,7 @@ class Fan(OnOFFAutoController):
             self.setState(OnOffState.AUTO)         
         
 
-class LightSwitch(object):
+class LightSwitch(OnOFFAutoController):
     # Relay light switch
 
     # Define light on and off times
@@ -165,29 +156,17 @@ class LightSwitch(object):
         self.LIGHT_ON_HOUR  = int(onTime) # 24 hour
         self.LIGHT_OFF_HOUR = int(offTime) # 24 hour
         self.LIGHT_ON_TIME  = time.mktime((2000, 01, 01, self.LIGHT_ON_HOUR, 00, 00, 0, 0))
-        self.LIGHT_OFF_TIME = time.mktime((2000, 01, 01, self.LIGHT_OFF_HOUR, 00, 00, 0, 0))        
-
-    def setState(self, state):
+        self.LIGHT_OFF_TIME = time.mktime((2000, 01, 01, self.LIGHT_OFF_HOUR, 00, 00, 0, 0))                    
+            
+    def on(self):
+        print("Light ON")
+        self.relay_pin.value(1)  # Set relay to ON state
+            
+    def off(self):   
+        print("Light OFF")
+        self.relay_pin.value(0)  # Set relay to OFF state
         
-        self.state = state
-            
-        if (state == OnOffState.ON):
-            self.relay_pin.value(1)  # Set relay to ON state
-            print("Light ON")
-        elif (state == OnOffState.OFF):
-            self.relay_pin.value(0)  # Set relay to OFF state
-            print("LightOFF")
-            
-    def toggleState(self):
-            
-        if (self.state == OnOffState.ON):
-            self.setState(OnOffState.OFF)
-        elif (self.state == OnOffState.OFF):
-            self.setState(OnOffState.AUTO)
-        elif (self.state == OnOffState.AUTO):
-            self.setState(OnOffState.ON)                
-            
-    def controlLights(self, rtc):
+    def control(self, rtc):
 
         print("Light state %s" %self.status())
         
@@ -197,13 +176,7 @@ class LightSwitch(object):
             
         if (OnOffState.AUTO == self.status()) and (not rtc.timeInRange(self.LIGHT_ON_TIME, self.LIGHT_OFF_TIME)):            
             self.setState(OnOffState.OFF)
-            self.setState(OnOffState.AUTO)
-     
-    def status(self):
-        return self.state
-        
-    def settings(self):
-        return str(self.LIGHT_ON_HOUR) + ":00 - " +  str(self.LIGHT_OFF_HOUR) + ":00"              
+            self.setState(OnOffState.AUTO)            
 
 
 class LinearActuator(object):
@@ -242,16 +215,7 @@ class LinearActuator(object):
             self.up_pin.value(0)  # Set up to OFF state        
             self.down_pin.value(1)  # Set down to ON state
             self.windowAngle = 0  
-            print("Window CLOSED")
-            
-    def toggleState(self):
-            
-        if (self.state == WindowState.OPEN):
-            self.setState(WindowState.CLOSED)
-        elif (self.state == WindowState.CLOSED):
-            self.setState(WindowState.AUTO)
-        elif (self.state == WindowState.AUTO):
-            self.setState(WindowState.OPEN)               
+            print("Window CLOSED")            
         
     def up(self):
         
@@ -295,7 +259,7 @@ class LinearActuator(object):
         return self.state
         
     
-class Pump(object):
+class Pump(OnOFFAutoController):
     # PWM dual power switch
 
     #### DEFINE WATERING TIMES HERE ####
@@ -308,34 +272,18 @@ class Pump(object):
         self.pump_a = PWM(Pin(PWM_IN), freq=1000)
         self.pump_b = PWM(Pin(PWM_OUT), freq=1000)
         
-        self.state = OnOffState.AUTO
-        
-    def setState(self, state):
-        
-        print('Set pump state:' + str(state))
-        
-        if (state == OnOffState.ON) and (OnOffState.ON != self.state):
-            print("PUMP ON")
-            MAX_PUMP_SPEED = 65535
-            self.pump_a.duty_u16(0)
-            self.pump_b.duty_u16(MAX_PUMP_SPEED)  # speed(0-65535)
-        elif (state == OnOffState.OFF) and (OnOffState.ON == self.state):
-            print("PUMP OFF")            
-            # Stop pump
-            self.pump_a.duty_u16(0)
-            self.pump_b.duty_u16(0)
-            
-        self.state = state
-        
-    def toggleState(self):
-            
-        if (self.state == OnOffState.ON):
-            self.setState(OnOffState.OFF)
-        elif (self.state == OnOffState.OFF):
-            self.setState(OnOffState.AUTO)
-        elif (self.state == OnOffState.AUTO):
-            self.setState(OnOffState.ON)           
-        
+    def on(self):
+        print("PUMP ON")
+        MAX_PUMP_SPEED = 65535
+        self.pump_a.duty_u16(0)
+        self.pump_b.duty_u16(MAX_PUMP_SPEED)  # speed(0-65535)
+                   
+    def off(self):   
+        print("PUMP OFF")            
+        # Stop pump
+        self.pump_a.duty_u16(0)
+        self.pump_b.duty_u16(0)
+              
     def watering(self, wateringPeriod):
         print("Watering Period %s seconds " %wateringPeriod )    
         time.sleep(wateringPeriod)
@@ -346,9 +294,8 @@ class Pump(object):
         time.sleep_ms(ONE_MINUTE)
         print("Watering sleep Period OFF ")
         self.setState(OnOffState.AUTO)
-       
-               
-    def controlWatering(self, temperature, rtc):
+              
+    def control(self, temperature, rtc):
         
         MIN_WATERING_TEMP = 10
         timeNow = rtc.getTimeStr()
@@ -362,16 +309,9 @@ class Pump(object):
             self.setState(OnOffState.ON)                          
             self.watering(wateringPeriod)         
      
-    def status(self):   
-        return self.state
-                 
-    def settings(self):
-        return str(self.WATERING_TIMES)
-    
     def setTimes(self, wateringTimes):
         self.WATERING_TIMES = wateringTimes
-    
-        
+       
 class Co2TemperatureHumidityProbe(object):
   
     def __init__(self):
@@ -703,19 +643,13 @@ class PlantCare(object):
         
         
     def setWindow(self, state):      
-        self.windows.setState(state)
-        
-    def toggleWindow(self):
-        self.windows.toggleState()        
+        self.windows.setState(state)        
         
     def setLight(self, state):
         self.light.setState(state)
         
     def setLightOnOffTime(self, onTime, offTime):
         self.light.setOnOffTime(onTime, offTime)
-        
-    def toggleLight(self):
-        self.light.toggleState()
         
     def getPumpStatus(self):
         return self.pump.status()
@@ -726,14 +660,8 @@ class PlantCare(object):
     def setPump(self, state):
         self.pump.setState(state)
         
-    def togglePump(self):
-        self.pump.toggleState()
-        
     def setFan(self, state):
         self.fan.setState(state)
-        
-    def toggleFan(self):
-        self.fan.toggleState()
         
     def getFanStatus(self):
         return self.fan.status()
@@ -743,9 +671,6 @@ class PlantCare(object):
         
     def setHeater(self, state):
         self.heater.setState(state)
-        
-    def toggleHeater(self):
-        self.heater.toggleState()
         
     def getHeaterStatus(self):
         return self.heater.status()
@@ -804,7 +729,7 @@ class PlantCare(object):
             print(timestamp)
             
             print("controlLights...")
-            self.light.controlLights(self.rtc)        
+            self.light.control(self.rtc)        
             
             print("controlTemperature...")
             self.probe.measureIt(self.rtc)
@@ -817,7 +742,7 @@ class PlantCare(object):
             self.heater.control(temperature, self.MIN_TEMPERATURE)
             
             print("controlWatering...")
-            self.pump.controlWatering(temperature, self.rtc)
+            self.pump.control(temperature, self.rtc)
             
             print("display data...")
             self.lcd.showData(self.probe, self.rtc, self.ip)        
@@ -834,3 +759,4 @@ class PlantCare(object):
             self.lcd.showError(101, "General error")
             sys.exit("Terminated")
                    
+        

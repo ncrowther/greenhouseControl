@@ -2,7 +2,6 @@ import sys
 import network
 import socket
 import time
-import asyncio
 from requests_2 import post, get
 import json
 import gc
@@ -10,12 +9,14 @@ import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
+GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
+        
 class PlantServer(object):
     
     #ssid = 'TALKTALKE0F9AF_EXT'
     ssid = 'TALKTALKE0F9AF'
     password = 'H6K8EK9M'  
-    ipAddress = "IP"
+    ipAddress = "ERR"
         
     def __init__(self):
         
@@ -65,9 +66,7 @@ class PlantServer(object):
             
  
     def configure(self, plantCare):
-            
-        GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
-        
+               
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
         resp = None
         timestamp = "2024-09-01T00:00:00.000Z"
@@ -130,8 +129,8 @@ class PlantServer(object):
     def care(self):
         print('Start care...')
         
-        SLEEP_TIME = 10
-        LOG_TIME = 30 # fifteen mins
+        SLEEP_TIME = 5
+        LOG_TIME = 90 # fifteen mins
         
         count = 0
         
@@ -144,10 +143,10 @@ class PlantServer(object):
             
             if (count % LOG_TIME == 0):
                 self.logger()
-                if (count == 0):  # First time aroud use timestamp to set pico clock
+                if (count == 0):  # First time around use timestamp to set pico clock
                     self.plantCare.setDateTime(timestamp)
                 
-            asyncio.sleep(SLEEP_TIME)
+            time.sleep(SLEEP_TIME)
             
             count = count + 1
                             
@@ -176,8 +175,6 @@ class PlantServer(object):
             
             
     def logData(self, timestamp, temperature, humidity, co2, vpd):
-        
-        GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
         
         header = {
           'Content-Type': 'application/json',
@@ -224,6 +221,3 @@ def main():
         machine.reset()
 
 main()
-
-
-
