@@ -14,6 +14,9 @@ const GreenhouseLight = ({ jsonConfig }) => {
   const pumpState = jsonConfig.doc.pumpState;
   const lowTemp = jsonConfig.doc.temperatureRange[0];
   const highTemp = jsonConfig.doc.temperatureRange[1];
+  const tapOnOne = jsonConfig.doc.wateringTimes[0].split(":")[0]
+  const tapOnTwo = jsonConfig.doc.wateringTimes[1].split(":")[0]
+  const tapOnThree = jsonConfig.doc.wateringTimes[2].split(":")[0]
 
   const [lightOn, setLightOn] = useState(jsonConfig.doc.lightOnOff[0]);
   const [lightOff, setLightOff] = useState(jsonConfig.doc.lightOnOff[1]);
@@ -34,9 +37,9 @@ const GreenhouseLight = ({ jsonConfig }) => {
       "fanState": fanState,
       "heaterState": heaterState,
       "wateringTimes": [
-        "09:00",
-        "12:00",
-        "17:00"
+        tapOnOne,
+        tapOnTwo,
+        tapOnThree
       ],
       "windowState": "OFF",
       "temperatureRange": [

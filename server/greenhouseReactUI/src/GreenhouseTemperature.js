@@ -13,6 +13,11 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
   const heaterState = jsonConfig.doc.heaterState;
   const fanState = jsonConfig.doc.fanState;
   const pumpState = jsonConfig.doc.pumpState;
+  const lightOn = jsonConfig.doc.lightOnOff[0];
+  const lightOff = jsonConfig.doc.lightOnOff[1];
+  const tapOnOne = jsonConfig.doc.wateringTimes[0].split(":")[0]
+  const tapOnTwo = jsonConfig.doc.wateringTimes[1].split(":")[0]
+  const tapOnThree = jsonConfig.doc.wateringTimes[2].split(":")[0]
 
   const [minTemperature, setMinTemperature] = useState(jsonConfig.doc.temperatureRange[0]);
   const [maxTemperature, setMaxTemperature] = useState(jsonConfig.doc.temperatureRange[1]);
@@ -29,16 +34,16 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
     jsonConfig = JSON.stringify({
       "lightState": lightState,
       "lightOnOff": [
-        "08",
-        "21"
+        lightOn,
+        lightOff
       ],
       "pumpState": pumpState,
       "fanState": fanState,
       "heaterState": heaterState,
       "wateringTimes": [
-        "09:00",
-        "12:00",
-        "17:00"
+        tapOnOne,
+        tapOnTwo,
+        tapOnThree
       ],
       "windowState": "OFF",
       "temperatureRange": [
@@ -77,7 +82,7 @@ const GreenhouseTemperature = ({ jsonConfig }) => {
       }}>
 
         <h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Min:&nbsp;</h3>
-        <Knob value={minTemperature} onChange={(e) => setMinTemperature(e.value)} min={0} max={30}  />
+        <Knob value={minTemperature} onChange={(e) => setMinTemperature(e.value)} min={0} max={30} valueColor="blue" rangeColor="lightgray" />
 
         <h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max:&nbsp;</h3>
         <Knob value={maxTemperature} onChange={(e) => setMaxTemperature(e.value)} min={5} max={50} valueColor="red" rangeColor="lightgray"/>

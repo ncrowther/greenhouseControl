@@ -176,7 +176,7 @@ class LightSwitch(OnOFFAutoController):
         self.state = OnOffState.AUTO
 
     def setOnOffTime(self, onTime, offTime):
-        # refine light on and off times
+        # redefine light on and off times
         self.LIGHT_ON_HOUR  = int(onTime) # 24 hour
         self.LIGHT_OFF_HOUR = int(offTime) # 24 hour
         self.LIGHT_ON_TIME  = time.mktime((2000, 01, 01, self.LIGHT_ON_HOUR, 00, 00, 0, 0))
