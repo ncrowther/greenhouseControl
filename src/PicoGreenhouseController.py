@@ -11,6 +11,12 @@ from plantcare import PlantCare, WindowState, OnOffState
 
 GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
         
+"""
+This code is a Python program that controls a plant care system. 
+It connects to a network, retrieves system time, temperature, humidity, 
+and CO2 data from the plant care system, and logs the data to a Greenhouse Data Service. 
+The program also includes a function to display an error message with a specific code and message.
+"""
 class PlantServer(object):
     
     #ssid = 'TALKTALKE0F9AF_EXT'
@@ -20,7 +26,6 @@ class PlantServer(object):
         
     def __init__(self):
         
-        # https://docs.pycom.io/tutorials/networks/wlan/
         self.wlan = network.WLAN(network.STA_IF)
         self.ipAddress = self.connect_to_network()
         
@@ -30,13 +35,20 @@ class PlantServer(object):
         else:            
             self.plantCare = PlantCare(self.ipAddress)
             
-    
+    """
+    Connect to a Wi-Fi network.
+
+    Parameters:
+    self (object): The instance of the class.
+
+    Returns:
+    str: The IP address of the connected network.
+    """    
     def connect_to_network(self):
 
         print('Check Network...')    
         
         # Check if already connected
-        #if self.wlan.status() != 3:
         print("Connecting to Wi-Fi...")
         
         self.wlan.active(True)
@@ -64,7 +76,15 @@ class PlantServer(object):
         status = self.wlan.ifconfig()
         return status[0]     
             
- 
+    """
+    Configure the plant care system based on the configuration stored in the Greenhouse Data Service.
+
+    Args:
+        plantCare (PlantCare): The plant care system to configure.
+
+    Returns:
+        str: The timestamp of the last successful configuration.
+    """
     def configure(self, plantCare):
                
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
@@ -123,14 +143,33 @@ class PlantServer(object):
             
             return timestamp
            
+    """
+    This function displays an error message with a specific code and message.
+
+    Args:
+        code (int): The error code.
+        message (str): The error message.
+
+    Returns:
+        None
+    """
     def displayError(self, code, message):
         self.plantCare.displayError(code, message)
         
+    """
+    This function is responsible for caring for plants.
+
+    Parameters:
+    self (object): An instance of the class.
+
+    Returns:
+    None
+    """
     def care(self):
         print('Start care...')
         
         SLEEP_TIME = 5
-        LOG_TIME = 90 # fifteen mins
+        LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
         count = 0
         
@@ -151,6 +190,10 @@ class PlantServer(object):
             count = count + 1
                             
         
+    # This function is used to log data from the plant care system. 
+    # It attempts to connect to the network, retrieve system time,  temperature, humidity, 
+    # and CO2 from the plant care system, and then log the data. If any errors occur during this process, 
+    # it will display an error message and reset the machine.
     def logger(self):  
         
         print('Start logger...')
@@ -174,6 +217,8 @@ class PlantServer(object):
             machine.reset()
             
             
+    # This code is a function that logs data to the Greenhouse Data Service. 
+    # The response from the server is returned.
     def logData(self, timestamp, temperature, humidity, co2, vpd):
         
         header = {
@@ -206,7 +251,15 @@ class PlantServer(object):
             gc.collect()          
             return response
             
+"""
+This function is the main entry point for the program.
 
+Parameters:
+None
+
+Returns:
+None
+"""
 def main():   
                
     try: 

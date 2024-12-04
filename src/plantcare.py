@@ -45,6 +45,17 @@ class HardwareError(Exception):
         self.message = message
         
 # Abtract class for controller devices
+
+    """
+    This class is a controller for an ON/OFF device.
+    
+    Attributes:
+        state (OnOffState): The current state of the device.
+    
+    Methods:
+        setState(state): Sets the state of the device.
+        status(): Returns the current state of the device.
+    """
 class OnOFFAutoController:
     
     state = OnOffState.AUTO
@@ -63,6 +74,13 @@ class OnOFFAutoController:
     def status(self):
         return self.state
     
+"""
+This code defines a class called Heater that inherits from the OnOFFAutoController class. 
+The Heater class has an init method that initializes the relay pin number and sets it to output mode. 
+It also has on and off methods that set the relay pin to the corresponding state. 
+The control method turns on the heater if it is lower than the min temperature
+If the temperature rises above the dead zone, the heater is turned off
+"""
 class Heater(OnOFFAutoController):
     # Relay heater
     
@@ -94,7 +112,11 @@ class Heater(OnOFFAutoController):
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)         
 
-            
+"""
+This code defines a class Fan that controls a fan using PWM signals. 
+The on method turns the fan on, and the off method turns it off. 
+The control method checks the temperature and turns the fan on or off based on the specified conditions.
+"""
 class Fan(OnOFFAutoController):
     # PWM dual power switch
     
@@ -135,7 +157,9 @@ class Fan(OnOFFAutoController):
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)         
         
-
+"""
+The Light class has methods to turn the light on and off, as well as to control the light based on a given time.
+"""
 class LightSwitch(OnOFFAutoController):
     # Relay light switch
 
@@ -178,7 +202,11 @@ class LightSwitch(OnOFFAutoController):
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)            
 
-
+""" 
+This class is for Window Control. 
+It sets up two GPIO pins, one for the up button and one for the down button. 
+It also initializes the window angle to 0 and sets the initial state of the window to AUTO.
+"""
 class LinearActuator(object):
     # Linear Actuator for window
 
@@ -258,7 +286,10 @@ class LinearActuator(object):
     def status(self):
         return self.state
         
-    
+"""
+The Pump class has methods for controlling the pump's speed, turning it off, and watering the plants. 
+It also has a control method that determines when to water the plants based on temperature and time.
+"""
 class Pump(OnOFFAutoController):
     # PWM dual power switch
 
@@ -403,11 +434,14 @@ class Co2TemperatureHumidityProbe(object):
             #print('measureIt error: ' + e)   
             #raise HardwareError("Pimoroni C02 Probe", 100)
 
-
+"""
+class  Clock is used to interact with an I2C clock. 
+The init method initializes the I2C bus and sets the address of the clock. 
+The class also includes a method called getTime, which retrieves the current time from the clock and returns it as a string.
+"""
 class Clock(object):
-#            13:45:00 Mon 24 May 2021
-#  the register value is the binary-coded decimal (BCD) format
-#               sec min hour week day month year
+#  The register value is the binary-coded decimal (BCD) format
+#  sec min hour week day month year
     NowTime = b'\x00\x45\x13\x02\x24\x05\x21'
     w  = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     address = 0x68
@@ -495,6 +529,9 @@ class Clock(object):
 
         return timeStr
 
+"""
+This class initializes the LCD display and provides methods showData and showError which are responsible for displaying data on the LCD screen.
+"""
 class Lcd(object):
     
     #  display mode
@@ -568,15 +605,18 @@ class Lcd(object):
             self.lcd.putstr(ip)               
             self.screen = 0
                 
-            
-        
+                 
     def showError(self, code, message):
         self.lcd.clear()
         self.lcd.putstr("Error: " + str(code))
         self.lcd.putstr("\n")
         self.lcd.putstr(message)        
         
-    
+"""
+This code controls various devices such as a pump, fan, heater, light, and probe. 
+The "careforplants" method performs various tasks such as controlling the lights, temperature, watering, and displaying data on the LCD screen. 
+It also includes error handling to handle hardware errors and general exceptions.
+"""
 class PlantCare(object):
     
 
