@@ -52,13 +52,11 @@ const IndustrialController = () => {
     return <h2>Error loading data...</h2>;
   }
 
-  console.log("RESULT 1:" + JSON.stringify(results[0].data))
-  console.log("RESULT 2:" + JSON.stringify(results[1].data))
+  //console.log("RESULT 1:" + JSON.stringify(results[0].data))
+  //console.log("RESULT 2:" + JSON.stringify(results[1].data))
 
   const logData = results[0].data
   const configData = results[1].data
-
-  console.log("RESULT 3:" + JSON.stringify(  configData.doc.lightState))
 
   return (
 
