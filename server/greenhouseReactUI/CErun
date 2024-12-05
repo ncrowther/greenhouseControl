@@ -25,18 +25,6 @@ ibmcloud ce app create -n greenhouse --image ${REGISTRY}/greenhouse
 # Get the URL of the app for later use
 URL=$(ibmcloud ce app get -n greenhouse -o url)
 
-# Now call it
-curl --location $URL | tee out
-#if ! [[ "${PIPESTATUS[200]}" == "0" ]] ; then
-#  echo "Expected 200 return code"
-#  cat out
-#  exit 1
-#fi
+# Show the url
+echo  $URL 
 
-
-# Since the image can be used as a job too, test it
-#ibmcloud ce jobrun submit --name hi-job --ai=1 --image ${REGISTRY}/fruitcounter --wait 
-#ibmcloud ce jobrun logs -n hi-job | tee out | grep "Hello from.*job" || exit 1
-
-# Clean up
-#clean

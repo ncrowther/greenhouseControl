@@ -70,7 +70,7 @@ const Co2Chart = ({ data}) => {
 
     setChartData(data);
     setChartOptions(options);
-  }, []);
+  },[]);
 
   return (
     <div className="card">

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Card } from 'primereact/card';
 import { Chip } from 'primereact/chip';
 import { MdOutlineAccessTime } from "react-icons/md";
 import { FaTemperatureEmpty  } from "react-icons/fa6";
@@ -61,11 +60,11 @@ const GreenhouseDetails = ({ data }) => {
 
   return (
     <div className="card flex flex-wrap gap-2">
-      <Chip label={timeText} icon={MdOutlineAccessTime}/> <br></br>
-      <Chip label={temperatureText} icon={FaTemperatureEmpty }/> <br></br>
-      <Chip label={humidityText} icon={WiHumidity}/> <br></br>
-      <Chip label={co2Text} icon={MdOutlineCo2}/> <br></br>
-      <Chip label={vpdText} icon={MdEnergySavingsLeaf}/>
+      <Chip key="1" label={timeText} icon={MdOutlineAccessTime}/> <br></br>
+      <Chip key="2" label={temperatureText} icon={FaTemperatureEmpty }/> <br></br>
+      <Chip key="3" label={humidityText} icon={WiHumidity}/> <br></br>
+      <Chip key="4" label={co2Text} icon={MdOutlineCo2}/> <br></br>
+      <Chip key="5" label={vpdText} icon={MdEnergySavingsLeaf}/>
     </div>
   );
 };

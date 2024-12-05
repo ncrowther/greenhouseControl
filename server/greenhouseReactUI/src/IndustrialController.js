@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
 import GreenhouseConfig from './GreenhouseConfig.js';
 import GreenhouseTemperature from './GreenhouseTemperature.js';
 import GreenhouseLight from './GreenhouseLight.js';
@@ -26,38 +26,39 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  const { data : logData, isLoading, error } = useQuery({
-    queryFn: () =>
+  const results = useQueries({
+    queries: [
+      { queryKey: ['logData', 1], queryFn: () =>
       fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(
-        // fetch('http://localhost:3000/docs', { mode: 'cors' }).then(
         (res) => res.json()
-      ),
+      )},
+      { queryKey: ['configData', 2], queryFn: () =>
+        fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', { mode: 'cors' }).then(
+          (res) => res.json()
+        )},      
+    ],
   });
-
-
-  // Get config from data API
-  
-  const { data: jsonConfig } = useQuery({
-    queryFn: () =>
-      fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', { mode: 'cors' }).then(
-        (res) => res.json()
-      ),
-    queryKey: [''],
-  });
-
-
 
   // Show a loading message while data is fetching
+  const isLoading = results.some(result => result.isLoading)
   if (isLoading) {
     return <h2>Loading...</h2>;
   }
 
-  // to handle error
-  if (error) {
-    return <div className="error">Error fetching data from Cloudant</div>
+  
+  // Show a error message
+  const isError = results.some(result => result.isError)
+  if (isError) {
+    return <h2>Error loading data...</h2>;
   }
 
+  console.log("RESULT 1:" + JSON.stringify(results[0].data))
+  console.log("RESULT 2:" + JSON.stringify(results[1].data))
 
+  const logData = results[0].data
+  const configData = results[1].data
+
+  console.log("RESULT 3:" + JSON.stringify(  configData.doc.lightState))
 
   return (
 
@@ -74,25 +75,25 @@ const IndustrialController = () => {
       <Divider type="solid" />
 
       <Card title="Configuration" className="card">
-        <GreenhouseConfig jsonConfig={jsonConfig} />
+        <GreenhouseConfig configData={configData} />
       </Card>
 
       <Divider type="solid" />
 
       <Card title="Temperature" className="md:w-25rem" >
-        <GreenhouseTemperature jsonConfig={jsonConfig} />
+        <GreenhouseTemperature configData={configData} />
       </Card>   
 
       <Divider type="solid" />          
 
       <Card title="Light" className="md:w-25rem">
-        <GreenhouseLight jsonConfig={jsonConfig} />
+        <GreenhouseLight configData={configData} />
       </Card>   
 
       <Divider type="solid" />       
 
       <Card title="Watering" className="md:w-25rem">
-        <GreenhouseWatering jsonConfig={jsonConfig} />
+        <GreenhouseWatering configData={configData} />
       </Card>    
 
       <Divider type="solid" />       

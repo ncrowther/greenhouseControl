@@ -6,28 +6,28 @@ import { Knob } from 'primereact/knob';
  * Set the greenhouse config
  * @returns {JSX.Element} The component.
  */
-const GreenhouseLight = ({ jsonConfig }) => {
+const GreenhouseLight = ({ configData }) => {
 
-  const lightState = jsonConfig.doc.lightState;
-  const heaterState = jsonConfig.doc.heaterState;
-  const fanState = jsonConfig.doc.fanState;
-  const pumpState = jsonConfig.doc.pumpState;
-  const lowTemp = jsonConfig.doc.temperatureRange[0];
-  const highTemp = jsonConfig.doc.temperatureRange[1];
-  const tapOnOne = jsonConfig.doc.wateringTimes[0].split(":")[0]
-  const tapOnTwo = jsonConfig.doc.wateringTimes[1].split(":")[0]
-  const tapOnThree = jsonConfig.doc.wateringTimes[2].split(":")[0]
+  const lightState = configData.doc.lightState;
+  const heaterState = configData.doc.heaterState;
+  const fanState = configData.doc.fanState;
+  const pumpState = configData.doc.pumpState;
+  const lowTemp = configData.doc.temperatureRange[0];
+  const highTemp = configData.doc.temperatureRange[1];
+  const tapOnOne = configData.doc.wateringTimes[0].split(":")[0]
+  const tapOnTwo = configData.doc.wateringTimes[1].split(":")[0]
+  const tapOnThree = configData.doc.wateringTimes[2].split(":")[0]
 
-  const [lightOn, setLightOn] = useState(jsonConfig.doc.lightOnOff[0]);
-  const [lightOff, setLightOff] = useState(jsonConfig.doc.lightOnOff[1]);
+  const [lightOn, setLightOn] = useState(configData.doc.lightOnOff[0]);
+  const [lightOff, setLightOff] = useState(configData.doc.lightOnOff[1]);
 
-  const handleOnSubmit = (event, jsonConfig) => {
+  const handleOnSubmit = (event, configData) => {
 
     event.preventDefault();
 
-    console.log("Got: " + JSON.stringify(jsonConfig))
+    console.log("Got: " + JSON.stringify(configData))
 
-    jsonConfig = JSON.stringify({
+    configData = JSON.stringify({
       "lightState": lightState,
       "lightOnOff": [
         lightOn,
@@ -48,7 +48,7 @@ const GreenhouseLight = ({ jsonConfig }) => {
       ]
     })
 
-    console.log("SEND: " + JSON.stringify(jsonConfig))
+    console.log("SEND: " + JSON.stringify(configData))
 
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -57,13 +57,13 @@ const GreenhouseLight = ({ jsonConfig }) => {
       //fetch('http://localhost:3000/config?id=default', {
       method: 'POST',
       headers: myHeaders,
-      body: jsonConfig // body data type must match "Content-Type" header
+      body: configData // body data type must match "Content-Type" header
 
-    })
-
-    setTimeout(() => {
+    }).then(    
+      setTimeout(() => {
       window.location.reload(true);
-    }, 500);
+      }, 500))
+    .catch(error => console.error(error));
 
   };
 
@@ -92,7 +92,7 @@ const GreenhouseLight = ({ jsonConfig }) => {
         alignItems: 'center'
       }}>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { jsonConfig })} tooltip="Select light on off time" />
+        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { configData })} tooltip="Select light on off time" />
       </div>
 
     </div>
