@@ -45,10 +45,11 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
     ibmcloud target -g default
 
 4.	Select the code engine project:  
+N
 
     ibmcloud ce project select -n [PROJECT_NAME]
 
-5.	Start Docker Desktop
+5.	Start Rancher or Docker Desktop
 
     docker login -u ncrowthe -p C****!
 
