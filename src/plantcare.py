@@ -118,33 +118,24 @@ The on method turns the fan on, and the off method turns it off.
 The control method checks the temperature and turns the fan on or off based on the specified conditions.
 """
 class Fan(OnOFFAutoController):
-    # PWM dual power switch
-    
-    # Degrees in which the temp must cool before turning off
-    DEAD_ZONE = 1
     
     def __init__(self):
-        # Define pins for Fan
-        PWM_IN = 18
-        PWM_OUT = 19        
-        self.fan_a = PWM(Pin(PWM_IN), freq=1000)
-        self.fan_b = PWM(Pin(PWM_OUT), freq=1000)       
+        # GPIO pin number fan is connected to
+        RELAY_PIN = 27
+        self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
     def on(self):
         print("Fan ON")
-        MAX_FAN_SPEED = 65535
-        self.fan_a.duty_u16(0)
-        self.fan_b.duty_u16(MAX_FAN_SPEED)  # speed(0-65535)
+        self.relay_pin.value(1)  # Set relay to ON state
             
     def off(self):   
-        # Stop fan
-        print("Fan OFF")        
-        self.fan_a.duty_u16(0)
-        self.fan_b.duty_u16(0)
+        print("Fan OFF")
+        self.relay_pin.value(0)  # Set relay to OFF state
+
         
     def control(self, temperature, maxTemperature):
         
-        # Degrees in which the temp must rise before turning off
+        # Degrees in which the temp must decrease before turning off
         DEAD_ZONE = 1
         
         # On
@@ -153,9 +144,9 @@ class Fan(OnOFFAutoController):
             self.setState(OnOffState.AUTO) 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature + DEAD_ZONE)):        
+        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
             self.setState(OnOffState.OFF)
-            self.setState(OnOffState.AUTO)         
+            self.setState(OnOffState.AUTO)
         
 """
 The Light class has methods to turn the light on and off, as well as to control the light based on a given time.
