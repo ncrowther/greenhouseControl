@@ -148,6 +148,7 @@ class Fan(OnOFFAutoController):
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)
         
+
 """
 The Light class has methods to turn the light on and off, as well as to control the light based on a given time.
 """
@@ -260,15 +261,15 @@ class LinearActuator(object):
             
     def control(self, temperature, maxTemperature):
         
-        # Degrees in which the temp must rise before turning off
-        DEAD_ZONE = 1
+        # Degrees in which the temp must drop below max temperature before closing
+        DEAD_ZONE = 5
         
         # On
         if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
             self.up() 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature + DEAD_ZONE)):        
+        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
             self.down()     
 
     def angle(self):
@@ -766,7 +767,7 @@ class PlantCare(object):
             self.probe.measureIt(self.rtc)
 
             temperature = self.probe.temperature            
-            #temperature = self.windows.control(temperature, self.MAX_TEMPERATURE)
+            #self.windows.control(temperature, self.MAX_TEMPERATURE)
 
             self.fan.control(temperature, self.MAX_TEMPERATURE)
 
@@ -790,4 +791,5 @@ class PlantCare(object):
             self.lcd.showError(101, "General error")
             sys.exit("Terminated")
                    
-        
+
+
