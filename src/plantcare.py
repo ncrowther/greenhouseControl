@@ -552,8 +552,6 @@ class Lcd(object):
     def showData(self, probe, rtc, ip):
                 
         # Display time & temp on the LCD screen
-        # print("SCREEN: " + str(self.screen))
-        TOTAL_SCREENS = 5
                 
         if (self.screen == 0): 
             temperatureStr = str(probe.temperature) + "C"
@@ -589,12 +587,7 @@ class Lcd(object):
             self.lcd.clear()
             self.lcd.putstr(timeStr)
             self.lcd.putstr("\n")
-            self.lcd.putstr(dateStr)               
-            self.screen = 4
-            
-        elif (self.screen == 4):
-            self.lcd.clear()
-            self.lcd.putstr(ip)               
+            self.lcd.putstr(dateStr)                         
             self.screen = 0
                 
                  
