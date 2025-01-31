@@ -73,6 +73,77 @@ class OnOFFAutoController:
             
     def status(self):
         return self.state
+
+#
+## SH20 temperature humidity probe
+#
+class TemperatureHumidityProbe(object):
+  
+    def __init__(self):
+        # setup the I2C communication for the SHT20 sensor
+        #  I2C Pins
+        I2C_PORT = 1
+        I2C_SDA = 6
+        I2C_SCL = 7        
+
+        i2c = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA))
+                                                      
+        addr = i2c.scan()
+
+        addr = i2c.scan()[0]
+        print("**************************" + str(addr))
+
+
+
+        self.sht = sht20.SHT20(i2c)
+        
+        self.temperature = 0        
+        self.highTemp = 0
+        self.lowTemp = 100
+        
+        self.humidity = 0        
+        self.highHumidity = 0
+        self.lowHumidity = 100        
+        
+    def measureIt(self, rtc):   
+    
+        try:
+            print('SHT20 measureIt')
+            #self.sht.reset()
+            
+            self.temperature = self.sht.temperature
+            self.temperature = round(self.temperature, 2)
+                    
+            self.humidity = self.sht.humidity
+            self.humidity = round(self.humidity, 2)
+                 
+            print("SH20 Temperature (C): " + str(self.temperature))
+            print("SH20 Humidity (%RH): " + str(self.humidity))
+            
+            # Reset stats at midnight
+            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
+                print("Reset temperature stats")
+                self.highTemp = 0
+                self.lowTemp = 100
+             
+            # Set temperature high score
+            if (self.temperature > self.highTemp):
+                self.highTemp = self.temperature
+            
+            if (self.temperature < self.lowTemp):
+                self.lowTemp = self.temperature
+                
+            # Set humidity high score
+            if (self.humidity > self.highHumidity):
+                self.highHumidity = self.humidity
+            
+            if (self.humidity < self.lowHumidity):
+                self.lowHumidity = self.humidity
+
+        except Exception as e:
+            print(e)  
+            raise HardwareError("SHT20 Probe", 100)            
+    
     
 """
 This code defines a class called Heater that inherits from the OnOFFAutoController class. 
@@ -118,33 +189,24 @@ The on method turns the fan on, and the off method turns it off.
 The control method checks the temperature and turns the fan on or off based on the specified conditions.
 """
 class Fan(OnOFFAutoController):
-    # PWM dual power switch
-    
-    # Degrees in which the temp must cool before turning off
-    DEAD_ZONE = 1
     
     def __init__(self):
-        # Define pins for Fan
-        PWM_IN = 18
-        PWM_OUT = 19        
-        self.fan_a = PWM(Pin(PWM_IN), freq=1000)
-        self.fan_b = PWM(Pin(PWM_OUT), freq=1000)       
+        # GPIO pin number fan is connected to
+        RELAY_PIN = 27
+        self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
     def on(self):
         print("Fan ON")
-        MAX_FAN_SPEED = 65535
-        self.fan_a.duty_u16(0)
-        self.fan_b.duty_u16(MAX_FAN_SPEED)  # speed(0-65535)
+        self.relay_pin.value(1)  # Set relay to ON state
             
     def off(self):   
-        # Stop fan
-        print("Fan OFF")        
-        self.fan_a.duty_u16(0)
-        self.fan_b.duty_u16(0)
+        print("Fan OFF")
+        self.relay_pin.value(0)  # Set relay to OFF state
+
         
     def control(self, temperature, maxTemperature):
         
-        # Degrees in which the temp must rise before turning off
+        # Degrees in which the temp must decrease before turning off
         DEAD_ZONE = 1
         
         # On
@@ -153,10 +215,11 @@ class Fan(OnOFFAutoController):
             self.setState(OnOffState.AUTO) 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature + DEAD_ZONE)):        
+        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
             self.setState(OnOffState.OFF)
-            self.setState(OnOffState.AUTO)         
+            self.setState(OnOffState.AUTO)
         
+
 """
 The Light class has methods to turn the light on and off, as well as to control the light based on a given time.
 """
@@ -269,15 +332,15 @@ class LinearActuator(object):
             
     def control(self, temperature, maxTemperature):
         
-        # Degrees in which the temp must rise before turning off
-        DEAD_ZONE = 1
+        # Degrees in which the temp must drop below max temperature before closing
+        DEAD_ZONE = 5
         
         # On
         if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
             self.up() 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature + DEAD_ZONE)):        
+        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
             self.down()     
 
     def angle(self):
@@ -343,7 +406,7 @@ class Pump(OnOFFAutoController):
     def setTimes(self, wateringTimes):
         self.WATERING_TIMES = wateringTimes
        
-class Co2TemperatureHumidityProbe(object):
+class Co2Probe(object):
   
     def __init__(self):
         # setup the I2C communication for the Co2 sensor
@@ -353,14 +416,6 @@ class Co2TemperatureHumidityProbe(object):
         I2C_SCL = 21        
 
         self.i2c = PimoroniI2C(sda=(I2C_SDA), scl=(I2C_SCL))  
- 
-        self.temperature = 0        
-        self.highTemp = 0
-        self.lowTemp = 100
-        
-        self.humidity = 0        
-        self.highHumidity = 0
-        self.lowHumidity = 100
         
         self.co2 = 0        
         self.highCo2 = 0
@@ -377,41 +432,16 @@ class Co2TemperatureHumidityProbe(object):
                 print("Waiting for sensor")
                 time.sleep_ms(5000)
                 
-            self.co2, self.temperature, self.humidity = breakout_scd41.measure()
+            self.co2, temperature, humidity = breakout_scd41.measure()
   
-            self.temperature = round(self.temperature, 2)
-            self.humidity = round(self.humidity, 2)
             self.co2 = round(self.co2, 0)
-                 
-            print("Temperature (C): " + str(self.temperature))
-            print("Humidity (%RH): " + str(self.humidity))
             print("Co2 (ppm): " + str(self.co2))
             
             # Reset stats at midnight
             if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
                 print("Reset stats")
-                self.highTemp = 0
-                self.lowTemp = 100
-                
-                self.highHumidity = 0
-                self.lowHumidity = 100
-                
                 self.highCo2 = 0
                 self.lowCo2 = 2000
-                
-            # Set temperature high score
-            if (self.temperature > self.highTemp):
-                self.highTemp = self.temperature
-            
-            if (self.temperature < self.lowTemp):
-                self.lowTemp = self.temperature
-                
-            # Set humidity high score
-            if (self.humidity > self.highHumidity):
-                self.highHumidity = self.humidity
-            
-            if (self.humidity < self.lowHumidity):
-                self.lowHumidity = self.humidity
                 
             # Set co2 high score
             if (self.co2 > self.highCo2):
@@ -532,7 +562,7 @@ class Clock(object):
 """
 This class initializes the LCD display and provides methods showData and showError which are responsible for displaying data on the LCD screen.
 """
-class Lcd(object):
+class Lcd(object):  
     
     #  display mode
     screen = 0
@@ -545,9 +575,9 @@ class Lcd(object):
         I2C_SCL = 7
         I2C_FREQ = 400000
     
-        # setup the I2C communication for the OLED display
+        # setup the I2C communication for the LCD display
         self.bus = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=I2C_FREQ)
-
+                                                      
         addr = self.bus.scan()
 
         addr = self.bus.scan()[0]
@@ -557,11 +587,9 @@ class Lcd(object):
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    def showData(self, probe, rtc, ip):
+    def showData(self, probe, co2probe, rtc, ip):
                 
         # Display time & temp on the LCD screen
-        # print("SCREEN: " + str(self.screen))
-        TOTAL_SCREENS = 5
                 
         if (self.screen == 0): 
             temperatureStr = str(probe.temperature) + "C"
@@ -574,7 +602,7 @@ class Lcd(object):
             self.screen = 1
             
         elif (self.screen == 1):
-            co2Str = str(probe.co2) + " ppm"
+            co2Str = str(co2probe.co2) + " ppm"
             
             self.lcd.clear()
             self.lcd.putstr(co2Str)
@@ -597,12 +625,7 @@ class Lcd(object):
             self.lcd.clear()
             self.lcd.putstr(timeStr)
             self.lcd.putstr("\n")
-            self.lcd.putstr(dateStr)               
-            self.screen = 4
-            
-        elif (self.screen == 4):
-            self.lcd.clear()
-            self.lcd.putstr(ip)               
+            self.lcd.putstr(dateStr)                         
             self.screen = 0
                 
                  
@@ -632,7 +655,8 @@ class PlantCare(object):
         
         ## Creat the objects to be controlled
         self.light = LightSwitch()
-        self.probe = Co2TemperatureHumidityProbe()
+        self.probe = TemperatureHumidityProbe()
+        self.co2probe = Co2Probe()
         self.pump = Pump()
         self.fan = Fan()
         self.windows = LinearActuator()
@@ -725,7 +749,7 @@ class PlantCare(object):
         return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
  
     def getCo2Data(self):
-        return [self.probe.co2, self.probe.highCo2, self.probe.lowCo2]    
+        return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]    
 
     def getSystemTime(self):
         return self.rtc.getDateTimeStr()
@@ -771,11 +795,18 @@ class PlantCare(object):
             print("controlLights...")
             self.light.control(self.rtc)        
             
-            print("controlTemperature...")
+         
+            #print("read temp and humidity...")
             self.probe.measureIt(self.rtc)
+            
+            print("Read co2...")
+            self.co2probe.measureIt(self.rtc)
+            #print("co2: " + str(co2probe.co2))
+            
 
-            temperature = self.probe.temperature            
-            #temperature = self.windows.control(temperature, self.MAX_TEMPERATURE)
+            temperature = self.probe.temperature
+            print("Temp: "+ str(temperature))
+            #self.windows.control(temperature, self.MAX_TEMPERATURE)
 
             self.fan.control(temperature, self.MAX_TEMPERATURE)
 
@@ -785,7 +816,7 @@ class PlantCare(object):
             self.pump.control(temperature, self.rtc)
             
             print("display data...")
-            self.lcd.showData(self.probe, self.rtc, self.ip)        
+            self.lcd.showData(self.probe, self.co2probe, self.rtc, self.ip)        
 
         except HardwareError as e:
             print(e)            
@@ -798,5 +829,17 @@ class PlantCare(object):
             self.cleanUp()
             self.lcd.showError(101, "General error")
             sys.exit("Terminated")
-                   
-        
+            
+def main():
+    
+    datetime = '10:01:00,Sunday,2024-09-29' 
+    plantCare = PlantCare("192.168.1.1")
+    
+    while True:
+        plantCare.careforplants()
+
+if __name__ == "__main__":
+    main()
+
+
+
