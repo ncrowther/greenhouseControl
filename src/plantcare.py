@@ -804,12 +804,8 @@ class PlantCare(object):
             #print("co2: " + str(co2probe.co2))
             
 
-<<<<<<< HEAD
             temperature = self.probe.temperature
             print("Temp: "+ str(temperature))
-=======
-            temperature = self.probe.temperature            
->>>>>>> 66259984b4bba2c954d35c2621b1299db2b72a61
             #self.windows.control(temperature, self.MAX_TEMPERATURE)
 
             self.fan.control(temperature, self.MAX_TEMPERATURE)
@@ -833,7 +829,6 @@ class PlantCare(object):
             self.cleanUp()
             self.lcd.showError(101, "General error")
             sys.exit("Terminated")
-<<<<<<< HEAD
             
 def main():
     
@@ -846,8 +841,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-=======
-                   
->>>>>>> 66259984b4bba2c954d35c2621b1299db2b72a61
 
 
