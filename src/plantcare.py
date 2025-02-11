@@ -1,4 +1,5 @@
 import sys
+import math
 import traceback
 from machine import Pin, PWM, ADC, I2C
 import dht
@@ -73,6 +74,77 @@ class OnOFFAutoController:
             
     def status(self):
         return self.state
+
+#
+## SH20 temperature humidity probe
+#
+class TemperatureHumidityProbe(object):
+  
+    def __init__(self):
+        # setup the I2C communication for the SHT20 sensor
+        #  I2C Pins
+        I2C_PORT = 1
+        I2C_SDA = 6
+        I2C_SCL = 7        
+
+        i2c = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA))
+                                                      
+        addr = i2c.scan()
+
+        addr = i2c.scan()[0]
+        print("**************************" + str(addr))
+
+
+
+        self.sht = sht20.SHT20(i2c)
+        
+        self.temperature = 0        
+        self.highTemp = 0
+        self.lowTemp = 100
+        
+        self.humidity = 0        
+        self.highHumidity = 0
+        self.lowHumidity = 100        
+        
+    def measureIt(self, rtc):   
+    
+        try:
+            print('SHT20 measureIt')
+            #self.sht.reset()
+            
+            self.temperature = self.sht.temperature
+            self.temperature = round(self.temperature, 2)
+                    
+            self.humidity = self.sht.humidity
+            self.humidity = round(self.humidity, 2)
+                 
+            print("SH20 Temperature (C): " + str(self.temperature))
+            print("SH20 Humidity (%RH): " + str(self.humidity))
+            
+            # Reset stats at midnight
+            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
+                print("Reset temperature stats")
+                self.highTemp = 0
+                self.lowTemp = 100
+             
+            # Set temperature high score
+            if (self.temperature > self.highTemp):
+                self.highTemp = self.temperature
+            
+            if (self.temperature < self.lowTemp):
+                self.lowTemp = self.temperature
+                
+            # Set humidity high score
+            if (self.humidity > self.highHumidity):
+                self.highHumidity = self.humidity
+            
+            if (self.humidity < self.lowHumidity):
+                self.lowHumidity = self.humidity
+
+        except Exception as e:
+            print(e)  
+            raise HardwareError("SHT20 Probe", 100)            
+    
     
 """
 This code defines a class called Heater that inherits from the OnOFFAutoController class. 
@@ -133,11 +205,19 @@ class Fan(OnOFFAutoController):
         self.relay_pin.value(0)  # Set relay to OFF state
 
         
-    def control(self, temperature, maxTemperature):
+    def control(self, temperature, maxTemperature, vpd):
         
         # Degrees in which the temp must decrease before turning off
         DEAD_ZONE = 1
+        MIN_VPD = 0.4
         
+        if (vpd < MIN_VPD):
+            self.setState(OnOffState.ON)
+            self.setState(OnOffState.AUTO)
+        else:
+            self.setState(OnOffState.OFF)
+            self.setState(OnOffState.AUTO)
+            
         # On
         if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
             self.setState(OnOffState.ON)
@@ -516,7 +596,7 @@ class Lcd(object):
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    def showData(self, probe, co2probe, rtc, ip):
+    def showData(self, probe, co2probe, rtc, vpd):
                 
         # Display time & temp on the LCD screen
                 
@@ -532,10 +612,12 @@ class Lcd(object):
             
         elif (self.screen == 1):
             co2Str = str(co2probe.co2) + " ppm"
+            vpdStr = str(vpd) + " vpd"
             
             self.lcd.clear()
             self.lcd.putstr(co2Str)
-            self.lcd.putstr("\n")            
+            self.lcd.putstr("\n")
+            self.lcd.putstr(vpdStr)
             self.screen = 2
             
         elif (self.screen == 2):
@@ -584,7 +666,8 @@ class PlantCare(object):
         
         ## Creat the objects to be controlled
         self.light = LightSwitch()
-        self.probe = Co2TemperatureHumidityProbe()
+        self.probe = TemperatureHumidityProbe()
+        self.co2probe = Co2Probe()
         self.pump = Pump()
         self.fan = Fan()
         self.windows = LinearActuator()
@@ -671,10 +754,10 @@ class PlantCare(object):
         return self.heater.settings()        
         
     def getTemperatureData(self):
-        return [self.co2probe.temperature, self.co2probe.highTemp, self.co2probe.lowTemp]
+        return [self.probe.temperature, self.probe.highTemp, self.probe.lowTemp]
     
     def getHumidityData(self):
-        return [self.co2probe.humidity, self.co2probe.highHumidity, self.co2probe.lowHumidity]    
+        return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
  
     def getCo2Data(self):
         return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]    
@@ -711,6 +794,21 @@ class PlantCare(object):
         #self.pump.fanOff()
         self.pump.setState(OnOffState.OFF)
         self.light.setState(OnOffState.OFF)
+        
+    def calculateVPD(self, airTemperature, leafTemperature, humidity):
+        print(airTemperature, leafTemperature, humidity)
+        leafVp = 0.61078 * math.exp(17.27 * leafTemperature / (leafTemperature + 237.3))
+        
+        print(leafVp)
+    
+        airVp = 0.61078 * math.exp(17.27 * airTemperature / (airTemperature + 237.3)) * (humidity / 100)
+        
+        print(airVp)
+        vpd = round(leafVp - airVp, 2)
+        
+        print(vpd)
+        
+        return vpd        
     
     def careforplants(self):
           
@@ -723,13 +821,27 @@ class PlantCare(object):
             print("controlLights...")
             self.light.control(self.rtc)        
             
-            print("controlTemperature...")
+         
+            #print("read temp and humidity...")
             self.probe.measureIt(self.rtc)
+            
+            print("Read co2...")
+            self.co2probe.measureIt(self.rtc)
+            #print("co2: " + str(co2probe.co2))
+            
 
-            temperature = self.probe.temperature            
+            temperature = self.probe.temperature
+            print("Temp: "+ str(temperature))
             #self.windows.control(temperature, self.MAX_TEMPERATURE)
+            
+            humidity = self.probe.humidity
+            print("Humidity: "+ str(humidity))
 
-            self.fan.control(temperature, self.MAX_TEMPERATURE)
+            airTemperature = temperature
+            leafTemperature = temperature - 2.8
+            vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
+            
+            self.fan.control(temperature, self.MAX_TEMPERATURE, vpd)
 
             self.heater.control(temperature, self.MIN_TEMPERATURE)
             
@@ -737,7 +849,7 @@ class PlantCare(object):
             self.pump.control(temperature, self.rtc)
             
             print("display data...")
-            self.lcd.showData(self.probe, self.rtc, self.ip)        
+            self.lcd.showData(self.probe, self.co2probe, self.rtc, vpd)        
 
         except HardwareError as e:
             print(e)            
