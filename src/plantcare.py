@@ -214,9 +214,7 @@ class Fan(OnOFFAutoController):
         if (vpd < MIN_VPD):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO)
-        else:
-            self.setState(OnOffState.OFF)
-            self.setState(OnOffState.AUTO)
+            return
             
         # On
         if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
@@ -796,17 +794,12 @@ class PlantCare(object):
         self.light.setState(OnOffState.OFF)
         
     def calculateVPD(self, airTemperature, leafTemperature, humidity):
-        print(airTemperature, leafTemperature, humidity)
+
         leafVp = 0.61078 * math.exp(17.27 * leafTemperature / (leafTemperature + 237.3))
-        
-        print(leafVp)
     
         airVp = 0.61078 * math.exp(17.27 * airTemperature / (airTemperature + 237.3)) * (humidity / 100)
         
-        print(airVp)
         vpd = round(leafVp - airVp, 2)
-        
-        print(vpd)
         
         return vpd        
     
