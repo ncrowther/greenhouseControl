@@ -84,9 +84,9 @@ class MLX90614:
         
         # setup the I2C communication for the SHT20 sensor
         #  I2C Pins
-        I2C_PORT = 1
-        I2C_SDA = 6
-        I2C_SCL = 7        
+        I2C_PORT = 0
+        I2C_SDA = 16
+        I2C_SCL = 17        
 
         i2c = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=100000)
                                                       

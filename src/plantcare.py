@@ -12,6 +12,7 @@ import ds18x20
 from machine_i2c_lcd import I2cLcd
 import breakout_scd41
 from pimoroni_i2c import PimoroniI2C
+from MLX90614 import MLX90614
 
 #################################################
 ### Greenouse controller for Rasberry Pi Pico ###
@@ -89,12 +90,11 @@ class TemperatureHumidityProbe(object):
 
         i2c = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA))
                                                       
-        addr = i2c.scan()
+        scan = i2c.scan()
+        print("probe scan:", scan)
 
-        addr = i2c.scan()[0]
-        print("**************************" + str(addr))
-
-
+        addr = 64
+        print("Temp humidity probe addr:", addr)
 
         self.sht = sht20.SHT20(i2c)
         
@@ -580,15 +580,16 @@ class Lcd(object):
         I2C_PORT = 1
         I2C_SDA = 6
         I2C_SCL = 7
-        I2C_FREQ = 400000
+        I2C_FREQ = 100000 #400000
     
         # setup the I2C communication for the LCD display
         self.bus = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=I2C_FREQ)
                                                       
-        addr = self.bus.scan()
-
-        addr = self.bus.scan()[0]
-        print(addr)
+        scan = self.bus.scan()
+        print("I2c LDC scan: ", scan)
+        
+        addr = 39 #self.bus.scan()[0]
+        print("I2c LDC addr: ", addr)
 
         self.lcd = I2cLcd(self.bus, addr, 2, 16)
         
@@ -666,12 +667,19 @@ class PlantCare(object):
         self.light = LightSwitch()
         self.probe = TemperatureHumidityProbe()
         self.co2probe = Co2Probe()
+    
         self.pump = Pump()
         self.fan = Fan()
         self.windows = LinearActuator()
         self.heater = Heater()
         self.lcd = Lcd()
                 
+        #self.heatSensor = MLX90614()
+        #time.sleep(1)
+        # Read device ID to make sure that we can communicate with the ADXL343
+        #data = self.heatSensor.read_reg(self.heatSensor.MLX90614_TA)
+        #print(data)
+        
         # Startup check
         self.windows.setState(WindowState.OPEN)
         #self.pump.setState(OnOffState.ON)
@@ -830,8 +838,12 @@ class PlantCare(object):
             humidity = self.probe.humidity
             print("Humidity: "+ str(humidity))
 
-            airTemperature = temperature
-            leafTemperature = temperature - 2.8
+            airTemperature = temperature 
+            leafTemperature = temperature - 1.5
+        
+            print("Ambient Temp:",airTemperature,"C")
+            print("Leaf Temp:", leafTemperature,"C")
+
             vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
             
             self.fan.control(temperature, self.MAX_TEMPERATURE, vpd)
@@ -858,7 +870,6 @@ class PlantCare(object):
             
 def main():
     
-    datetime = '10:01:00,Sunday,2024-09-29' 
     plantCare = PlantCare("192.168.1.1")
     
     while True:
