@@ -50,6 +50,8 @@ See:
 
     ibmcloud login --sso
 
+    (if using public account,  from the IBM Cloud console click user icon->Login to CLI and API.  e.g.: ibmcloud login -a https://cloud.ibm.com -u passcode -p l6bjKxF0gL)
+
 3.	In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups.  Select the resource group for Code Engine. E.g. default
 
     ibmcloud target -g default
