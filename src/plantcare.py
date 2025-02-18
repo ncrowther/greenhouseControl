@@ -84,9 +84,13 @@ class TemperatureHumidityProbe(object):
     def __init__(self):
         # setup the I2C communication for the SHT20 sensor
         #  I2C Pins
-        I2C_PORT = 1
-        I2C_SDA = 6
-        I2C_SCL = 7        
+        #I2C_PORT = 1
+        #I2C_SDA = 6
+        #I2C_SCL = 7
+        
+        I2C_PORT = 0
+        I2C_SDA = 20
+        I2C_SCL = 21
 
         i2c = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA))
                                                       
@@ -577,30 +581,34 @@ class Lcd(object):
     def __init__(self):
         
         #  I2C Pins
-        I2C_PORT = 1
-        I2C_SDA = 6
-        I2C_SCL = 7
+        #I2C_PORT = 0
+        #I2C_SDA = 6
+        #I2C_SCL = 7
         I2C_FREQ = 100000 #400000
+        
+        I2C_PORT = 0
+        I2C_SDA = 20
+        I2C_SCL = 21
     
         # setup the I2C communication for the LCD display
         self.bus = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=I2C_FREQ)
                                                       
         scan = self.bus.scan()
-        print("I2c LDC scan: ", scan)
+        print("I2c LED scan: ", scan)
         
         addr = 39 #self.bus.scan()[0]
-        print("I2c LDC addr: ", addr)
+        print("I2c LED addr: ", addr)
 
         self.lcd = I2cLcd(self.bus, addr, 2, 16)
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    def showData(self, probe, co2probe, rtc, vpd):
+    def showData(self, probe, co2probe, rtc, vpd, leafTemperature, airTemperature):
                 
         # Display time & temp on the LCD screen
                 
         if (self.screen == 0): 
-            temperatureStr = str(probe.temperature) + "C"
+            temperatureStr = str(airTemperature) + "A - " + str(airTemperature) + "L"
             humidityStr    = str(probe.humidity) + "%"
             
             self.lcd.clear()
@@ -674,7 +682,7 @@ class PlantCare(object):
         self.heater = Heater()
         self.lcd = Lcd()
                 
-        #self.heatSensor = MLX90614()
+        self.heatSensor = MLX90614()
         #time.sleep(1)
         # Read device ID to make sure that we can communicate with the ADXL343
         #data = self.heatSensor.read_reg(self.heatSensor.MLX90614_TA)
@@ -839,9 +847,10 @@ class PlantCare(object):
             print("Humidity: "+ str(humidity))
 
             airTemperature = temperature 
-            leafTemperature = temperature - 1.5
+            #leafTemperature = temperature - 1.5
+            leafTemperature = round(self.heatSensor.get_obj_temp(),2)
         
-            print("Ambient Temp:",airTemperature,"C")
+            print("Air Temp:",airTemperature,"C")
             print("Leaf Temp:", leafTemperature,"C")
 
             vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
@@ -854,7 +863,7 @@ class PlantCare(object):
             self.pump.control(temperature, self.rtc)
             
             print("display data...")
-            self.lcd.showData(self.probe, self.co2probe, self.rtc, vpd)        
+            self.lcd.showData(self.probe, self.co2probe, self.rtc, vpd, leafTemperature, airTemperature)        
 
         except HardwareError as e:
             print(e)            
@@ -877,6 +886,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
