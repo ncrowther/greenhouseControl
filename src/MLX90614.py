@@ -20,9 +20,8 @@ import time
 import struct
 from micropython import const
 
-
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/jposada202020/MicroPython_MLX90614.git"
+__repo__ = "https://github.com/ncrowther/greenhouseControl"
 
 
 class MLX90614:
