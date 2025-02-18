@@ -608,7 +608,7 @@ class Lcd(object):
         # Display time & temp on the LCD screen
                 
         if (self.screen == 0): 
-            temperatureStr = str(airTemperature) + "A - " + str(airTemperature) + "L"
+            temperatureStr = str(airTemperature) + "A - " + str(leafTemperature) + "L"
             humidityStr    = str(probe.humidity) + "%"
             
             self.lcd.clear()
