@@ -26,14 +26,19 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
+  // const dataservice = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs'
+  const dataservice = 'http://localhost:3000/docs'
+  //const configservice = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default'
+  const configservice = 'http://localhost:3000/config?id=default'
+
   const results = useQueries({
     queries: [
       { queryKey: ['logData', 1], queryFn: () =>
-      fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs', { mode: 'cors' }).then(
+      fetch(dataservice, { mode: 'cors' }).then(
         (res) => res.json()
       )},
       { queryKey: ['configData', 2], queryFn: () =>
-        fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', { mode: 'cors' }).then(
+        fetch(configservice, { mode: 'cors' }).then(
           (res) => res.json()
         )},      
     ],

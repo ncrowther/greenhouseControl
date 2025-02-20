@@ -9,7 +9,7 @@ import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
-GREENHOUSE_DATASERVICE = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
+GREENHOUSE_DATASERVICE = 'https://lz4fm5hn-3000.uks1.devtunnels.ms' #'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud'
         
 """
 This code is a Python program that controls a plant care system. 

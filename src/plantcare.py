@@ -209,11 +209,12 @@ class Fan(OnOFFAutoController):
         self.relay_pin.value(0)  # Set relay to OFF state
 
         
-    def control(self, temperature, maxTemperature, vpd):
+    def control(self, vpd):
         
         # Degrees in which the temp must decrease before turning off
-        DEAD_ZONE = 1
+        DEAD_ZONE = 0.1
         MIN_VPD = 0.4
+        MAX_VPD = 1.6
         
         if (vpd < MIN_VPD):
             self.setState(OnOffState.ON)
@@ -221,12 +222,12 @@ class Fan(OnOFFAutoController):
             return
             
         # On
-        if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
+        if (OnOffState.AUTO == self.status()) and (vpd >= MAX_VPD):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO) 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
+        if (OnOffState.AUTO == self.status()) and (vpd < (MAX_VPD - DEAD_ZONE)):        
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)
         
@@ -855,7 +856,7 @@ class PlantCare(object):
 
             vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
             
-            self.fan.control(temperature, self.MAX_TEMPERATURE, vpd)
+            self.fan.control(vpd)
 
             self.heater.control(temperature, self.MIN_TEMPERATURE)
             
