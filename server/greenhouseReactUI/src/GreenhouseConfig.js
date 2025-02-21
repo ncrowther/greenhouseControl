@@ -64,8 +64,8 @@ const GreenhouseConfig = ({ configData }) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-     fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-    //fetch('http://localhost:3000/config?id=default', {
+     //fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
+    fetch('https://lz4fm5hn-3000.uks1.devtunnels.ms/config?id=default', {
       method: 'POST',
       headers: myHeaders,
       body: configData // body data type must match "Content-Type" header

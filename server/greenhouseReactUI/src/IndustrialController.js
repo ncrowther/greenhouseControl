@@ -27,9 +27,9 @@ const IndustrialController = () => {
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
   // const dataservice = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs'
-  const dataservice = 'http://localhost:3000/docs'
+  const dataservice = 'https://lz4fm5hn-3000.uks1.devtunnels.ms/docs'
   //const configservice = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default'
-  const configservice = 'http://localhost:3000/config?id=default'
+  const configservice = 'https://lz4fm5hn-3000.uks1.devtunnels.ms/config?id=default'
 
   const results = useQueries({
     queries: [
