@@ -26,10 +26,10 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  // const dataservice = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/docs'
-  const dataservice = 'https://lz4fm5hn-3000.uks1.devtunnels.ms/docs'
-  //const configservice = 'https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default'
-  const configservice = 'https://lz4fm5hn-3000.uks1.devtunnels.ms/config?id=default'
+  // const devtunnel = 'https://ph8pr72f-3000.uks1.devtunnels.ms/'
+  const devtunnel = 'http://localhost:3000'
+  const dataservice = devtunnel + '/docs'
+  const configservice = devtunnel + '/config?id=default'
 
   const results = useQueries({
     queries: [
