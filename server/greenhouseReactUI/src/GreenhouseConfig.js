@@ -10,7 +10,7 @@ import { IoRainyOutline } from "react-icons/io5";
  * Set the greenhouse config
  * @returns {JSX.Element} The component.
  */
-const GreenhouseConfig = ({ configData }) => {
+const GreenhouseConfig = ({ configData , baseurl}) => {
 
   const [light, setLight] = useState(configData.doc.lightState);
   const [heater, setHeater] = useState(configData.doc.heaterState);
@@ -64,9 +64,9 @@ const GreenhouseConfig = ({ configData }) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-     //fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-    fetch('https://lz4fm5hn-3000.uks1.devtunnels.ms/config?id=default', {
+    fetch(baseurl + '/config?id=default', {
       method: 'POST',
+      mode: 'cors',
       headers: myHeaders,
       body: configData // body data type must match "Content-Type" header
 

@@ -15,7 +15,7 @@ const VpdChart = ({ data}) => {
 
   const vpdReadings = data.Docs.reduce((vpdReadings, obj) => {
 
-    var leafTemperature = obj.temperature - 2.8
+    var leafTemperature = obj.temperature - 1.5
     var leafVp = 0.61078 * Math.exp(17.27 * leafTemperature / (leafTemperature + 237.3))
     var airVp = 0.61078 * Math.exp(17.27 * obj.temperature / (obj.temperature + 237.3)) * (obj.humidity / 100)
     var vpd = (leafVp - airVp).toFixed(2)

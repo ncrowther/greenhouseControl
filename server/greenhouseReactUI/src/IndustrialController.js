@@ -26,10 +26,10 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  const devtunnel = 'https://ph8pr72f-3000.uks1.devtunnels.ms'
-  //const devtunnel = 'http://localhost:3000'
-  const dataservice = devtunnel + '/docs'
-  const configservice = devtunnel + '/config?id=default'
+  const baseurl = 'https://ph8pr72f-3000.uks1.devtunnels.ms'
+  //const baseurl = 'http://localhost:3000'
+  const dataservice = baseurl + '/docs'
+  const configservice = baseurl + '/config?id=default'
 
   const results = useQueries({
     queries: [
@@ -78,7 +78,7 @@ const IndustrialController = () => {
       <Divider type="solid" />
 
       <Card title="Configuration" className="card">
-        <GreenhouseConfig configData={configData} />
+        <GreenhouseConfig configData={configData} baseurl={baseurl} />
       </Card>
 
       <Divider type="solid" />
