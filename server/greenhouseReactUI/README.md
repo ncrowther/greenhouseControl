@@ -1,5 +1,5 @@
-# RefundUI
-React speeding ticket UI for wxo open source lab
+# Greenhouse UI
+React UI for greenhouse
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -11,8 +11,9 @@ Install:
 Start locallly:
 ### `npm start`
 
-Run app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Running in development mode using VSC port forwarding on Raspberry Pi Server.\
+Open [https://ph8pr72f-3001.uks1.devtunnels.ms/](https://ph8pr72f-3001.uks1.devtunnels.ms/) to view it in your browser.
+
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
