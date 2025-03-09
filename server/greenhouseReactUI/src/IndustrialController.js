@@ -26,8 +26,8 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  // const devtunnel = 'https://ph8pr72f-3000.uks1.devtunnels.ms/'
-  const devtunnel = 'http://localhost:3000'
+  const devtunnel = 'https://ph8pr72f-3000.uks1.devtunnels.ms'
+  //const devtunnel = 'http://localhost:3000'
   const dataservice = devtunnel + '/docs'
   const configservice = devtunnel + '/config?id=default'
 
