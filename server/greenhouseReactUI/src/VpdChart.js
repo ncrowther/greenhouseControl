@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Chart } from 'primereact/chart';
 
 /**
- * A chart to display humidity data.
+ * A chart to display VPD data.
  * @param {Co2ChartProps} data - The data for the chart.
  * @returns {JSX.Element} The component.
  */
