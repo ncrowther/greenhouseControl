@@ -207,8 +207,7 @@ class Fan(OnOFFAutoController):
     def off(self):   
         print("Fan OFF")
         self.relay_pin.value(0)  # Set relay to OFF state
-
-        
+     
     def control(self, vpd):
         
         # Degrees in which the temp must decrease before turning off
@@ -216,12 +215,13 @@ class Fan(OnOFFAutoController):
         MIN_VPD = 0.4
         MAX_VPD = 1.6
         
-        if (vpd < MIN_VPD):
+        # On if vpd too low
+        if (OnOffState.AUTO == self.status()) and (vpd < MIN_VPD):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO)
             return
             
-        # On
+        # On if vpd too high
         if (OnOffState.AUTO == self.status()) and (vpd >= MAX_VPD):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO) 
@@ -669,6 +669,7 @@ class PlantCare(object):
     def __init__(self, ip):
         
         self.ip = ip
+        self.vpd = 0
         
         self.rtc = Clock()
         
@@ -775,7 +776,10 @@ class PlantCare(object):
         return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
  
     def getCo2Data(self):
-        return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]    
+        return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]
+    
+    def getVpdData(self):
+        return self.vpd    
 
     def getSystemTime(self):
         return self.rtc.getDateTimeStr()
@@ -839,41 +843,39 @@ class PlantCare(object):
             self.co2probe.measureIt(self.rtc)
             #print("co2: " + str(co2probe.co2))
             
-
-            temperature = self.probe.temperature
-            print("Temp: "+ str(temperature))
-            #self.windows.control(temperature, self.MAX_TEMPERATURE)
+            airTemperature = self.probe.temperature
             
             humidity = self.probe.humidity
             print("Humidity: "+ str(humidity))
 
-            airTemperature = temperature 
-            #leafTemperature = temperature - 1.5
+            #leafTemperature = airTemperature - 1.5
             leafTemperature = round(self.heatSensor.get_obj_temp(),2)
         
             print("Air Temp:",airTemperature,"C")
             print("Leaf Temp:", leafTemperature,"C")
 
-            vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
+            self.vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
+                 
+            self.windows.control(leafTemperature, self.MAX_TEMPERATURE)
+                        
+            self.fan.control(self.vpd)
             
-            self.fan.control(vpd)
-
-            self.heater.control(temperature, self.MIN_TEMPERATURE)
+            self.heater.control(leafTemperature, self.MIN_TEMPERATURE)
             
             print("controlWatering...")
-            self.pump.control(temperature, self.rtc)
+            self.pump.control(leafTemperature, self.rtc)
             
             print("display data...")
-            self.lcd.showData(self.probe, self.co2probe, self.rtc, vpd, leafTemperature, airTemperature)        
+            self.lcd.showData(self.probe, self.co2probe, self.rtc, self.vpd, leafTemperature, airTemperature)        
 
         except HardwareError as e:
-            print(e)            
+            traceback.print_exception(e)           
             self.cleanUp()
             self.lcd.showError(e.error_code, e.message)
             sys.exit("Terminated")
-            
-        except Exception as e:
-            print(e)
+                                   
+        except Exception as e:    
+            traceback.print_exception(e)
             self.cleanUp()
             self.lcd.showError(101, "General error")
             sys.exit("Terminated")
@@ -887,3 +889,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

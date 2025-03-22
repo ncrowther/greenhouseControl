@@ -32,7 +32,7 @@ class PlantServer(object):
         if self.ipAddress == None:
             self.plantCare = PlantCare(None, None)         
             self.displayError(99, "No WIFI")
-        else:            
+        else:
             self.plantCare = PlantCare(self.ipAddress)
             
     """
@@ -49,7 +49,7 @@ class PlantServer(object):
         print('Check Network...')    
         
         # Check if already connected
-        print("Connecting to Wi-Fi...")
+        print("Connect to Wi-Fi....")
         
         self.wlan.active(True)
         self.wlan.config(pm = 0xa11140) # Disable power-save mode
@@ -89,20 +89,21 @@ class PlantServer(object):
                
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
         resp = None
-        timestamp = "2024-09-01T00:00:00.000Z"
+        timestamp = 'ERROR'
         
         gc.collect() 
         resp = None
         response = "ERROR"
         try:
-            resp = get( request_url, timeout=10)
+            resp = get( request_url, timeout=20)
             response = resp.text
+            
             resp.close()
             
             jsonData = json.loads(response)
             
             timestamp = jsonData["timestamp"]
-            
+            print("timestamp: " + timestamp)
             # Config stored inside doc          
             doc = jsonData["doc"]
 
@@ -134,14 +135,19 @@ class PlantServer(object):
         
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                print(resp)
                 resp.close()
             print(e)
         finally:
             if resp:
+                print(resp)
                 resp.close()
-            gc.collect()
+                gc.collect()
+                
+                if (timestamp == "ERROR"):
+                    raise Exception("Failed to get time")
             
-            return timestamp
+                return timestamp
            
     """
     This function displays an error message with a specific code and message.
@@ -178,12 +184,14 @@ class PlantServer(object):
             # get config data
             timestamp = self.configure(self.plantCare)
             
+            print("TIME: " + timestamp)
+            
             self.plantCare.careforplants()
             
             if (count % LOG_TIME == 0):
-                self.logger()
                 if (count == 0):  # First time around use timestamp to set pico clock
                     self.plantCare.setDateTime(timestamp)
+                self.logger()                    
                 
             time.sleep(SLEEP_TIME)
             
@@ -207,7 +215,7 @@ class PlantServer(object):
             temperatureData = self.plantCare.getTemperatureData()
             humidityData = self.plantCare.getHumidityData()
             co2Data = self.plantCare.getCo2Data()
-            vpd = 0
+            vpd = self.plantCare.getVpdData()
             self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
                 
         except Exception as err:
@@ -220,6 +228,8 @@ class PlantServer(object):
     # This code is a function that logs data to the Greenhouse Data Service. 
     # The response from the server is returned.
     def logData(self, timestamp, temperature, humidity, co2, vpd):
+        
+        print("Logging data at " + str(timestamp))
         
         header = {
           'Content-Type': 'application/json',
@@ -274,3 +284,5 @@ def main():
         machine.reset()
 
 main()
+
+
