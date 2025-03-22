@@ -40,7 +40,7 @@ const GreenhouseLight = ({ configData, configservice }) => {
         tapOnTwo,
         tapOnThree
       ],
-      "windowState": "OFF",
+      "windowState": heaterState,
       "temperatureRange": [
         lowTemp,
         highTemp

@@ -46,7 +46,7 @@ const GreenhouseWatering = ({ configData, configservice}) => {
         tapOnTwoTime,
         tapOnThreeTime
       ],
-      "windowState": "OFF",
+      "windowState": heaterState,
       "temperatureRange": [
         lowTemp,
         highTemp
