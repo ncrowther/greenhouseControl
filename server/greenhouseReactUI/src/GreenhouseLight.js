@@ -6,7 +6,7 @@ import { Knob } from 'primereact/knob';
  * Set the greenhouse config
  * @returns {JSX.Element} The component.
  */
-const GreenhouseLight = ({ configData }) => {
+const GreenhouseLight = ({ configData, configservice }) => {
 
   const lightState = configData.doc.lightState;
   const heaterState = configData.doc.heaterState;
@@ -21,11 +21,10 @@ const GreenhouseLight = ({ configData }) => {
   const [lightOn, setLightOn] = useState(configData.doc.lightOnOff[0]);
   const [lightOff, setLightOff] = useState(configData.doc.lightOnOff[1]);
 
-  const handleOnSubmit = (event, configData) => {
+  const handleOnSubmit = (event, configData, configservice) => {
 
     event.preventDefault();
 
-    console.log("Got: " + JSON.stringify(configData))
 
     configData = JSON.stringify({
       "lightState": lightState,
@@ -53,9 +52,9 @@ const GreenhouseLight = ({ configData }) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-    fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-      //fetch('http://localhost:3000/config?id=default', {
+    fetch(configservice, {
       method: 'POST',
+      mode: 'cors',
       headers: myHeaders,
       body: configData // body data type must match "Content-Type" header
 
@@ -92,7 +91,7 @@ const GreenhouseLight = ({ configData }) => {
         alignItems: 'center'
       }}>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { configData })} tooltip="Select light on off time" />
+        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { configData},  configservice)} tooltip="Select light on off time" />
       </div>
 
     </div>

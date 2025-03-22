@@ -78,25 +78,25 @@ const IndustrialController = () => {
       <Divider type="solid" />
 
       <Card title="Configuration" className="card">
-        <GreenhouseConfig configData={configData} baseurl={baseurl} />
+        <GreenhouseConfig configData={configData} configservice={configservice} />
       </Card>
 
       <Divider type="solid" />
 
       <Card title="Temperature" className="md:w-25rem" >
-        <GreenhouseTemperature configData={configData} />
+        <GreenhouseTemperature configData={configData} configservice={configservice}  />
       </Card>   
 
       <Divider type="solid" />          
 
       <Card title="Light" className="md:w-25rem">
-        <GreenhouseLight configData={configData} />
+        <GreenhouseLight configData={configData} configservice={configservice} />
       </Card>   
 
       <Divider type="solid" />       
 
       <Card title="Watering" className="md:w-25rem">
-        <GreenhouseWatering configData={configData} />
+        <GreenhouseWatering configData={configData} configservice={configservice} />
       </Card>    
 
       <Divider type="solid" />       

@@ -7,7 +7,7 @@ import { Knob } from 'primereact/knob';
  * Set the greenhouse config
  * @returns {JSX.Element} The component.
  */
-const GreenhouseWatering = ({ configData }) => {
+const GreenhouseWatering = ({ configData, configservice}) => {
 
   const lightState = configData.doc.lightState;
   const heaterState = configData.doc.heaterState;
@@ -22,7 +22,7 @@ const GreenhouseWatering = ({ configData }) => {
   const [tapOnTwo, setTapOnTwo] = useState(configData.doc.wateringTimes[1].split(":")[0])
   const [tapOnThree, setTapOnThree] = useState(configData.doc.wateringTimes[2].split(":")[0])
 
-  const handleOnSubmit = (event, configData) => {
+  const handleOnSubmit = (event, configData, configservice) => {
 
     event.preventDefault();
 
@@ -58,9 +58,9 @@ const GreenhouseWatering = ({ configData }) => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-    fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-      //fetch('http://localhost:3000/config?id=default', {
+    fetch(configservice, {
       method: 'POST',
+      mode: 'cors',
       headers: myHeaders,
       body: configData // body data type must match "Content-Type" header
 
@@ -101,7 +101,7 @@ const GreenhouseWatering = ({ configData }) => {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-          <Button label=" Apply" inputid="applyWatering" name="applyWatering" value="Apply" onClick={(e) => handleOnSubmit(e, { configData })} tooltip="Select watering times" />
+          <Button label=" Apply" inputid="applyWatering" name="applyWatering" value="Apply" onClick={(e) => handleOnSubmit(e, { configData }, configservice)} tooltip="Select watering times" />
         </div>
 
     </div>

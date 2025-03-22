@@ -7,7 +7,7 @@ import { Knob } from 'primereact/knob';
  * Set the greenhouse config
  * @returns {JSX.Element} The component.
  */
-const GreenhouseTemperature = ({ configData }) => {
+const GreenhouseTemperature = ({ configData, configservice }) => {
 
   const lightState = configData.doc.lightState;
   const heaterState = configData.doc.heaterState;
@@ -22,11 +22,11 @@ const GreenhouseTemperature = ({ configData }) => {
   const [minTemperature, setMinTemperature] = useState(configData.doc.temperatureRange[0]);
   const [maxTemperature, setMaxTemperature] = useState(configData.doc.temperatureRange[1]);
 
-  const handleOnSubmit = (event, configData) => {
+  const handleOnSubmit = (event, configData, configservice) => {
 
     event.preventDefault();
 
-    console.log("Got: " + JSON.stringify(configData))
+    console.log("On Submit: ")
 
     var lowTemp = Math.trunc(minTemperature )
     var highTemp = Math.trunc(maxTemperature )
@@ -52,14 +52,16 @@ const GreenhouseTemperature = ({ configData }) => {
       ]
     })
 
+
+    console.log("POST: " + configservice)
     console.log("SEND: " + JSON.stringify(configData))
 
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     // Send data to the backend via POST
-    fetch('https://dataservice.1apbmbk49s5e.eu-gb.codeengine.appdomain.cloud/config?id=default', {
-      //fetch('http://localhost:3000/config?id=default', {
+    fetch(configservice, {
       method: 'POST',
+      mode: 'cors',
       headers: myHeaders,
       body: configData // body data type must match "Content-Type" header
 
@@ -67,7 +69,7 @@ const GreenhouseTemperature = ({ configData }) => {
       setTimeout(() => {
       window.location.reload(true);
       }, 500))
-    .catch(error => console.error(error));
+    .catch(error => console.error(error));    
 
 
   };
@@ -97,7 +99,7 @@ const GreenhouseTemperature = ({ configData }) => {
         alignItems: 'center'
       }}>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { configData })} tooltip="Select min and max temperature" />
+        <Button label=" Apply" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e, { configData}, configservice)} tooltip="Select min and max temperature" />
       </div>
 
     </div>

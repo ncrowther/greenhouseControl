@@ -10,7 +10,7 @@ exports.findById = function findById(service, dbname, id) {
     }).then(response => {
 
       // console.log('***Found doc ' + id)
-      console.log(response.result);
+      //console.log(response.result);
 
       resolve(response.result);
     })

@@ -67,6 +67,8 @@ app.post('/doc', async (req, res) => {
     "vpd": newDoc.vpd
   }
 
+  console.log(JSON.stringify(doc));
+
   await cloudantLib.createDoc(service, logDbName, doc).then(function (ret) {
 
     console.error('[App] Created doc');
