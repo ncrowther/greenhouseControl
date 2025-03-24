@@ -1,6 +1,7 @@
 import { useQueries } from '@tanstack/react-query';
 import GreenhouseConfig from './GreenhouseConfig.js';
 import GreenhouseTemperature from './GreenhouseTemperature.js';
+import GreenhouseVpd from './GreenhouseVpd.js';
 import GreenhouseLight from './GreenhouseLight.js';
 import GreenhouseWatering from './GreenhouseWatering.js';
 import GreenhouseDetails from './GreenhouseDetails.js';
@@ -27,7 +28,6 @@ const IndustrialController = () => {
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
   const baseurl = 'https://ph8pr72f-3000.uks1.devtunnels.ms'
-  //const baseurl = 'http://localhost:3000'
   const dataservice = baseurl + '/docs'
   const configservice = baseurl + '/config?id=default'
 
@@ -86,6 +86,12 @@ const IndustrialController = () => {
       <Card title="Temperature" className="md:w-25rem" >
         <GreenhouseTemperature configData={configData} configservice={configservice}  />
       </Card>   
+
+      <Divider type="solid" />
+
+      <Card title="Vpd" className="md:w-25rem" >
+        <GreenhouseVpd configData={configData} configservice={configservice}  />
+      </Card>       
 
       <Divider type="solid" />          
 
