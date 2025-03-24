@@ -25,6 +25,8 @@ const service = CloudantV1.newInstance()
 
 const logDbName = process.env.LOG_DB_NAME
 const configDbName = process.env.CONFIG_DB_NAME
+const photoDbName = process.env.PHOTO_DB_NAME
+
 const fs = require('fs');
 
 const app = express()
@@ -43,6 +45,7 @@ const port = process.env.PORT || 3000 //8080
 
 console.log('Log DB: ' + logDbName);
 console.log('Config DB: ' + configDbName);
+console.log('Photo DB: ' + photoDbName);
 
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.urlencoded({ extended: true }))
@@ -71,7 +74,7 @@ app.post('/doc', async (req, res) => {
 
   await cloudantLib.createDoc(service, logDbName, doc).then(function (ret) {
 
-    console.error('[App] Created doc');
+    console.error('Created doc');
 
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
@@ -108,10 +111,21 @@ app.get('/docs', async (req, res) => {
 
 })
 
+// ///////////////////// Set Config ////////////////////
+app.post('/config', async (req, res) => {
+
+  const id = req.query.id;
+  const newDoc = req.body;
+
+  console.log('Set Config: ' + JSON.stringify(newDoc))
+
+  updateDoc(res, configDbName, id, newDoc)
+
+
+})
+
 // //////////////// Get Config ////////////////////////
 app.get('/config', async (req, res) => {
-
-  //var query = require('url').parse(req.url,true).query;
 
   const id = req.query.id;
   console.log('Get config for ' + id)
@@ -136,37 +150,80 @@ app.get('/config', async (req, res) => {
 
 })
 
-// ///////////////////// Set Config ////////////////////
-app.post('/config', async (req, res) => {
+
+// ///////////////////// Write Photo ////////////////////
+app.post('/photo', async (req, res) => {
+
+    console.log('Write photo');
+  
+    const doc = req.body;
+
+    await createDoc(doc, res, photoDbName);
+
+    // Latest always saved at 1
+    id = "1";
+    updateDoc(res, photoDbName, id, doc);
+    
+  })
+
+// //////////////// Get Photo ////////////////////////
+app.get('/photo', async (req, res) => {
 
   const id = req.query.id;
-  const newDoc = req.body;
+  console.log('Get photo for ' + id)
 
-  console.log('Set Config: ' + JSON.stringify(newDoc))
+  await cloudantLib.findById(service, photoDbName, id).then(function (doc) {
 
-  findDoc(res, id, newDoc)
+    res.status(200);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(doc);
+
+  }, function (err) {
+    console.error('[App] Cloudant DB Failure in get photo: ' + err)
+    res.status(500);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(err);
+  })
 
 })
 
+
+// Create cloudant doc
+async function createDoc(doc, res, dbName) {
+
+  console.log('[App] Create doc:' + JSON.stringify(doc));
+
+  await cloudantLib.createDoc(service, dbName, doc).then(function (ret) {
+
+    console.log('[App] Created doc:' + JSON.stringify(ret));
+
+    return ret
+
+  }, function (err) {
+    console.error('[App] Cloudant DB Failure in create photo doc: ' + err);
+    res.status(500);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(err);
+  });
+}
+
 /**
- * Find document from Cloudant database.
+ * Find and update document in Cloudant database.
  * @param {Object} res - The response object.
  * @returns {void}
  */
-async function findDoc(res, id, newDoc) {
+async function updateDoc(res, dbName, id, newDoc) {
   console.log('Update doc');
 
-  await cloudantLib.findById(service, configDbName, id).then(function (doc) {
+  await cloudantLib.findById(service, dbName, id).then(function (doc) {
 
     console.log('Updating: ' + JSON.stringify(doc));
 
-    cloudantLib.updateDoc(service, configDbName, doc, newDoc).then(function (doc) {
+    cloudantLib.updateDoc(service, dbName, doc, newDoc).then(function (doc) {
 
       res.status(200);
       res.set('Access-Control-Allow-Origin', '*');
       res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-      //res.header('Access-Control-Allow-Origin', 'Origin, X-Requested-With, Content-Type, Accept');
-      //res.header('Access-Control-Allow-Header', 'Origin, X-Requested-With, Content-Type, Accept');
 
       res.send(doc);
 
@@ -180,10 +237,16 @@ async function findDoc(res, id, newDoc) {
 
 
   }, function (err) {
-    console.error('[App] Cloudant DB Failure in find doc: ' + err)
-    res.status(500);
+
+    // Create doc if not found
+    newDoc._id = "1"
+    createDoc(newDoc, res, photoDbName);
+
+    res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
+    res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
+    res.send(newDoc);
   })
 
 }

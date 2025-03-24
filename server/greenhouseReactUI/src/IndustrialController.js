@@ -30,6 +30,7 @@ const IndustrialController = () => {
   const baseurl = 'https://ph8pr72f-3000.uks1.devtunnels.ms'
   const dataservice = baseurl + '/docs'
   const configservice = baseurl + '/config?id=default'
+  const photoservice = baseurl + '/photo?id=1'
 
   const results = useQueries({
     queries: [
@@ -40,7 +41,11 @@ const IndustrialController = () => {
       { queryKey: ['configData', 2], queryFn: () =>
         fetch(configservice, { mode: 'cors' }).then(
           (res) => res.json()
-        )},      
+        )},     
+      { queryKey: ['photoData', 3], queryFn: () =>
+        fetch(photoservice, { mode: 'cors' }).then(
+          (res) => res.json()
+        )},           
     ],
   });
 
@@ -59,15 +64,27 @@ const IndustrialController = () => {
 
   //console.log("RESULT 1:" + JSON.stringify(results[0].data))
   //console.log("RESULT 2:" + JSON.stringify(results[1].data))
+  //console.log("RESULT 3:" + JSON.stringify(results[2].data))
 
   const logData = results[0].data
   const configData = results[1].data
+  const photoData = results[2].data
+
+  let photo=""
+  let photoTimestamp = ""
+  if (photoData) {
+     photo='data:image/jpeg;base64,' + photoData.photo
+     photoTimestamp = photoData.timestamp
+  }
 
   return (
 
     <Panel header="" className="p-panel-title ml-2 text-primary" >
-      <img style={{ width: 380, height: 200 }} align="center" src="greenhouse.jpg" alt="Greenhouse" />
+
       <h1>Greenhouse Controller</h1>
+
+      <img style={{ width: 380, height: 200 }} align="center" id='base64image' src={photo} alt="GreenhousePhoto" />
+      <h6>{photoTimestamp}</h6>
    
       <Divider type="solid" />       
 
