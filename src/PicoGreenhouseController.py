@@ -85,7 +85,7 @@ class PlantServer(object):
     Returns:
         str: The timestamp of the last successful configuration.
     """
-    def configure(self, plantCare):
+    def configure(self, plantCare, count):
                
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
         resp = None
@@ -144,7 +144,7 @@ class PlantServer(object):
                 resp.close()
                 gc.collect()
                 
-                if (timestamp == "ERROR"):
+                if (timestamp == "ERROR" and count == 1):
                     raise Exception("Failed to get time")
             
                 return timestamp
@@ -182,7 +182,7 @@ class PlantServer(object):
         while True:
 
             # get config data
-            timestamp = self.configure(self.plantCare)
+            timestamp = self.configure(self.plantCare, count)
             
             print("TIME: " + timestamp)
             
@@ -284,5 +284,4 @@ def main():
         machine.reset()
 
 main()
-
 
