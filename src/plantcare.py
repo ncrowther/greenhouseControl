@@ -697,10 +697,12 @@ class PlantCare(object):
         self.fan.setState(OnOffState.OFF)
         #self.heater.setState(OnOffState.ON)
         #self.fan.off()     
-        time.sleep_ms(5000)
+        #time.sleep_ms(5000)
 
         # Turn off everything and then set to AUTO before starting loop
-        self.windows.setState(WindowState.CLOSED)
+        self.windows.setState(WindowState.OPEN)
+        time.sleep_ms(50)
+        self.windows.setState(WindowState.CLOSED)               
         self.windows.setState(WindowState.AUTO)
         
         self.pump.setState(OnOffState.OFF)
@@ -718,7 +720,8 @@ class PlantCare(object):
     def setDateTime(self, datetime):              
         # Set internal clock
         # datetime "2024-11-10T19:26:35.927Z"
-        
+        if (datetime == None):
+            datetime = "2000-01-01T01:01:01.927Z"
         #12th character to the 20th character
         time = datetime[11:20] 
 
@@ -839,9 +842,9 @@ class PlantCare(object):
             #print("read temp and humidity...")
             self.probe.measureIt(self.rtc)
             
-            print("Read co2...")
+            #print("Read co2...")
             self.co2probe.measureIt(self.rtc)
-            #print("co2: " + str(co2probe.co2))
+            print("co2: " + str(self.co2probe.co2))
             
             airTemperature = self.probe.temperature
             

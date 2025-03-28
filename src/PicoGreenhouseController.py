@@ -9,7 +9,7 @@ import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
-GREENHOUSE_DATASERVICE = 'https://ph8pr72f-3000.uks1.devtunnels.ms' #'https://lz4fm5hn-3000.uks1.devtunnels.ms'
+GREENHOUSE_DATASERVICE = 'http://192.168.1.33:3000' #'https://e577-195-149-14-243.ngrok-free.app' #https://ph8pr72f-3000.uks1.devtunnels.ms' #'https://lz4fm5hn-3000.uks1.devtunnels.ms'
         
 """
 This code is a Python program that controls a plant care system. 
@@ -19,8 +19,8 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    #ssid = 'TALKTALKE0F9AF_EXT'
-    ssid = 'TALKTALKE0F9AF'
+    ssid = 'TALKTALKE0F9AF_EXT'
+    #ssid = 'TALKTALKE0F9AF'
     password = 'H6K8EK9M'  
     ipAddress = "ERR"
         
@@ -55,27 +55,33 @@ class PlantServer(object):
         self.wlan.config(pm = 0xa11140) # Disable power-save mode
         self.wlan.connect(self.ssid, self.password)
 
-        max_wait = 100
-        while max_wait > 0:
-            if self.wlan.status() < 0 or self.wlan.status() >= 3:
-                break
-            max_wait -= 1
+        attempt = 0
+        MAX_TRIES = 10
+        
+        while True:
+            #if self.wlan.status() < 0 or self.wlan.status() >= 3:
+            #   break
+            #max_wait -= 1
             print('waiting for connection...')
             time.sleep(2)
 
-        if self.wlan.status() != 3:
-            print('Network connection failed') 
-            return None
-        else:
-            print('********************************************WIFI CONNECTED')
-            status = self.wlan.ifconfig()
-            ip = status[0]
-            print('ip = ' + ip)
-            self.ipAddress = ip
-                
-        status = self.wlan.ifconfig()
-        return status[0]     
-            
+            if self.wlan.status() != 3:
+                print('Network connection failed') 
+            else:
+                print('********************************************WIFI CONNECTED')
+                status = self.wlan.ifconfig()
+                ip = status[0]
+                print('ip = ' + ip)
+                self.ipAddress = ip
+                    
+                status = self.wlan.ifconfig()
+                return status[0]
+        
+            if (attempt < MAX_TRIES):
+                attempt = attempt + 1
+            else:
+                return -1
+        
     """
     Configure the plant care system based on the configuration stored in the Greenhouse Data Service.
 
@@ -89,19 +95,20 @@ class PlantServer(object):
                
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
         resp = None
-        timestamp = 'ERROR'
+        timestamp = '2000-01-01T13:14:39.216Z'
         
         gc.collect() 
         resp = None
         response = "ERROR"
         try:
-            resp = get( request_url, timeout=20)
+            resp = get( request_url, timeout=200)
             response = resp.text
             
+            print(response)
             resp.close()
             
             jsonData = json.loads(response)
-            
+            print(jsonData)
             timestamp = jsonData["timestamp"]
             print("timestamp: " + timestamp)
             # Config stored inside doc          
@@ -143,10 +150,7 @@ class PlantServer(object):
                 print(resp)
                 resp.close()
                 gc.collect()
-                
-                if (timestamp == "ERROR" and count == 1):
-                    raise Exception("Failed to get time")
-            
+                           
                 return timestamp
            
     """
@@ -184,7 +188,7 @@ class PlantServer(object):
             # get config data
             timestamp = self.configure(self.plantCare, count)
             
-            print("TIME: " + timestamp)
+            print("TIME: " + str(timestamp))
             
             self.plantCare.careforplants()
             
@@ -281,7 +285,8 @@ def main():
         sys.print_exception(err)
         errMsg = '{}: {}'.format(type(err).__name__, err)
         print(errMsg)
-        machine.reset()
+        #machine.reset()
 
 main()
+
 
