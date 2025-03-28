@@ -14,11 +14,12 @@ const GreenhouseDetails = ({ data }) => {
   var airTemperature = data.Docs[totalRecords].temperature
   var humidity = data.Docs[totalRecords].humidity
   var co2 = data.Docs[totalRecords].co2
+  var vpd = data.Docs[totalRecords].vpd
 
-  var leafTemperature = airTemperature - 2.8
-  var leafVp = 0.61078 * Math.exp(17.27 * leafTemperature / (leafTemperature + 237.3))
-  var airVp = 0.61078 * Math.exp(17.27 * airTemperature / (airTemperature + 237.3)) * (humidity / 100)
-  var vpd = (leafVp - airVp).toFixed(2)
+  //var leafTemperature = airTemperature - 2.8
+  //var leafVp = 0.61078 * Math.exp(17.27 * leafTemperature / (leafTemperature + 237.3))
+  //var airVp = 0.61078 * Math.exp(17.27 * airTemperature / (airTemperature + 237.3)) * (humidity / 100)
+  //var vpd = (leafVp - airVp).toFixed(2)
 
   const timeText = <b style={{ color: 'green' }}>&nbsp;{timestamp} </b>
 
