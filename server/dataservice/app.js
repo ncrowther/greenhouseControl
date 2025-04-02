@@ -132,9 +132,12 @@ app.get('/config', async (req, res) => {
 
   await cloudantLib.findById(service, configDbName, id).then(function (doc) {
 
+    var local = new Date();
+    local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
+
     const config = {
       doc: doc,
-      timestamp: new Date()
+      timestamp: (local)
     }
 
     res.status(200);
@@ -156,8 +159,13 @@ app.post('/photo', async (req, res) => {
 
     console.log('Write photo');
   
-    const doc = req.body;
+    
+    const photo = req.body.photo;
 
+    len = photo.length
+    console.log("Photo len: " + len)
+
+    doc = req.body
     await createDoc(doc, res, photoDbName);
 
     // Latest always saved at 1
@@ -191,11 +199,11 @@ app.get('/photo', async (req, res) => {
 // Create cloudant doc
 async function createDoc(doc, res, dbName) {
 
-  console.log('[App] Create doc:' + JSON.stringify(doc));
+  console.log('[App] Create doc:' + JSON.stringify(doc.id));
 
   await cloudantLib.createDoc(service, dbName, doc).then(function (ret) {
 
-    console.log('[App] Created doc:' + JSON.stringify(ret));
+    console.log('[App] Created doc');
 
     return ret
 
@@ -217,7 +225,7 @@ async function updateDoc(res, dbName, id, newDoc) {
 
   await cloudantLib.findById(service, dbName, id).then(function (doc) {
 
-    console.log('Updating: ' + JSON.stringify(doc));
+    console.log('Updating doc: ' + id);
 
     cloudantLib.updateDoc(service, dbName, doc, newDoc).then(function (doc) {
 
