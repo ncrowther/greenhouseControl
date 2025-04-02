@@ -121,7 +121,6 @@ app.post('/config', async (req, res) => {
 
   updateDoc(res, configDbName, id, newDoc)
 
-
 })
 
 // //////////////// Get Config ////////////////////////
@@ -158,19 +157,33 @@ app.get('/config', async (req, res) => {
 app.post('/photo', async (req, res) => {
 
     console.log('Write photo');
+
+    const newDoc = req.body;
+
+    var timestamp = new Date().toISOString();
   
-    
-    const photo = req.body.photo;
+    const doc = {
+      "_id": timestamp,
+      "photo": newDoc.photo,
+      "timestamp": newDoc.timestamp
+    }
 
-    len = photo.length
-    console.log("Photo len: " + len)
+    console.log(JSON.stringify(doc));
 
-    doc = req.body
-    await createDoc(doc, res, photoDbName);
-
-    // Latest always saved at 1
-    id = "1";
-    updateDoc(res, photoDbName, id, doc);
+    await cloudantLib.createDoc(service, photoDbName, doc).then(function (ret) {
+  
+      console.error('Created photo');
+  
+      res.status(200);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(timestamp);
+  
+    }, function (err) {
+      console.error('[App] Cloudant DB Failure in create photo: ' + err)
+      res.status(500);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(err);
+    })    
     
   })
 
@@ -188,6 +201,29 @@ app.get('/photo', async (req, res) => {
 
   }, function (err) {
     console.error('[App] Cloudant DB Failure in get photo: ' + err)
+    res.status(500);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(err);
+  })
+
+})
+
+// //////////////// Get All Photos ////////////////////////
+app.get('/photos', async (req, res) => {
+
+  console.log('Get all photos')
+
+  //await purge(res);
+
+  await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
+
+    console.log("Count: " + docs.length)
+    res.status(200);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(docs);
+
+  }, function (err) {
+    console.error('[App] Cloudant DB Failure in get photos: ' + err)
     res.status(500);
     res.set('Access-Control-Allow-Origin', '*');
     res.send(err);
@@ -247,8 +283,8 @@ async function updateDoc(res, dbName, id, newDoc) {
   }, function (err) {
 
     // Create doc if not found
-    newDoc._id = "1"
-    createDoc(newDoc, res, photoDbName);
+    newDoc._id = "default"
+    createDoc(newDoc, res, dbName);
 
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
