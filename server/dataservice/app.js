@@ -165,7 +165,7 @@ app.post('/photo', async (req, res) => {
     const doc = {
       "_id": timestamp,
       "photo": newDoc.photo,
-      "timestamp": newDoc.timestamp
+      "timestamp": timestamp
     }
 
     console.log(JSON.stringify(doc));

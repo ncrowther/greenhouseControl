@@ -72,15 +72,17 @@ const IndustrialController = () => {
   const configData = results[1].data
   const photoData = results[2].data
 
-  let latestPhoto=""
+  let latestPhoto=null
   let photos=""
   let photoTimestamp = ""
   if (photoData) {
      photos=photoData.Docs
      let latest = photos.length
-     latestPhoto = photoData.Docs[latest-1]
-     latestPhoto='data:image/jpeg;base64,' + latestPhoto.photo
-     photoTimestamp = latestPhoto.timestamp
+     let latestPhotoDoc = photos[latest-1]
+     if (latestPhotoDoc) {
+      photoTimestamp = latestPhotoDoc.timestamp
+      latestPhoto='data:image/jpeg;base64,' + latestPhotoDoc.photo
+     }
   }
 
   return (
@@ -89,7 +91,8 @@ const IndustrialController = () => {
 
       <h1>Greenhouse Controller</h1>
 
-      <img style={{ width: 640, height: 480 }} align="center" id='base64image' src={latestPhoto} alt="GreenhousePhoto" />
+      <Image style={{ width: 320, height: 240 }} align="center" id='base64image' src={latestPhoto} alt="GreenhousePhoto"/>
+
       <h6>{photoTimestamp}</h6>
             
       <Divider type="solid" />       
