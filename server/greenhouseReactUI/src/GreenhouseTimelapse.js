@@ -31,7 +31,7 @@ const GreenhouseTimelapse = ({ photoData }) => {
     }
 
     const thumbnailTemplate = (item) => {
-        return <img src={'data:image/jpeg;base64,' + item.timestamp} alt={item.timestamp} style={{ width: '100%' }} />
+        return  <h5> {item.timestamp} </h5>
     }
 
     return (
