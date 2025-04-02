@@ -30,7 +30,7 @@ class PlantServer(object):
         self.ipAddress = self.connect_to_network()
         
         if self.ipAddress == None:
-            self.plantCare = PlantCare(None, None)         
+            self.plantCare = PlantCare(None)         
             self.displayError(99, "No WIFI")
         else:
             self.plantCare = PlantCare(self.ipAddress)
@@ -80,7 +80,7 @@ class PlantServer(object):
             if (attempt < MAX_TRIES):
                 attempt = attempt + 1
             else:
-                return -1
+                return None
         
     """
     Configure the plant care system based on the configuration stored in the Greenhouse Data Service.
