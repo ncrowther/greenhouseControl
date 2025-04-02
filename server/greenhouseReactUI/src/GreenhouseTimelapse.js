@@ -31,7 +31,8 @@ const GreenhouseTimelapse = ({ photoData }) => {
     }
 
     const thumbnailTemplate = (item) => {
-        return  <h5> {item.timestamp} </h5>
+        const hour = new Date(item.timestamp).getHours()
+        return  <body>&nbsp; {hour} &nbsp;</body>
     }
 
     return (
