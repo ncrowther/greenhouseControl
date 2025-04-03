@@ -94,7 +94,7 @@ app.get('/docs', async (req, res) => {
 
   console.log('Get docs')
 
-  await purge(res);
+  await purge(res, logDbName);
 
   await cloudantLib.findAllDocs(service, logDbName).then(function (docs) {
 
@@ -213,7 +213,7 @@ app.get('/photos', async (req, res) => {
 
   console.log('Get all photos')
 
-  //await purge(res);
+  await purge(res, photoDbName);
 
   await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
 
@@ -300,11 +300,12 @@ async function updateDoc(res, dbName, id, newDoc) {
  * @param {Object} res - The response object.
  * @returns {void}
  */
-async function purge(res) {
-  console.log('Purge docs');
+async function purge(res, dbName) {
 
-  await cloudantLib.getExpiredDocs(service, logDbName).then(function (docs) {
-    cloudantLib.deleteDocs(service, logDbName, docs);
+  console.log('Purge docs in ' + dbName);
+
+  await cloudantLib.getExpiredDocs(service, dbName).then(function (docs) {
+    cloudantLib.deleteDocs(service, dbName, docs);
 
   }, function (err) {
     console.error('[App] Cloudant DB Failure in purge docs: ' + err);
