@@ -218,8 +218,7 @@ app.get('/photos', async (req, res) => {
   await purge(res, purgeWindow, photoDbName);
 
   await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
-
-    console.log("Count: " + docs.length)
+    
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
     res.send(docs);

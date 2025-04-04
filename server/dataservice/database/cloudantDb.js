@@ -48,16 +48,17 @@ exports.findAllDocs = function findAllDocs(service, dbName) {
       includeDocs: true,
       limit: 1000
     }).then(response => {
-      //console.log('***Found ' + response.result.rows)
+      console.log('***Found ' + response.result.rows.length + " docs")
 
       var docs = [];
       var i = 0;
 
       response.result.rows.forEach(function (doc) {
 
-        var docdoc = doc.doc
-        if (!docdoc._id.startsWith("_design")) {
-          docs[i] = docdoc;
+        var doc = doc.doc
+
+        if (!doc._id.startsWith("_design")) {
+          docs[i] = doc;
           i++;
         }
       })
@@ -85,7 +86,8 @@ exports.findAllDocs = function findAllDocs(service, dbName) {
 exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
 
   const purgeDate = moment(new Date()).subtract(purgeWindow, 'hours').format('YYYY-MM-DDThh:mm');
-  console.log(purgeDate);
+  console.log("Purge window is " + purgeWindow + " hours");
+  console.log("Purge docs created before " + purgeDate);
 
   return new Promise((resolve, reject) => {
     // Get all docs
@@ -102,12 +104,12 @@ exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
 
         //console.log('***Doc ' + doc)
 
-        var docdoc = doc.doc
+        var doc = doc.doc
         
-        if (!docdoc._id.startsWith("_design") && (docdoc._id < purgeDate)) {
-          docdoc._deleted = true
-          docs[i] = docdoc;
-          console.log('***DELETE ' + docdoc._id)
+        if (!doc._id.startsWith("_design") && (doc._id < purgeDate)) {
+          doc._deleted = true
+          docs[i] = doc;
+          console.log('***DELETE ' + doc._id)
           i++;
         }
       })
