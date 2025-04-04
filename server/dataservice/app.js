@@ -94,7 +94,8 @@ app.get('/docs', async (req, res) => {
 
   console.log('Get docs')
 
-  await purge(res, logDbName);
+  const purgeWindow = 48 // Hours
+  await purge(res, purgeWindow, logDbName);
 
   await cloudantLib.findAllDocs(service, logDbName).then(function (docs) {
 
@@ -213,7 +214,8 @@ app.get('/photos', async (req, res) => {
 
   console.log('Get all photos')
 
-  await purge(res, photoDbName);
+  const purgeWindow = 12  // Hours
+  await purge(res, purgeWindow, photoDbName);
 
   await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
 
@@ -300,11 +302,11 @@ async function updateDoc(res, dbName, id, newDoc) {
  * @param {Object} res - The response object.
  * @returns {void}
  */
-async function purge(res, dbName) {
+async function purge(res, purgeWindow, dbName) {
 
   console.log('Purge docs in ' + dbName);
 
-  await cloudantLib.getExpiredDocs(service, dbName).then(function (docs) {
+  await cloudantLib.getExpiredDocs(service, purgeWindow, dbName).then(function (docs) {
     cloudantLib.deleteDocs(service, dbName, docs);
 
   }, function (err) {

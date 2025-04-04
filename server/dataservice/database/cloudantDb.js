@@ -82,9 +82,9 @@ exports.findAllDocs = function findAllDocs(service, dbName) {
   })
 }
 
-exports.getExpiredDocs = function getExpiredDocs(service, dbName) {
+exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
 
-  const purgeDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD');
+  const purgeDate = moment(new Date()).subtract(purgeWindow, 'hours').format('YYYY-MM-DDThh:mm');
   console.log(purgeDate);
 
   return new Promise((resolve, reject) => {
