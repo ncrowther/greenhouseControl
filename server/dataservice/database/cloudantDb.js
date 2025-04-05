@@ -85,7 +85,7 @@ exports.findAllDocs = function findAllDocs(service, dbName) {
 
 exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
 
-  const purgeDate = moment(new Date()).subtract(purgeWindow, 'hours').format('YYYY-MM-DDThh:mm');
+  const purgeDate =  moment(new Date()).subtract(purgeWindow, 'hours').format('YYYY-MM-DDThh:mm:ss.000z');
   console.log("Purge window is " + purgeWindow + " hours");
   console.log("Purge docs created before " + purgeDate);
 
@@ -102,8 +102,6 @@ exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
 
       response.result.rows.forEach(function (doc) {
 
-        //console.log('***Doc ' + doc)
-
         var doc = doc.doc
         
         if (!doc._id.startsWith("_design") && (doc._id < purgeDate)) {
@@ -111,7 +109,7 @@ exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
           docs[i] = doc;
           console.log('***DELETE ' + doc._id)
           i++;
-        }
+        }   
       })
 
       resolve(docs);

@@ -214,7 +214,7 @@ app.get('/photos', async (req, res) => {
 
   console.log('Get all photos')
 
-  const purgeWindow = 12  // Hours
+  const purgeWindow = 24  // Hours
   await purge(res, purgeWindow, photoDbName);
 
   await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
