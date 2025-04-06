@@ -210,9 +210,9 @@ class Fan(OnOFFAutoController):
      
     def control(self, vpd):
         
-        # Degrees in which the temp must decrease before turning off
+        # Set acceptable VPD range
         DEAD_ZONE = 0.1
-        MIN_VPD = 0.4
+        MIN_VPD = 0.0
         MAX_VPD = 1.6
         
         # On if vpd too low
@@ -222,7 +222,7 @@ class Fan(OnOFFAutoController):
             return
             
         # On if vpd too high
-        if (OnOffState.AUTO == self.status()) and (vpd >= MAX_VPD):
+        if (OnOffState.AUTO == self.status()) and (vpd > MAX_VPD):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO) 
 
