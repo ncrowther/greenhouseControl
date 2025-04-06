@@ -287,7 +287,8 @@ class LinearActuator(object):
 
     # Define window pulse count and length
     MAX_ACTUATOR_ANGLE = 90
-    PULSE_TIME = 500  
+    MIN_ACTUATOR_ANGLE = -10
+    PULSE_TIME = 600  
     PULSE_DEGREE_CHANGE = 5
     
     def __init__(self):
@@ -333,7 +334,7 @@ class LinearActuator(object):
         
     def down(self):
         
-        if (self.windowAngle > 0):        
+        if (self.windowAngle >= self.MIN_ACTUATOR_ANGLE):        
             self.up_pin.value(0)  # Set up to OFF state   
             self.down_pin.value(1)  # Set down to ON state
             time.sleep_ms(self.PULSE_TIME)
@@ -877,11 +878,7 @@ class PlantCare(object):
             self.lcd.showError(e.error_code, e.message)
             sys.exit("Terminated")
                                    
-        except Exception as e:    
-            traceback.print_exception(e)
-            self.cleanUp()
-            self.lcd.showError(101, "General error")
-            sys.exit("Terminated")
+
             
 def main():
     
