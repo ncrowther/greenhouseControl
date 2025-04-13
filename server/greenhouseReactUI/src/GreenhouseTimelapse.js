@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Galleria } from 'primereact/galleria';
+import { Carousel } from 'primereact/carousel';
 /**
  * Show greenhouse timelapse photos
  * @returns {JSX.Element} The component.
@@ -7,18 +7,27 @@ import { Galleria } from 'primereact/galleria';
 const GreenhouseTimelapse = ({ photoData }) => {
 
     const [images, setImages] = useState(null);
+
     const responsiveOptions = [
         {
-            breakpoint: '991px',
-            numVisible: 12
+            breakpoint: '1400px',
+            numVisible: 2,
+            numScroll: 1
+        },
+        {
+            breakpoint: '1199px',
+            numVisible: 3,
+            numScroll: 1
         },
         {
             breakpoint: '767px',
-            numVisible: 12
+            numVisible: 2,
+            numScroll: 1
         },
         {
             breakpoint: '575px',
-            numVisible: 12
+            numVisible: 1,
+            numScroll: 1
         }
     ];
 
@@ -27,19 +36,22 @@ const GreenhouseTimelapse = ({ photoData }) => {
     }, [])
 
     const itemTemplate = (item) => {
-        return <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} style={{ width: '100%' }} />
-    }
+        return (
+            <div>
+                <div className="border-1 surface-border border-round m-2 text-center py-5 px-3">
+                    <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} className="w-6 shadow-2" />
+                </div>
+                <div>
+                    <h4 className="mb-1">{item.timestamp}</h4>
+                </div>
+            </div >     
+        )                 
 
-    const thumbnailTemplate = (item) => {
-        const hour = new Date(item.timestamp).getHours()
-        return  <body>&nbsp; {hour} &nbsp;</body>
     }
 
     return (
         <div className="card">
-            <Galleria value={images} responsiveOptions={responsiveOptions} numVisible={50} style={{ maxWidth: '640px' }} 
-                item={itemTemplate} thumbnail={thumbnailTemplate} />
-                    
+            <Carousel value={images} numVisible={3} numScroll={1} verticalViewPortHeight="480px" itemTemplate={itemTemplate} />
         </div>
     )
 }
