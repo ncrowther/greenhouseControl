@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Carousel } from 'primereact/carousel';
+import { Galleria } from 'primereact/galleria';
 /**
  * Show greenhouse timelapse photos
  * @returns {JSX.Element} The component.
@@ -7,27 +7,18 @@ import { Carousel } from 'primereact/carousel';
 const GreenhouseTimelapse = ({ photoData }) => {
 
     const [images, setImages] = useState(null);
-
     const responsiveOptions = [
         {
-            breakpoint: '1400px',
-            numVisible: 2,
-            numScroll: 1
-        },
-        {
-            breakpoint: '1199px',
-            numVisible: 3,
-            numScroll: 1
+            breakpoint: '991px',
+            numVisible: 12
         },
         {
             breakpoint: '767px',
-            numVisible: 2,
-            numScroll: 1
+            numVisible: 12
         },
         {
             breakpoint: '575px',
-            numVisible: 1,
-            numScroll: 1
+            numVisible: 12
         }
     ];
 
@@ -36,22 +27,18 @@ const GreenhouseTimelapse = ({ photoData }) => {
     }, [])
 
     const itemTemplate = (item) => {
-        return (
-            <div>
-                <div className="border-1 surface-border border-round m-2 text-center py-5 px-3">
-                    <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} className="w-6 shadow-2" />
-                </div>
-                <div>
-                    <h4 className="mb-1">{item.timestamp}</h4>
-                </div>
-            </div >     
-        )                 
+        return <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} style={{ width: '100%' }} />
+    }
 
+    const thumbnailTemplate = (item) => {
+        return <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} style={{ width: '100%', height: '100%'}} />
     }
 
     return (
         <div className="card">
-            <Carousel value={images} numVisible={3} numScroll={1} verticalViewPortHeight="480px" itemTemplate={itemTemplate} />
+            <Galleria value={images} responsiveOptions={responsiveOptions} numVisible={50} style={{ maxWidth: '480px' }} 
+                item={itemTemplate} thumbnail={thumbnailTemplate} circular autoplay transitionInterval={1000}/>
+                    
         </div>
     )
 }
