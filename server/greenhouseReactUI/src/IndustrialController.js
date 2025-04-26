@@ -29,7 +29,7 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  const baseurl =  'https://2bcb-195-149-14-243.ngrok-free.app' //'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms'
+  const baseurl =  'https://925b-195-149-14-243.ngrok-free.app' //'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms'
   const dataservice = baseurl + '/docs'
   const configservice = baseurl + '/config?id=default'
   const photoservice = baseurl + '/photos'
@@ -91,10 +91,8 @@ const IndustrialController = () => {
 
       <h1>Greenhouse Controller</h1>
 
-      <Image style={{ width: 320, height: 240 }} align="center" id='base64image' src={latestPhoto} alt="GreenhousePhoto"/>
+      <Image style={{ width: 160, height: 120 }} align="center" id='base64image' src={latestPhoto} alt="GreenhousePhoto"/>
 
-      <h6>{photoTimestamp}</h6>
-            
       <Divider type="solid" />       
 
       <Card title="Status" className="card" border="white">
