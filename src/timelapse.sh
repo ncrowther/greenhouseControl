@@ -7,4 +7,4 @@
 # chmod +rwx timelapse.sh
 # sudo crontab -e
 # @reboot sh /home/ncrowther/projects/timelapse/timelapse.sh > /home/ncrowther/projects/timelapse/timelapse.log
-sudo python /home/ncrowther/projects/timelapse/timelase.py
+sudo python /home/ncrowther/projects/timelapse/timelapse.py
