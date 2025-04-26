@@ -85,7 +85,7 @@ exports.findAllDocs = function findAllDocs(service, dbName) {
 
 exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
 
-  const purgeDate =  moment(new Date()).subtract(purgeWindow, 'hours').format('YYYY-MM-DDThh:mm:ss.000z');
+  const purgeDate =  moment(new Date()).subtract(purgeWindow, 'hours').format('YYYY-MM-DDTHH:mm:ss.000z');
   console.log("Purge window is " + purgeWindow + " hours");
   console.log("Purge docs created before " + purgeDate);
 

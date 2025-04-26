@@ -27,18 +27,17 @@ const GreenhouseTimelapse = ({ photoData }) => {
     }, [])
 
     const itemTemplate = (item) => {
-        return <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} style={{ width: '100%' }} />
+        return <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} style={{ width: '100%', display: 'block' }} />;
     }
 
     const thumbnailTemplate = (item) => {
-        const hour = new Date(item.timestamp).getHours()
-        return  <body>&nbsp; {hour} &nbsp;</body>
+        return <img src={'data:image/jpeg;base64,' + item.photo} alt={item.timestamp} style={{ width: '10%', height: '10%'}} />
     }
 
     return (
         <div className="card">
-            <Galleria value={images} responsiveOptions={responsiveOptions} numVisible={50} style={{ maxWidth: '640px' }} 
-                item={itemTemplate} thumbnail={thumbnailTemplate} />
+            <Galleria value={images} responsiveOptions={responsiveOptions} numVisible={5} style={{ maxWidth: '480px' }} 
+                item={itemTemplate} thumbnail={thumbnailTemplate} circular autoPlay transitionInterval={600}/>
                     
         </div>
     )
