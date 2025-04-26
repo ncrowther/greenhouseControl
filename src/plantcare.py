@@ -286,10 +286,10 @@ class LinearActuator(object):
     # Linear Actuator for window
 
     # Define window pulse count and length
-    MAX_ACTUATOR_ANGLE = 90
-    MIN_ACTUATOR_ANGLE = -10
-    PULSE_TIME = 600  
-    PULSE_DEGREE_CHANGE = 5
+    MAX_ACTUATOR_ANGLE = 100
+    MIN_ACTUATOR_ANGLE = 0
+    PULSE_TIME = 2000  
+    PULSE_DEGREE_CHANGE = 25
     
     def __init__(self):
         # GPIO pin + window is connected to
@@ -348,11 +348,11 @@ class LinearActuator(object):
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 5
         
-        # On
+        # Open
         if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
             self.up() 
 
-        # Off 
+        # Close 
         if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
             self.down()     
 
@@ -692,14 +692,6 @@ class PlantCare(object):
         #print(data)
         
         # Startup check
-        self.windows.setState(WindowState.OPEN)
-        #self.pump.setState(OnOffState.ON)
-        #self.light.setState(OnOffState.ON)
-        self.fan.setState(OnOffState.OFF)
-        #self.heater.setState(OnOffState.ON)
-        #self.fan.off()     
-        #time.sleep_ms(5000)
-
         # Turn off everything and then set to AUTO before starting loop
         self.windows.setState(WindowState.OPEN)
         time.sleep_ms(50)
