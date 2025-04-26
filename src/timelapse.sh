@@ -1,8 +1,10 @@
 # !/bin/sh
-# timelapse.sh
-# Run this script on startup:
+# See https://www.instructables.com/ShareCreate-Edit-Files-Between-Your-Mac-and-Raspbe/
+# Instructions: 
+# Create folder /home/ncrowther/projects/timelapse
+# Create folder /home/ncrowther/projects/timelapse/log
+# Move this file to /home/ncrowther/projects/timelapse
+# chmod +rwx timelapse.sh
 # sudo crontab -e
 # @reboot sh /home/ncrowther/projects/timelapse/timelapse.sh > /home/ncrowther/projects/timelapse/timelapse.log
-
-cd /home/ncrowther/projects/timelapse
-sudo python timelase.py
+sudo python /home/ncrowther/projects/timelapse/timelase.py
