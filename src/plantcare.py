@@ -208,26 +208,19 @@ class Fan(OnOFFAutoController):
         print("Fan OFF")
         self.relay_pin.value(0)  # Set relay to OFF state
      
-    def control(self, vpd):
+    def control(self, temperature, maxTemperature):
         
-        # Set acceptable VPD range
-        DEAD_ZONE = 0.1
-        MIN_VPD = 0.0
-        MAX_VPD = 1.6
+        # Degrees in which the temp must drop below max temperature before stopping
+        DEAD_ZONE = 2
         
-        # On if vpd too low
-        if (OnOffState.AUTO == self.status()) and (vpd < MIN_VPD):
+        # On
+        if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO)
             return
-            
-        # On if vpd too high
-        if (OnOffState.AUTO == self.status()) and (vpd > MAX_VPD):
-            self.setState(OnOffState.ON)
-            self.setState(OnOffState.AUTO) 
 
         # Off 
-        if (OnOffState.AUTO == self.status()) and (vpd < (MAX_VPD - DEAD_ZONE)):        
+        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)
         
@@ -346,7 +339,7 @@ class LinearActuator(object):
     def control(self, temperature, maxTemperature):
         
         # Degrees in which the temp must drop below max temperature before closing
-        DEAD_ZONE = 5
+        DEAD_ZONE = 2
         
         # Open
         if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
@@ -582,12 +575,8 @@ class Lcd(object):
             
     def __init__(self):
         
-        #  I2C Pins
-        #I2C_PORT = 0
-        #I2C_SDA = 6
-        #I2C_SCL = 7
+        #  I2C Settings
         I2C_FREQ = 100000 #400000
-        
         I2C_PORT = 0
         I2C_SDA = 20
         I2C_SCL = 21
@@ -806,7 +795,6 @@ class PlantCare(object):
         self.lcd.showError(code, message)
     
     def cleanUp(self):
-        #self.pump.fanOff()
         self.pump.setState(OnOffState.OFF)
         self.light.setState(OnOffState.OFF)
         
@@ -852,9 +840,9 @@ class PlantCare(object):
 
             self.vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
                  
-            self.windows.control(leafTemperature, self.MAX_TEMPERATURE)
+            self.windows.control(airTemperature, self.MAX_TEMPERATURE)
                         
-            self.fan.control(self.vpd)
+            self.fan.control(airTemperature, self.MAX_TEMPERATURE)
             
             self.heater.control(leafTemperature, self.MIN_TEMPERATURE)
             

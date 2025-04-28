@@ -60,7 +60,7 @@ app.post('/doc', async (req, res) => {
 
   const newDoc = req.body;
 
-  var timestamp = new Date();
+  var timestamp = new Date().getTimezoneOffset();
 
   const doc = {
     "_id": timestamp,
