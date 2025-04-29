@@ -193,8 +193,7 @@ class PlantServer(object):
             self.plantCare.careforplants()
             
             if (count % LOG_TIME == 0):
-                if (count == 0):  # First time around use timestamp to set pico clock
-                    self.plantCare.setDateTime(timestamp)
+                self.plantCare.setDateTime(timestamp)
                 self.logger()                    
                 
             time.sleep(SLEEP_TIME)
