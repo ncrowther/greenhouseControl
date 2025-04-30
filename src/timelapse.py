@@ -11,7 +11,7 @@ GREENHOUSE_SERVER_URL =  'http://192.168.1.33:3000'
 WAIT_TIME =  60 * 15  # every fifteen mins
 picam2 = Picamera2()
 
-camera_config = picam2.create_preview_configuration(main={"size":(640,480), "format": "RGB888"})
+camera_config = picam2.create_preview_configuration(main={"size":(320,240), "format": "RGB888"})
 picam2.configure(camera_config)
 picam2.start_preview(Preview.NULL)
    
@@ -44,10 +44,10 @@ while True:
     I1 = ImageDraw.Draw(img)
     
     # Add timestamp to the image
-    I1.text((10, 10), timestamp, fill=(255, 255, 255))
+    I1.text((10, 10), timestamp, fill=(255, 25, 25))
 
     # Display edited image
-    img.show()
+    #img.show()
 
     # Save the edited image
     img.save(image)    
