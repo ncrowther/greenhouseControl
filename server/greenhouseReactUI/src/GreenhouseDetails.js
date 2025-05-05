@@ -63,20 +63,13 @@ const GreenhouseDetails = ({ data }) => {
 
     return (
       <div className="card flex flex-wrap gap-2">
-        <Chip key="1" label={timeText} icon={MdOutlineAccessTime} /> <br></br>
-        <Chip key="2" label={temperatureText} icon={FaTemperatureEmpty} /> <br></br>
-        <Chip key="3" label={humidityText} icon={WiHumidity} /> <br></br>
-        <Chip key="4" label={co2Text} icon={MdOutlineCo2} /> <br></br>
-        <Chip key="5" label={vpdText} icon={MdEnergySavingsLeaf} />
+        <Chip id="1" key="1" label={timeText} icon={MdOutlineAccessTime} /> <br></br>
+        <Chip id="2" key="2" label={temperatureText} icon={FaTemperatureEmpty} /> <br></br>
+        <Chip id="3" key="3" label={humidityText} icon={WiHumidity} /> <br></br>
+        <Chip id="4" key="4" label={co2Text} icon={MdOutlineCo2} /> <br></br>
+        <Chip id="5" key="5" label={vpdText} icon={MdEnergySavingsLeaf} />
       </div>
     );
-  }
-
-  else {
-    return
-    <div className="card flex flex-wrap gap-2">
-      <h1>No Data</h1>N
-    </div>
   }
 
 };

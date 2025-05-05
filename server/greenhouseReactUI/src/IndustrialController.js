@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { useQueries } from '@tanstack/react-query';
 import GreenhouseConfig from './GreenhouseConfig.js';
 import GreenhouseTemperature from './GreenhouseTemperature.js';
@@ -29,7 +28,7 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  const baseurl =  'https://foxhound-hip-initially.ngrok-free.app' //'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms'
+  const baseurl = 'https://foxhound-hip-initially.ngrok-free.app' //'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms'
   const dataservice = baseurl + '/docs'
   const configservice = baseurl + '/config?id=default'
   const photoservice = baseurl + '/photo'
@@ -138,12 +137,6 @@ const IndustrialController = () => {
 
       <Divider type="solid" />
 
-      <Card title="Co2" className="md:w-25rem">
-        <Co2Chart data={logData} />
-      </Card>
-
-      <Divider type="solid" />
-
       <Card title="Vpd" className="md:w-25rem">
         <VpdChart data={logData} />
       </Card>
@@ -151,13 +144,23 @@ const IndustrialController = () => {
       <Divider type="solid" />
 
       <Card title="Timelapse" className="md:w-25rem">
-          <GreenhouseTimelapse timelapseData={timelapseData} />
-        </Card>
+        <GreenhouseTimelapse timelapseData={timelapseData} />
+      </Card>
 
     </Panel >
 
   );
 };
+
+
+/*
+<Divider type="solid" />
+
+<Card title="Co2" className="md:w-25rem">
+  <Co2Chart data={logData} />
+</Card>
+
+*/
 
 export default IndustrialController;
 

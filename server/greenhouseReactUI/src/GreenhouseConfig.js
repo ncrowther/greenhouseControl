@@ -1,6 +1,7 @@
 //import { useQuery } from '@tanstack/react-query';
 import React, { useState } from "react";
 import { Button } from 'primereact/button';
+import { BiWindow } from "react-icons/bi";
 import { FaFireFlameSimple } from "react-icons/fa6";
 import { CiLight } from "react-icons/ci";
 import { PiFanFill } from "react-icons/pi";
@@ -93,6 +94,30 @@ const GreenhouseConfig = ({ configData , configservice}) => {
     </div>
   }
 
+  // Set window buttons and highlight the one that is enabled
+  let windowButton = {}
+  if (configData.doc.windowState === 'OPEN') {
+    windowButton = <div className="p-inputgroup flex-1">
+      <Button label=" UP" icon={BiWindow} className="p-button-success" inputid="window1" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')} outlined />
+      <Button label=" DWN" icon={BiWindow} className="p-button-danger" inputid="window2" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')} />
+      <Button label=" AUTO" icon={BiWindow} className="p-button-warning" inputid="window3" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')} />
+    </div>
+  }
+  else if (configData.doc.windowState === 'CLOSED') {
+    windowButton = <div className="p-inputgroup flex-1">
+      <Button label=" UP" icon={BiWindow} className="p-button-success" inputid="window1" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')} />
+      <Button label=" DWN" icon={BiWindow} className="p-button-danger" inputid="window2" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')} outlined />
+      <Button label=" AUTO" icon={BiWindow} className="p-button-warning" inputid="window3" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')} />
+    </div>
+  }
+  else {
+    windowButton = <div className="p-inputgroup flex-1">
+      <Button label=" UP" icon={BiWindow} className="p-button-success" inputid="window1" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')} />
+      <Button label=" DWN" icon={BiWindow} className="p-button-danger" inputid="window2" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')} />
+      <Button label=" AUTO" icon={BiWindow} className="p-button-warning" inputid="window3" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')} outlined />
+    </div>
+  }  
+
   // Set fan buttons and highlight the one that is enabled
   let fanButton = {}
   if (configData.doc.fanState === 'ON') {
@@ -154,6 +179,10 @@ const GreenhouseConfig = ({ configData , configservice}) => {
         {heaterButton}
 
         <br></br>
+
+        {windowButton}
+
+        <br></br>        
 
         {fanButton}
 

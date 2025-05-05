@@ -14,7 +14,7 @@ exports.writeConfig = function writeConfig(configData, lightState, lightOn, ligh
       tapOnTwo,
       tapOnThree
     ],
-    "windowState": heaterState,
+    "windowState": windowState,
     "temperatureRange": [
       lowTemp,
       highTemp
