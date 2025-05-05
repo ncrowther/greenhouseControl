@@ -29,7 +29,7 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  const baseurl = 'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms' 'https://925b-195-149-14-243.ngrok-free.app' //
+  const baseurl =  'https://foxhound-hip-initially.ngrok-free.app' //'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms'
   const dataservice = baseurl + '/docs'
   const configservice = baseurl + '/config?id=default'
   const photoservice = baseurl + '/photo'

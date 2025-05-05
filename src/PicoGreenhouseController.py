@@ -56,7 +56,7 @@ class PlantServer(object):
         self.wlan.connect(self.ssid, self.password)
 
         attempt = 0
-        MAX_TRIES = 10
+        MAX_TRIES = 50
         
         while True:
             #if self.wlan.status() < 0 or self.wlan.status() >= 3:

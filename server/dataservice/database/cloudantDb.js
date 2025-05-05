@@ -133,7 +133,7 @@ exports.updateDoc = function updateDoc(service, dbName, doc, newDoc) {
       db: dbName,
       document: newDoc
     }).then(response => {
-      console.log(response.result);
+      //console.log(response.result);
       resolve(response.result);
     });
 
