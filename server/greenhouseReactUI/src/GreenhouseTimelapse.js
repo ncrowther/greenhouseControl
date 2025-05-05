@@ -4,7 +4,7 @@ import { Galleria } from 'primereact/galleria';
  * Show greenhouse timelapse photos
  * @returns {JSX.Element} The component.
  */
-const GreenhouseTimelapse = ({ photoData }) => {
+const GreenhouseTimelapse = ({ timelapseData }) => {
 
     const [images, setImages] = useState(null);
     const responsiveOptions = [
@@ -23,7 +23,7 @@ const GreenhouseTimelapse = ({ photoData }) => {
     ];
 
     useEffect(() => {
-        setImages(photoData.Docs);
+        setImages(timelapseData.Docs);
     }, [])
 
     const itemTemplate = (item) => {

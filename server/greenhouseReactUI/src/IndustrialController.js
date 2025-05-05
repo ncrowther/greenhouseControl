@@ -1,7 +1,7 @@
+import React, { useState } from "react";
 import { useQueries } from '@tanstack/react-query';
 import GreenhouseConfig from './GreenhouseConfig.js';
 import GreenhouseTemperature from './GreenhouseTemperature.js';
-import GreenhouseVpd from './GreenhouseVpd.js';
 import GreenhouseLight from './GreenhouseLight.js';
 import GreenhouseWatering from './GreenhouseWatering.js';
 import GreenhouseDetails from './GreenhouseDetails.js';
@@ -29,25 +29,38 @@ const IndustrialController = () => {
   //const queryStringParams = queryString.parse(window.location.search);
   //console.log("***queryStringParams.id: " + queryStringParams.id
 
-  const baseurl =  'https://925b-195-149-14-243.ngrok-free.app' //'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms'
+  const baseurl = 'http://localhost:3000' //'https://ph8pr72f-3000.uks1.devtunnels.ms' 'https://925b-195-149-14-243.ngrok-free.app' //
   const dataservice = baseurl + '/docs'
   const configservice = baseurl + '/config?id=default'
-  const photoservice = baseurl + '/photos'
+  const photoservice = baseurl + '/photo'
+  const timelapseservice = baseurl + '/photos'
 
   const results = useQueries({
     queries: [
-      { queryKey: ['logData', 1], queryFn: () =>
-      fetch(dataservice, { mode: 'cors' }).then(
-        (res) => res.json()
-      )},
-      { queryKey: ['configData', 2], queryFn: () =>
-        fetch(configservice, { mode: 'cors' }).then(
-          (res) => res.json()
-        )},     
-      { queryKey: ['photoData', 3], queryFn: () =>
-        fetch(photoservice, { mode: 'cors' }).then(
-          (res) => res.json()
-        )},           
+      {
+        queryKey: ['logData', 1], queryFn: () =>
+          fetch(dataservice, { mode: 'cors' }).then(
+            (res) => res.json()
+          )
+      },
+      {
+        queryKey: ['configData', 2], queryFn: () =>
+          fetch(configservice, { mode: 'cors' }).then(
+            (res) => res.json()
+          )
+      },
+      {
+        queryKey: ['photoData', 3], queryFn: () =>
+          fetch(photoservice, { mode: 'cors' }).then(
+            (res) => res.json()
+          )
+      },
+      {
+        queryKey: ['timelapseData', 4], queryFn: () =>
+          fetch(timelapseservice, { mode: 'cors' }).then(
+            (res) => res.json()
+          )
+      },
     ],
   });
 
@@ -57,7 +70,7 @@ const IndustrialController = () => {
     return <h2>Loading...</h2>;
   }
 
-  
+
   // Show a error message
   const isError = results.some(result => result.isError)
   if (isError) {
@@ -65,24 +78,18 @@ const IndustrialController = () => {
   }
 
   //console.log("RESULT 1:" + JSON.stringify(results[0].data))
-  //console.log("RESULT 2:" + JSON.stringify(results[1].data))
-  //console.log("RESULT 3:" + JSON.stringify(results[2].data))
+
 
   const logData = results[0].data
   const configData = results[1].data
   const photoData = results[2].data
+  const timelapseData = results[3].data
 
-  let latestPhoto=null
-  let photos=""
-  let photoTimestamp = ""
+  console.log(JSON.stringify(photoData))
+
+  let latestPhoto = null
   if (photoData) {
-     photos=photoData.Docs
-     let latest = photos.length
-     let latestPhotoDoc = photos[latest-1]
-     if (latestPhotoDoc) {
-      photoTimestamp = latestPhotoDoc.timestamp
-      latestPhoto='data:image/jpeg;base64,' + latestPhotoDoc.photo
-     }
+    latestPhoto = 'data:image/jpeg;base64,' + photoData.photo
   }
 
   return (
@@ -91,12 +98,12 @@ const IndustrialController = () => {
 
       <h1>Greenhouse Controller</h1>
 
-      <Image style={{ width: 160, height: 120 }} align="center" id='base64image' src={latestPhoto} alt="GreenhousePhoto"/>
+      <Image align="center" id='base64image' src={latestPhoto} alt="GreenhousePhoto" />
 
-      <Divider type="solid" />       
+      <Divider type="solid" />
 
       <Card title="Status" className="card" border="white">
-           <GreenhouseDetails data={logData} />
+        <GreenhouseDetails data={logData} />
       </Card>
 
       <Divider type="solid" />
@@ -108,55 +115,46 @@ const IndustrialController = () => {
       <Divider type="solid" />
 
       <Card title="Temperature" className="md:w-25rem" >
-        <GreenhouseTemperature configData={configData} configservice={configservice}  />
-      </Card>   
+        <GreenhouseTemperature configData={configData} configservice={configservice} />
+      </Card>
 
       <Divider type="solid" />
 
-      <Card title="Vpd" className="md:w-25rem" >
-        <GreenhouseVpd configData={configData} configservice={configservice}  />
-      </Card>       
-
-      <Divider type="solid" />          
-
       <Card title="Light" className="md:w-25rem">
         <GreenhouseLight configData={configData} configservice={configservice} />
-      </Card>   
+      </Card>
 
-      <Divider type="solid" />       
+      <Divider type="solid" />
 
       <Card title="Watering" className="md:w-25rem">
         <GreenhouseWatering configData={configData} configservice={configservice} />
-      </Card>    
+      </Card>
 
-      <Divider type="solid" />       
+      <Divider type="solid" />
 
       <Card title="Climate" className="md:w-25rem">
         <HumidityTempChart data={logData} />
       </Card>
 
-      <Divider type="solid" />       
+      <Divider type="solid" />
 
       <Card title="Co2" className="md:w-25rem">
         <Co2Chart data={logData} />
       </Card>
 
-      <Divider type="solid" />       
+      <Divider type="solid" />
 
       <Card title="Vpd" className="md:w-25rem">
         <VpdChart data={logData} />
       </Card>
 
-      <Divider type="solid" />       
+      <Divider type="solid" />
 
       <Card title="Timelapse" className="md:w-25rem">
-        <GreenhouseTimelapse photoData={photoData} />
-      </Card>      
-
+          <GreenhouseTimelapse timelapseData={timelapseData} />
+        </Card>
 
     </Panel >
-
-
 
   );
 };

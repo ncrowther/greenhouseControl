@@ -188,17 +188,21 @@ app.post('/photo', async (req, res) => {
     
   })
 
-// //////////////// Get Photo ////////////////////////
+// //////////////// Get Latest Photo ////////////////////////
 app.get('/photo', async (req, res) => {
 
   const id = req.query.id;
-  console.log('Get photo for ' + id)
+  console.log('Get latest photo')
 
-  await cloudantLib.findById(service, photoDbName, id).then(function (doc) {
+  await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
 
+    photos = docs.Docs
+    let latest = photos.length
+    let latestPhoto = photos[latest-1]
+    
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
-    res.send(doc);
+    res.send(latestPhoto);
 
   }, function (err) {
     console.error('[App] Cloudant DB Failure in get photo: ' + err)
@@ -206,6 +210,8 @@ app.get('/photo', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.send(err);
   })
+
+
 
 })
 
