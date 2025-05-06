@@ -7,7 +7,8 @@ from PIL import Image
 from PIL import ImageDraw
 
 
-GREENHOUSE_SERVER_URL =  'http://192.168.1.33:3000'
+GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
+BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
 WAIT_TIME =  60 * 15  # every fifteen mins
 picam2 = Picamera2()
 
@@ -32,8 +33,8 @@ while True:
     timestamp = str(timestamp)[0:19]
     print(timestamp)
     
-    #image = 'C:/Users/092463866/Pictures/greenhouse.jpg'
-    image = '/home/ncrowther/Pictures/greenhouse' + str(timestamp) + '.jpg'
+    # Create image file path
+    image = BASE_DIR + str(timestamp) + '.jpg'
 
     picam2.capture_file(image)
     
@@ -59,7 +60,7 @@ while True:
     print(image_64)
 
     url = GREENHOUSE_SERVER_URL + '/photo'
-    myobj = {'_id': frame, 'photo': image_64, 'timestamp': timestamp}
+    myobj = {'_id': frame, 'cam': 2, 'photo': image_64, 'timestamp': timestamp}
 
     try:
         res = requests.post(url, data = myobj)
