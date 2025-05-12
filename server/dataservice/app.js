@@ -25,7 +25,6 @@ const service = CloudantV1.newInstance()
 
 const logDbName = process.env.LOG_DB_NAME
 const configDbName = process.env.CONFIG_DB_NAME
-const photoDbName = process.env.PHOTO_DB_NAME
 
 const fs = require('fs');
 
@@ -45,7 +44,6 @@ const port = process.env.PORT || 3000 //8080
 
 console.log('Log DB: ' + logDbName);
 console.log('Config DB: ' + configDbName);
-console.log('Photo DB: ' + photoDbName);
 
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.urlencoded({ extended: true }))
@@ -157,49 +155,52 @@ app.get('/config', async (req, res) => {
 // ///////////////////// Write Photo ////////////////////
 app.post('/photo', async (req, res) => {
 
-    console.log('Write photo');
+  const newDoc = req.body;
 
-    const newDoc = req.body;
+  const camId = newDoc.cam
+  photoDb = getPhotoDb(camId);
+  console.log('Write photo to: ' + photoDb);
 
-    var timestamp = new Date().toISOString();
-  
-    const doc = {
-      "_id": timestamp,
-      "photo": newDoc.photo,
-      "timestamp": timestamp
-    }
+  var timestamp = new Date().toISOString();
 
-    console.log(JSON.stringify(doc));
+  const doc = {
+    "_id": timestamp,
+    "photo": newDoc.photo,
+    "timestamp": timestamp
+  }
 
-    await cloudantLib.createDoc(service, photoDbName, doc).then(function (ret) {
-  
-      console.error('Created photo');
-  
-      res.status(200);
-      res.set('Access-Control-Allow-Origin', '*');
-      res.send(timestamp);
-  
-    }, function (err) {
-      console.error('[App] Cloudant DB Failure in create photo: ' + err)
-      res.status(500);
-      res.set('Access-Control-Allow-Origin', '*');
-      res.send(err);
-    })    
-    
+  console.log(JSON.stringify(doc));
+
+  await cloudantLib.createDoc(service, photoDb, doc).then(function (ret) {
+
+    console.error('Created photo');
+
+    res.status(200);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(timestamp);
+
+  }, function (err) {
+    console.error('[App] Cloudant DB Failure in create photo: ' + err)
+    res.status(500);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(err);
   })
+
+})
 
 // //////////////// Get Latest Photo ////////////////////////
 app.get('/photo', async (req, res) => {
 
-  const id = req.query.id;
-  console.log('Get latest photo')
+  const camId = req.query.camId
+  photoDb = getPhotoDb(camId);
+  console.log('Get latest photos from: ' + photoDb);
 
-  await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
+  await cloudantLib.findAllDocs(service, photoDb).then(function (docs) {
 
     photos = docs.Docs
     let latest = photos.length
-    let latestPhoto = photos[latest-1]
-    
+    let latestPhoto = photos[latest - 1]
+
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
     res.send(latestPhoto);
@@ -215,16 +216,32 @@ app.get('/photo', async (req, res) => {
 
 })
 
+// ////// Helper function to get photoDb from cameraId passed in query param ///
+function getPhotoDb(camId) {
+  if (camId === null) {
+    camId = 1;
+  }
+
+  if (camId == 1) {
+    photoDb = process.env.CAM1_DB_NAME;
+  } else {
+    photoDb = process.env.CAM2_DB_NAME;
+  }
+  return photoDb;
+}
+
 // //////////////// Get All Photos ////////////////////////
 app.get('/photos', async (req, res) => {
 
-  console.log('Get all photos')
+  const camId = req.query.camId
+  photoDb = getPhotoDb(camId);
+  console.log('Get all photos from: ' + photoDb);
 
   const purgeWindow = 12  // Hours
-  await purge(res, purgeWindow, photoDbName);
+  await purge(res, purgeWindow, photoDb);
 
-  await cloudantLib.findAllDocs(service, photoDbName).then(function (docs) {
-    
+  await cloudantLib.findAllDocs(service, photoDb).then(function (docs) {
+
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
     res.send(docs);
@@ -237,7 +254,6 @@ app.get('/photos', async (req, res) => {
   })
 
 })
-
 
 // Create cloudant doc
 async function createDoc(doc, res, dbName) {

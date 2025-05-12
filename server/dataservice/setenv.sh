@@ -1,6 +1,7 @@
 export CLOUDANT_URL=https://3ac2a61f-2417-4dc1-b80a-fc2fe0981b7a-bluemix.cloudantnosqldb.appdomain.cloud
 export CLOUDANT_APIKEY=czz8OBUUT3ZWVeHosqVNQX8fMlTW0BYUAz5cJHrKlPLJ
 export CONFIG_DB_NAME=greenhouseconfig
-export PHOTO_DB_NAME=greenhousephotos
+export CAM1_DB_NAME=cam1
+export CAM2_DB_NAME=cam2
 export LOG_DB_NAME=greenhouselog
 
