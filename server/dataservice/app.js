@@ -25,6 +25,8 @@ const service = CloudantV1.newInstance()
 
 const logDbName = process.env.LOG_DB_NAME
 const configDbName = process.env.CONFIG_DB_NAME
+const cam1DbName = process.env.CAM1_DB_NAME
+const cam2DbName = process.env.CAM2_DB_NAME
 
 const fs = require('fs');
 
@@ -158,7 +160,7 @@ app.post('/photo', async (req, res) => {
   const newDoc = req.body;
 
   const camId = newDoc.cam
-  photoDb = getPhotoDb(camId);
+  photoDb = getPhotoDb(camId, cam1DbName, cam2DbName);
   console.log('Write photo to: ' + photoDb);
 
   var timestamp = new Date().toISOString();
@@ -192,7 +194,7 @@ app.post('/photo', async (req, res) => {
 app.get('/photo', async (req, res) => {
 
   const camId = req.query.camId
-  photoDb = getPhotoDb(camId);
+  photoDb = getPhotoDb(camId, cam1DbName, cam2DbName);
   console.log('Get latest photos from: ' + photoDb);
 
   await cloudantLib.findAllDocs(service, photoDb).then(function (docs) {
@@ -220,7 +222,7 @@ app.get('/photo', async (req, res) => {
 app.get('/photos', async (req, res) => {
 
   const camId = req.query.camId
-  photoDb = getPhotoDb(camId);
+  photoDb = getPhotoDb(camId, cam1DbName, cam2DbName);
   console.log('Get all photos from: ' + photoDb);
 
   const purgeWindow = 12  // Hours
@@ -325,15 +327,15 @@ async function purge(res, purgeWindow, dbName) {
 }
 
 // ////// Helper function to get photoDb from cameraId passed in query param ///
-function getPhotoDb(camId) {
+function getPhotoDb(camId, cam1DbName, cam2DbName) {
   if (camId === null) {
     camId = 1;
   }
 
   if (camId == 1) {
-    photoDb = process.env.CAM1_DB_NAME;
+    photoDb = cam1DbName;
   } else {
-    photoDb = process.env.CAM2_DB_NAME;
+    photoDb = cam2DbName;
   }
   return photoDb;
 }
