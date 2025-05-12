@@ -216,20 +216,6 @@ app.get('/photo', async (req, res) => {
 
 })
 
-// ////// Helper function to get photoDb from cameraId passed in query param ///
-function getPhotoDb(camId) {
-  if (camId === null) {
-    camId = 1;
-  }
-
-  if (camId == 1) {
-    photoDb = process.env.CAM1_DB_NAME;
-  } else {
-    photoDb = process.env.CAM2_DB_NAME;
-  }
-  return photoDb;
-}
-
 // //////////////// Get All Photos ////////////////////////
 app.get('/photos', async (req, res) => {
 
@@ -336,6 +322,20 @@ async function purge(res, purgeWindow, dbName) {
     res.set('Access-Control-Allow-Origin', '*');
     res.send(err);
   });
+}
+
+// ////// Helper function to get photoDb from cameraId passed in query param ///
+function getPhotoDb(camId) {
+  if (camId === null) {
+    camId = 1;
+  }
+
+  if (camId == 1) {
+    photoDb = process.env.CAM1_DB_NAME;
+  } else {
+    photoDb = process.env.CAM2_DB_NAME;
+  }
+  return photoDb;
 }
 
 app.listen(port, () => {
