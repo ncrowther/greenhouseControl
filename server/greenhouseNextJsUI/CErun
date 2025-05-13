@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Env Vars:
+# REGISTRY: name of the image registry/namespace to get the images
+
+# Clean up previous run
+function clean() {
+  set +ex
+  echo Cleaning...
+  (
+  ibmcloud ce app delete -n greenhouse -f
+  rm -f out
+  ) > /dev/null 2>&1
+}
+
+clean
+[[ "$1" == "clean" ]] && exit 0
+
+set -ex
+export REGISTRY=${REGISTRY:-docker.io/ncrowthe}
+
+# Create the app
+ibmcloud ce app create -n greenhousenextui --image ${REGISTRY}/greenhousenextui
+
+# Get the URL of the app for later use
+URL=$(ibmcloud ce app get -n greenhousenextui -o url)
+
+# Show the url
+echo  $URL 
+

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Header,
@@ -13,10 +13,10 @@ import {
   SideNav,
   SideNavItems,
   HeaderSideNavItems,
-} from "@carbon/react";
-import { Switcher, Notification, UserAvatar } from "@carbon/icons-react";
+} from '@carbon/react';
+import { Switcher, Notification, UserAvatar } from '@carbon/icons-react';
 
-import Link from "next/link";
+import Link from 'next/link';
 
 const TutorialHeader = () => (
   <HeaderContainer
@@ -47,10 +47,18 @@ const TutorialHeader = () => (
           <Link href="/co2" passHref legacyBehavior>
             <HeaderMenuItem>Co2</HeaderMenuItem>
           </Link>
-          <Link href="/timelapse?camId=1" passHref legacyBehavior>
+          <Link
+            href={{ pathname: '/timelapse', query: { camId: 1 } }}
+            passHref
+            legacyBehavior
+          >
             <HeaderMenuItem>Timelapse Cam 1</HeaderMenuItem>
           </Link>
-          <Link href="/timelapse?camId=2" passHref legacyBehavior>
+          <Link
+            href={{ pathname: '/timelapse', query: { camId: 2 } }}
+            passHref
+            legacyBehavior
+          >
             <HeaderMenuItem>Timelapse Cam 2</HeaderMenuItem>
           </Link>
           <Link href="/repos" passHref legacyBehavior>

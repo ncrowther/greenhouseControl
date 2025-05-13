@@ -21,7 +21,7 @@ set -ex
 export REGISTRY=${REGISTRY:-docker.io/ncrowthe}
 
 # Create the app
-ibmcloud ce app create -n dataservice --env-from-configmap greenhousedataserviceconfig --image ${REGISTRY}/dataservice
+ibmcloud ce app create -n dataservice --env-from-configmap dataserviceconfig --image ${REGISTRY}/dataservice
 
 # Get the URL of the app for later use
 URL=$(ibmcloud ce app get -n dataservice -o url)
