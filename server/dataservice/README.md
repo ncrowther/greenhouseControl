@@ -44,7 +44,7 @@ See:
 
 ### Deployment to code engine on IBM Cloud
 
-1.	Open Git Bash shell from VSC
+1.	Open Rancher WSL shell from VSC
 
 2.	Login to IBM Cloud.
 
@@ -54,7 +54,7 @@ See:
 
 3.	In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups.  Select the resource group for Code Engine. E.g. default
 
-    ibmcloud target -g default
+    ibmcloud target -g default  (redaction-new)
 
 4.	Select the code engine project:  
 

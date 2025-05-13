@@ -4,7 +4,20 @@
 
 UI using IBM Carbon Design System React components.
 
-## Create NextJS 13 app
+## Build
+
+Build and start
+
+Install the Next.js app’s dependencies with:
+
+yarn
+
+After the dependencies are installed, create a build with:
+
+yarn build
+
+
+## Start
 
 Run in Dev mode:
 ```bash
