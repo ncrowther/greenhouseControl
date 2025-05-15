@@ -2,13 +2,13 @@
 
 import { Content, Theme } from '@carbon/react';
 
-import TutorialHeader from '@/components/TutorialHeader/TutorialHeader';
+import GreenhouseHeader from '@/components/GreenhouseHeader/GreenhouseHeader';
 
 export function Providers({ children }) {
   return (
     <div>
       <Theme theme="g100">
-        <TutorialHeader />
+        <GreenhouseHeader />
       </Theme>
       <Content>{children}</Content>
     </div>

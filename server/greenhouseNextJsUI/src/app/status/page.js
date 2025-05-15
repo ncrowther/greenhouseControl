@@ -75,7 +75,7 @@ function StatusPage() {
     return `Error! ${error}`;
   }
 
-  const timeText = <b style={{ color: 'green' }}>&nbsp;{timestamp} </b>
+  const timeText = <b style={{ color: 'green' }}>&nbsp;{timestamp}UTC </b>
 
   // Set humidity color
   let humidityText = <b style={{ color: 'green' }}>&nbsp;{humidity} %</b>

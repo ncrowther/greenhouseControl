@@ -18,7 +18,7 @@ import { Switcher, Notification, UserAvatar } from '@carbon/icons-react';
 
 import Link from 'next/link';
 
-const TutorialHeader = () => (
+const GreenhouseHeader = () => (
   <HeaderContainer
     render={({ isSideNavExpanded, onClickSideNavExpand }) => (
       <Header aria-label="Carbon Tutorial">
@@ -32,14 +32,8 @@ const TutorialHeader = () => (
           <HeaderName prefix="IBM">Greenhouse</HeaderName>
         </Link>
         <HeaderNavigation aria-label="Carbon Tutorial">
-          <Link href="/config" passHref legacyBehavior>
-            <HeaderMenuItem>Configuration</HeaderMenuItem>
-          </Link>
-          <Link href="/status" passHref legacyBehavior>
-            <HeaderMenuItem>Status</HeaderMenuItem>
-          </Link>
           <Link href="/temphum" passHref legacyBehavior>
-            <HeaderMenuItem>Temperature/Humidity</HeaderMenuItem>
+            <HeaderMenuItem>Climate</HeaderMenuItem>
           </Link>
           <Link href="/vpd" passHref legacyBehavior>
             <HeaderMenuItem>Vpd</HeaderMenuItem>
@@ -52,18 +46,16 @@ const TutorialHeader = () => (
             passHref
             legacyBehavior
           >
-            <HeaderMenuItem>Timelapse Cam 1</HeaderMenuItem>
+            <HeaderMenuItem>Cam 1</HeaderMenuItem>
           </Link>
           <Link
             href={{ pathname: '/timelapse', query: { camId: 2 } }}
             passHref
             legacyBehavior
           >
-            <HeaderMenuItem>Timelapse Cam 2</HeaderMenuItem>
+            <HeaderMenuItem>Cam 2</HeaderMenuItem>
           </Link>
-          <Link href="/repos" passHref legacyBehavior>
-            <HeaderMenuItem>Data</HeaderMenuItem>
-          </Link>
+
         </HeaderNavigation>
         <SideNav
           aria-label="Side navigation"
@@ -72,12 +64,6 @@ const TutorialHeader = () => (
         >
           <SideNavItems>
             <HeaderSideNavItems>
-              <Link href="/config" passHref legacyBehavior>
-                <HeaderMenuItem>Configuration</HeaderMenuItem>
-              </Link>
-              <Link href="/status" passHref legacyBehavior>
-                <HeaderMenuItem>Status</HeaderMenuItem>
-              </Link>
               <Link href="/temphum" passHref legacyBehavior>
                 <HeaderMenuItem>Temperature/Humidity</HeaderMenuItem>
               </Link>
@@ -123,4 +109,4 @@ const TutorialHeader = () => (
   />
 );
 
-export default TutorialHeader;
+export default GreenhouseHeader;
