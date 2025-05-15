@@ -8,7 +8,7 @@ function clean() {
   set +ex
   echo Cleaning...
   (
-  ibmcloud ce app delete -n greenhouse -f
+  ibmcloud ce app delete -n greenhousenextui -f
   rm -f out
   ) > /dev/null 2>&1
 }
