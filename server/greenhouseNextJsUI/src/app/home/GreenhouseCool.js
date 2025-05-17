@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { Grid } from '@carbon/react';
 import { Knob } from 'primereact/knob';
-import { Button } from 'primereact/button';
+import {
+  Button,
+  Grid,
+  Column,
+} from '@carbon/react';
 import { BiWindow } from "react-icons/bi";
-import { FaFireFlameSimple } from "react-icons/fa6";
-import { CiLight } from "react-icons/ci";
 import { PiFanFill } from "react-icons/pi";
-import { IoRainyOutline } from "react-icons/io5";
+
 const config = require('../config/config.js')
 const endpoints = require('../endpoints.js')
 
@@ -138,24 +139,24 @@ function GreenhouseCool() {
   // Set window buttons and highlight the one that is enabled
   let windowButton = {}
   if (window === 'OPEN') {
-    windowButton = <div className="p-inputgroup flex-1">
-      <Button label=" UP*" icon={BiWindow} className="p-button-success" inputid="window1" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')} outlined />
-      <Button label=" DWN" icon={BiWindow} className="p-button-danger" inputid="window2" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')} />
-      <Button label=" AUTO" icon={BiWindow} className="p-button-warning" inputid="window3" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')} />
+    windowButton = <div>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowOpen" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')} outlined > UP*</Button>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowClosed" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')}> DWN</Button>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowAuto" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')}> AUTO</Button>
     </div>
   }
   else if (window === 'CLOSED') {
-    windowButton = <div className="p-inputgroup flex-1">
-      <Button label=" UP" icon={BiWindow} className="p-button-success" inputid="window1" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')} />
-      <Button label=" DWN*" icon={BiWindow} className="p-button-danger" inputid="window2" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')} outlined />
-      <Button label=" AUTO" icon={BiWindow} className="p-button-warning" inputid="window3" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')} />
+    windowButton = <div>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowOpen" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')}> UP</Button>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowClosed" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')} outlined > DWN*</Button>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowAuto" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')}> AUTO</Button>
     </div>
   }
   else {
-    windowButton = <div className="p-inputgroup flex-1">
-      <Button label=" UP" icon={BiWindow} className="p-button-success" inputid="window1" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')} />
-      <Button label=" DWN" icon={BiWindow} className="p-button-danger" inputid="window2" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')} />
-      <Button label=" AUTO*" icon={BiWindow} className="p-button-warning" inputid="window3" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')} outlined />
+    windowButton = <div>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowOpen" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')}> UP</Button>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowClosed" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')}> DWN</Button>
+      <Button kind="tertiary" renderIcon={BiWindow} inputid="windowAuto" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')} outlined > AUTO*</Button>
     </div>
   }
 
@@ -163,31 +164,31 @@ function GreenhouseCool() {
   let fanButton = {}
   if (fan === 'ON') {
     fanButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON*" icon={PiFanFill} className="p-button-success" inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')} outlined />
-      <Button label=" OFF" icon={PiFanFill} className="p-button-danger" inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')} />
-      <Button label=" AUTO" icon={PiFanFill} className="p-button-warning" inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')} />
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')} outlined > ON*</Button>
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')}> AUTO</Button>
     </div>
   }
   else if (fan === 'OFF') {
     fanButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={PiFanFill} className="p-button-success" inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')} />
-      <Button label=" OFF*" icon={PiFanFill} className="p-button-danger" inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')} outlined />
-      <Button label=" AUTO" icon={PiFanFill} className="p-button-warning" inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')} />
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')} outlined  > OFF*</Button>
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')} > AUTO</Button>
     </div>
   }
   else {
-    fanButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={PiFanFill} className="p-button-success" inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')} />
-      <Button label=" OFF" icon={PiFanFill} className="p-button-danger" inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')} />
-      <Button label=" AUTO*" icon={PiFanFill} className="p-button-warning" inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')} outlined />
+    fanButton = <div>
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')} outlined > AUTO*</Button>
     </div>
   }
 
   return (
 
-    <form onSubmit={(e) => handleOnSubmit(e)}>
+    <Column>
 
-      <div>
+      <form onSubmit={(e) => handleOnSubmit(e)}>
 
         <h4>Window</h4>
         {windowButton}
@@ -198,24 +199,17 @@ function GreenhouseCool() {
         {fanButton}
 
         <br></br>
+        <br></br>
 
         <h4>Max</h4>
-        <Knob value={highTemp} onChange={(e) => setHighTemp(e.value) } min={5} max={50} valueTemplate={'{value}C'} valueColor="red" rangeColor="lightgray"/>
+        <Knob value={highTemp} onChange={(e) => setHighTemp(e.value)} min={5} max={50} valueTemplate={'{value}C'} valueColor="red" rangeColor="lightgray" />
 
-      </div>
-
-      <div style={{
-        display: 'flex',
-        justifyContent: 'left',
-        alignItems: 'center'
-      }}>
-
-      <Button label=" Set" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e)} />        
+        <Button kind="primary" onClick={(e) => handleOnSubmit(e)} iconDescription="Set">Set</Button>
 
 
-      </div>
+      </form >
 
-    </form >
+    </Column>
 
   );
 

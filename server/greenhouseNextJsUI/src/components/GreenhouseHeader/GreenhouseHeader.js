@@ -41,19 +41,14 @@ const GreenhouseHeader = () => (
           <Link href="/co2" passHref legacyBehavior>
             <HeaderMenuItem>Co2</HeaderMenuItem>
           </Link>
-          <Link
-            href={{ pathname: '/timelapse', query: { camId: 1 } }}
-            passHref
-            legacyBehavior
-          >
+          <Link href="/timelapse1" passHref legacyBehavior>
             <HeaderMenuItem>Cam 1</HeaderMenuItem>
           </Link>
-          <Link
-            href={{ pathname: '/timelapse', query: { camId: 2 } }}
-            passHref
-            legacyBehavior
-          >
+          <Link href="/timelapse2" passHref legacyBehavior>
             <HeaderMenuItem>Cam 2</HeaderMenuItem>
+          </Link>
+          <Link href="/telemetry" passHref legacyBehavior>
+            <HeaderMenuItem>Telemetry</HeaderMenuItem>
           </Link>
 
         </HeaderNavigation>
@@ -73,14 +68,14 @@ const GreenhouseHeader = () => (
               <Link href="/co2" passHref legacyBehavior>
                 <HeaderMenuItem>Co2</HeaderMenuItem>
               </Link>
-              <Link href="/timelapse?camId=1" passHref legacyBehavior>
-                <HeaderMenuItem>Timelapse Cam 1</HeaderMenuItem>
+              <Link href="/timelapse1" passHref legacyBehavior>
+                <HeaderMenuItem>Cam 1</HeaderMenuItem>
               </Link>
-              <Link href="/timelapse?camId=2" passHref legacyBehavior>
-                <HeaderMenuItem>Timelapse Cam 2</HeaderMenuItem>
+              <Link href="/timelapse2" passHref legacyBehavior>
+                <HeaderMenuItem>Cam 2</HeaderMenuItem>
               </Link>
-              <Link href="/repos" passHref legacyBehavior>
-                <HeaderMenuItem>Data</HeaderMenuItem>
+              <Link href="/telemetry" passHref legacyBehavior>
+                <HeaderMenuItem>Telemetry</HeaderMenuItem>
               </Link>
             </HeaderSideNavItems>
           </SideNavItems>

@@ -5,7 +5,7 @@ import { Grid } from '@carbon/react';
 import { Galleria } from 'primereact/galleria';
 const endpoints = require('../endpoints.js');
 
-function TimelapsePage(camId) {
+function Timelapse1Page(camId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [images, setImages] = useState(null);
@@ -46,7 +46,6 @@ function TimelapsePage(camId) {
 
   useEffect(() => {
     async function getPhotoData(camId) {
-      camId = 1;
       await fetch(`${endpoints.photoServiceEndpoint}?camId=${camId}`, {
         method: 'get',
         headers: {
@@ -74,13 +73,15 @@ function TimelapsePage(camId) {
               setImages(timelapseData.Docs);
 
               const itemTemplate = (item) => {
-                return (
-                  <img
-                    src={'data:image/jpeg;base64,' + item.photo}
-                    alt={item.timestamp}
-                    style={{ width: '100%', display: 'block' }}
-                  />
-                );
+                if (item) {
+                  return (
+                    <img
+                      src={'data:image/jpeg;base64,' + item.photo}
+                      alt={item.timestamp}
+                      style={{ width: '100%', display: 'block' }}
+                    />
+                  );
+                }
               };
 
               const thumbnailTemplate = (item) => {
@@ -120,7 +121,7 @@ function TimelapsePage(camId) {
     }
 
     //console.log(JSON.stringify(camId))
-    camId = 1; //camId.searchParams.camId
+    const camId = 1
     getPhotoData(camId);
   }, []);
 
@@ -131,6 +132,8 @@ function TimelapsePage(camId) {
   if (error) {
     return `Error! ${error}`;
   }
+
+
 
   return (
     <div className="timelapse-page">
@@ -148,4 +151,4 @@ function TimelapsePage(camId) {
     </div>
   );
 }
-export default TimelapsePage;
+export default Timelapse1Page;

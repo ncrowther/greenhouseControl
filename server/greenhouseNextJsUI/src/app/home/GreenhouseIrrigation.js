@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { Grid } from '@carbon/react';
+import { Button, Grid, Column } from '@carbon/react';
 import { Knob } from 'primereact/knob';
-import { Button } from 'primereact/button';
 import { IoRainyOutline } from "react-icons/io5";
 const config = require('../config/config.js')
 const endpoints = require('../endpoints.js')
@@ -30,7 +29,7 @@ function GreenhouseIrrigation() {
   const [error, setError] = useState();
 
 
- const handleOnSubmit = (event) => {
+  const handleOnSubmit = (event) => {
 
     // Prevent default refresh
     event.preventDefault();
@@ -141,58 +140,55 @@ function GreenhouseIrrigation() {
   // Set pump buttons and highlight the one that is enabled
   let pumpButton = {}
   if (pump === 'ON') {
-    pumpButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON*" icon={IoRainyOutline} className="p-button-success" inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')} outlined />
-      <Button label=" OFF" icon={IoRainyOutline} className="p-button-danger" inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')} />
-      <Button label=" AUTO" icon={IoRainyOutline} className="p-button-warning" inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')} />
+    pumpButton = <div>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')} outlined > ON*</Button>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')}> AUTO</Button>
     </div>
   }
   else if (pump === 'OFF') {
-    pumpButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={IoRainyOutline} className="p-button-success" inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')} />
-      <Button label=" OFF*" icon={IoRainyOutline} className="p-button-danger" inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')} outlined />
-      <Button label=" AUTO" icon={IoRainyOutline} className="p-button-warning" inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')} />
+    pumpButton = <div>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')} outlined > OFF*</Button>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')}> AUTO*</Button>
     </div>
   }
   else {
-    pumpButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={IoRainyOutline} className="p-button-success" inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')} />
-      <Button label=" OFF" icon={IoRainyOutline} className="p-button-danger" inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')} />
-      <Button label=" AUTO*" icon={IoRainyOutline} className="p-button-warning" inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')} outlined />
+    pumpButton = <div>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')} outlined > AUTO*</Button>
     </div>
   }
 
   return (
 
+          <Column>
     <form onSubmit={(e) => handleOnSubmit(e)}>
-
-      <div>
 
         <h4>Pump</h4>
         {pumpButton}
 
-        <br></br>        
+        <br></br>
+        <br></br>
+        <div>
+          <h4>Time 1</h4>
+          <Knob value={pumpOnTime1} onChange={(e) => setPumpOnTime1(e.value)} min={0} max={23} valueTemplate={'{value}H'} valueColor="green" rangeColor="lightgray" />
 
-        <h3>Time 1</h3>
-        <Knob value={pumpOnTime1} onChange={(e) => setPumpOnTime1(e.value)} min={0} max={23} valueTemplate={'{value}H'} valueColor="green" rangeColor="lightgray" />
+          <h4>Time 2</h4>
+          <Knob value={pumpOnTime2} onChange={(e) => setPumpOnTime2(e.value)} min={0} max={23} valueTemplate={'{value}H'} valueColor="green" rangeColor="lightgray" />
 
-        <h3>Time 2</h3>
-        <Knob value={pumpOnTime2} onChange={(e) => setPumpOnTime2(e.value)} min={0} max={23} valueTemplate={'{value}H'} valueColor="green" rangeColor="lightgray" />
+          <h4>Time 3</h4>
+          <Knob value={pumpOnTime3} onChange={(e) => setPumpOnTime3(e.value)} min={0} max={23} valueTemplate={'{value}H'} valueColor="green" rangeColor="lightgray" />
+        </div>
 
-        <h3>Time 2</h3>
-        <Knob value={pumpOnTime3} onChange={(e) => setPumpOnTime3(e.value)} min={0} max={23} valueTemplate={'{value}H'} valueColor="green" rangeColor="lightgray" />
+  
 
-      </div>
-
-      <div style={{
-        display: 'flex',
-        justifyContent: 'left',
-        alignItems: 'center'
-      }}>
-      <Button label=" Set" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e)} tooltip="Set on/off times" />
-      </div>
+      <Button kind="primary" onClick={(e) => handleOnSubmit(e)} iconDescription="Set">Set</Button>
 
     </form >
+
+    </Column>
 
   );
 

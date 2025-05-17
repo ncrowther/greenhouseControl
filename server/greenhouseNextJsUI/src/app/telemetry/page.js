@@ -1,6 +1,6 @@
 'use client';
 
-import RepoTable from './RepoTable';
+import TelemetryTable from './TelemetryTable';
 import {
   Link,
   DataTableSkeleton,
@@ -14,8 +14,8 @@ import React, { useEffect, useState } from 'react';
 
 const headers = [
   {
-    key: 'created',
-    header: 'Created',
+    key: '_id',
+    header: 'Timestamp',
   },
   {
     key: 'humidity',
@@ -24,6 +24,14 @@ const headers = [
   {
     key: 'temperature',
     header: 'Temperature',
+  },
+  {
+    key: 'co2',
+    header: 'Co2',
+  },
+  {
+    key: 'vpd',
+    header: 'Vpd',
   }
 ];
 
@@ -42,25 +50,22 @@ const LinkList = ({ url, homepageUrl }) => (
 );
 
 const getRowItems = (rows) =>
-  rows.map((row) => ({
+  rows.slice(0).reverse().map((row) => ({
+    id: row._id,
     ...row,
-    key: row.id,
-    temperature: row.temperature,
-    humidity: row.humidity,
-    created: row._id
   }));
 
 function RepoPage() {
   const [firstRowIndex, setFirstRowIndex] = useState(0);
-  const [currentPageSize, setCurrentPageSize] = useState(10);
+  const [currentPageSize, setCurrentPageSize] = useState(15);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
-    async function getCarbonRepos() {
+    async function getData() {
 
-      await fetch(`${endpoints.dataServiceEndpoint}/docs`, {
+      await fetch(`${endpoints.dataServiceEndpoint}`, {
         method: "get",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +80,6 @@ function RepoPage() {
         })
         .catch((err) => {
           console.log(err);
-          res.status(500).json({ error: err });
           setError('Error obtaining repository data');
         });
 
@@ -83,7 +87,7 @@ function RepoPage() {
       setLoading(false);
     }
 
-    getCarbonRepos();
+    getData();
   }, []);
 
   if (loading) {
@@ -92,7 +96,7 @@ function RepoPage() {
         <Column lg={16} md={8} sm={4} className="repo-page__r1">
           <DataTableSkeleton
             columnCount={headers.length + 1}
-            rowCount={10}
+            rowCount={1}
             headers={headers}
           />
         </Column>
@@ -107,9 +111,9 @@ function RepoPage() {
   return (
     <Grid className="repo-page">
       <Column lg={16} md={8} sm={4} className="repo-page__r1">
-        <RepoTable
+        <TelemetryTable
           headers={headers}
-          rows={rows.slice(firstRowIndex, firstRowIndex + currentPageSize)}
+          rows={rows}
         />
         <Pagination
           totalItems={rows.length}

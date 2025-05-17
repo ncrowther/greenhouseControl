@@ -15,7 +15,7 @@ import {
   TableExpandedRow,
 } from '@carbon/react';
 
-const RepoTable = ({ rows, headers }) => {
+const TelemetryTable = ({ rows, headers }) => {
   const getRowDescription = (rowId) => {
     const row = rows.find(({ id }) => id === rowId);
     return row ? row.description : '';
@@ -54,9 +54,7 @@ const RepoTable = ({ rows, headers }) => {
                       <TableCell key={cell.id}>{cell.value}</TableCell>
                     ))}
                   </TableExpandRow>
-                  <TableExpandedRow colSpan={headers.length + 1}>
-                    <p>{getRowDescription(row.id)}</p>
-                  </TableExpandedRow>
+
                 </React.Fragment>
               ))}
             </TableBody>
@@ -67,4 +65,4 @@ const RepoTable = ({ rows, headers }) => {
   );
 };
 
-export default RepoTable;
+export default TelemetryTable;

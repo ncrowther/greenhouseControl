@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { Grid } from '@carbon/react';
 import { Knob } from 'primereact/knob';
-import { Button } from 'primereact/button';
-import { BiWindow } from "react-icons/bi";
 import { FaFireFlameSimple } from "react-icons/fa6";
-import { CiLight } from "react-icons/ci";
-import { PiFanFill } from "react-icons/pi";
-import { IoRainyOutline } from "react-icons/io5";
+import {
+  Button,
+  Grid,
+  Column,
+} from '@carbon/react';
 const config = require('../config/config.js')
 const endpoints = require('../endpoints.js')
 
@@ -34,7 +33,7 @@ function GreenhouseHeat() {
   const [error, setError] = useState();
 
 
- const handleOnSubmit = (event) => {
+  const handleOnSubmit = (event) => {
 
     // Prevent default refresh
     event.preventDefault();
@@ -46,7 +45,7 @@ function GreenhouseHeat() {
         lightOffTime
       ],
       "pumpState": pump,
-      "fanState": fan,
+      "heaterState": heater,
       "heaterState": heater,
       "wateringTimes": [
         pumpOnTime1,
@@ -97,7 +96,7 @@ function GreenhouseHeat() {
                 setPumpOnTime3(configData.wateringTimes[2])
 
                 setHeater(configData.heaterState);
-                setFan(configData.fanState);
+                setHeater(configData.heaterState);
                 setPump(configData.pumpState);
                 setWindow(configData.windowState);
 
@@ -138,55 +137,48 @@ function GreenhouseHeat() {
   // Set heater buttons and highlight the one that is enabled
   let heaterButton = {}
   if (heater === 'ON') {
-    heaterButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON*" icon={FaFireFlameSimple} className="p-button-success" inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')} outlined />
-      <Button label=" OFF" icon={FaFireFlameSimple} className="p-button-danger" inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')} />
-      <Button label=" AUTO" icon={FaFireFlameSimple} className="p-button-warning" inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} />
+    heaterButton = <div>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')} outlined> ON*</Button>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} outlined > AUTO</Button>
     </div>
   }
   else if (heater === 'OFF') {
-    heaterButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={FaFireFlameSimple} className="p-button-success" inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')} />
-      <Button label=" OFF*" icon={FaFireFlameSimple} className="p-button-danger" inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')} outlined />
-      <Button label=" AUTO" icon={FaFireFlameSimple} className="p-button-warning" inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} />
+    heaterButton = <div>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')} outlined> OFF*</Button>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} > AUTO</Button>
     </div>
+
   }
   else {
-    heaterButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={FaFireFlameSimple} className="p-button-success" inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')} />
-      <Button label=" OFF" icon={FaFireFlameSimple} className="p-button-danger" inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')} />
-      <Button label=" AUTO*" icon={FaFireFlameSimple} className="p-button-warning" inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} outlined />
+    heaterButton = <div>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} outlined > AUTO*</Button>
     </div>
   }
 
   return (
 
-    <form onSubmit={(e) => handleOnSubmit(e)}>
+    <Column>
 
-      <div>
+      <form onSubmit={(e) => handleOnSubmit(e)}>
 
         <h4>Heater</h4>
         {heaterButton}
 
-        <br></br>        
-        
-       <h4>Min</h4>
+        <br></br>
+        <br></br>
+
+        <h4>Min</h4>
         <Knob value={lowTemp} onChange={(e) => setLowTemp(e.value)} min={5} max={50} valueTemplate={'{value}C'} valueColor="blue" rangeColor="lightgray" />
 
+        <Button kind="primary" onClick={(e) => handleOnSubmit(e)} iconDescription="Set">Set</Button>
 
-      </div>
+      </form >
 
-      <div style={{
-        display: 'flex',
-        justifyContent: 'left',
-        alignItems: 'center'
-      }}>
-
-      <Button label=" Set" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e)} />     
-
-      </div>
-
-    </form >
+    </Column>
 
   );
 

@@ -1,16 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { Grid } from '@carbon/react';
 import { Knob } from 'primereact/knob';
-import { Button } from 'primereact/button';
-import { BiWindow } from "react-icons/bi";
-import { FaFireFlameSimple } from "react-icons/fa6";
 import { CiLight } from "react-icons/ci";
-import { PiFanFill } from "react-icons/pi";
-import { IoRainyOutline } from "react-icons/io5";
 const config = require('../config/config.js')
 const endpoints = require('../endpoints.js')
+import {
+  Button,
+  Grid,
+  Column,
+} from '@carbon/react';
 
 /**
  * Set the greenhouse config
@@ -35,7 +34,7 @@ function GreenhouseLight() {
 
 
 
- const handleOnSubmit = (event) => {
+  const handleOnSubmit = (event) => {
 
     // Prevent default refresh
     event.preventDefault();
@@ -145,37 +144,40 @@ function GreenhouseLight() {
   // Set light buttons and highlight the one that is enabled
   let lightButton = {}
   if (light === 'ON') {
-    lightButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON*" icon={CiLight} severity="danger" className="p-button-success" inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')} outlined />
-      <Button label=" OFF" icon={CiLight} className="p-button-danger" inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')} />
-      <Button label=" AUTO" icon={CiLight} className="p-button-warning" inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')} />
+    lightButton = <div>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')} outlined> ON*</Button>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')}  > AUTO</Button>
     </div>
   }
   else if (light === 'OFF') {
-    lightButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={CiLight} className="p-button-success" inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')} />
-      <Button label=" OFF*" icon={CiLight} className="p-button-danger" inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')} outlined />
-      <Button label=" AUTO" icon={CiLight} className="p-button-warning" inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')} />
+    lightButton = <div>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')} outlined> OFF*</Button>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')}  > AUTO</Button>
     </div>
   }
   else {
-    lightButton = <div className="p-inputgroup flex-1">
-      <Button label=" ON" icon={CiLight} className="p-button-success" inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')} />
-      <Button label=" OFF" icon={CiLight} className="p-button-danger" inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')} />
-      <Button label=" AUTO*" icon={CiLight} className="p-button-warning" inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')} outlined />
+    lightButton = <div>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')}> ON</Button>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')}> OFF</Button>
+      <Button kind="tertiary" renderIcon={CiLight} inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')} outlined > AUTO*</Button>
     </div>
+
   }
 
   return (
 
-    <form onSubmit={(e) => handleOnSubmit(e)}>
+    <Column>
 
-      <div>
+      <form onSubmit={(e) => handleOnSubmit(e)}>
 
         <h4>Light</h4>
+
         {lightButton}
 
-        <br></br>        
+        <br></br>
+        <br></br>
 
         <h4>On</h4>
         <Knob value={lightOnTime} onChange={(e) => setLightOnTime(e.value)} min={0} max={24} valueTemplate={'{value}H'} valueColor="orange" rangeColor="lightgray" />
@@ -183,17 +185,11 @@ function GreenhouseLight() {
         <h4>Off</h4>
         <Knob value={lightOffTime} onChange={(e) => setLightOffTime(e.value)} min={0} max={24} valueTemplate={'{value}H'} valueColor="gray" rangeColor="lightgray" />
 
-      </div>
+        <Button kind="primary" onClick={(e) => handleOnSubmit(e)} iconDescription="Set">Set</Button>
 
-      <div style={{
-        display: 'flex',
-        justifyContent: 'left',
-        alignItems: 'center'
-      }}>
-      <Button label=" Set" inputid="applyTemp" name="applyTemp" value="Apply" onClick={(e) => handleOnSubmit(e)} tooltip="Set on/off time" />
-      </div>
+      </form >
 
-    </form >
+    </Column>
 
   );
 
