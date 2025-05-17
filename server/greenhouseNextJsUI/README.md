@@ -42,6 +42,8 @@ Configure paths in `jsconfig.json`
 
 1. Open Rancher WSL shell from VSC
 
+   Yarn build
+
 2. Login to IBM Cloud.
 
    ibmcloud login --sso
