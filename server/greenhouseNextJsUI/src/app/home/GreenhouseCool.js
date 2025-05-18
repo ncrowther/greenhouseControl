@@ -140,7 +140,7 @@ function GreenhouseCool() {
   let windowButton = {}
   if (window === 'OPEN') {
     windowButton = <div>
-      <Button kind="danger" renderIcon={BiWindow} inputid="windowOpen" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')}  > UP*</Button>
+      <Button kind="primary" renderIcon={BiWindow} inputid="windowOpen" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')}  > UP*</Button>
       <Button kind="tertiary" renderIcon={BiWindow} inputid="windowClosed" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')}> DWN</Button>
       <Button kind="tertiary" renderIcon={BiWindow} inputid="windowAuto" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')}> AUTO</Button>
     </div>
@@ -148,7 +148,7 @@ function GreenhouseCool() {
   else if (window === 'CLOSED') {
     windowButton = <div>
       <Button kind="tertiary" renderIcon={BiWindow} inputid="windowOpen" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')}> UP</Button>
-      <Button kind="danger" renderIcon={BiWindow} inputid="windowClosed" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')}  > DWN*</Button>
+      <Button kind="primary" renderIcon={BiWindow} inputid="windowClosed" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')}  > DWN*</Button>
       <Button kind="tertiary" renderIcon={BiWindow} inputid="windowAuto" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')}> AUTO</Button>
     </div>
   }
@@ -156,7 +156,7 @@ function GreenhouseCool() {
     windowButton = <div>
       <Button kind="tertiary" renderIcon={BiWindow} inputid="windowOpen" name="windowOpen" value="OPEN" onClick={(e) => setWindow('OPEN')}> UP</Button>
       <Button kind="tertiary" renderIcon={BiWindow} inputid="windowClosed" name="windowClosed" value="CLOSED" onClick={(e) => setWindow('CLOSED')}> DWN</Button>
-      <Button kind="danger" renderIcon={BiWindow} inputid="windowAuto" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')}  > AUTO*</Button>
+      <Button kind="primary" renderIcon={BiWindow} inputid="windowAuto" name="windowAuto" value="AUTO" onClick={(e) => setWindow('AUTO')}  > AUTO*</Button>
     </div>
   }
 
@@ -164,7 +164,7 @@ function GreenhouseCool() {
   let fanButton = {}
   if (fan === 'ON') {
     fanButton = <div className="p-inputgroup flex-1">
-      <Button kind="danger" renderIcon={PiFanFill} inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')} > ON*</Button>
+      <Button kind="primary" renderIcon={PiFanFill} inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')} > ON*</Button>
       <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')}> OFF</Button>
       <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')}> AUTO</Button>
     </div>
@@ -172,7 +172,7 @@ function GreenhouseCool() {
   else if (fan === 'OFF') {
     fanButton = <div className="p-inputgroup flex-1">
       <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')}> ON</Button>
-      <Button kind="danger" renderIcon={PiFanFill} inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')}   > OFF*</Button>
+      <Button kind="primary" renderIcon={PiFanFill} inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')}   > OFF*</Button>
       <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')} > AUTO</Button>
     </div>
   }
@@ -180,7 +180,7 @@ function GreenhouseCool() {
     fanButton = <div>
       <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan1" name="fanOn" value="ON" onClick={(e) => setFan('ON')}> ON</Button>
       <Button kind="tertiary" renderIcon={PiFanFill} inputid="fan2" name="fanOff" value="OFF" onClick={(e) => setFan('OFF')}> OFF</Button>
-      <Button kind="danger" renderIcon={PiFanFill} inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')}  > AUTO*</Button>
+      <Button kind="primary" renderIcon={PiFanFill} inputid="fan3" name="fanAuto" value="AUTO" onClick={(e) => setFan('AUTO')}  > AUTO*</Button>
     </div>
   }
 

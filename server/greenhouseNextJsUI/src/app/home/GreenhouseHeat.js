@@ -138,7 +138,7 @@ function GreenhouseHeat() {
   let heaterButton = {}
   if (heater === 'ON') {
     heaterButton = <div>
-      <Button kind="danger" renderIcon={FaFireFlameSimple} inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')} > ON*</Button>
+      <Button kind="primary" renderIcon={FaFireFlameSimple} inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')} > ON*</Button>
       <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')}> OFF</Button>
       <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} > AUTO</Button>
     </div>
@@ -146,7 +146,7 @@ function GreenhouseHeat() {
   else if (heater === 'OFF') {
     heaterButton = <div>
       <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')}> ON</Button>
-      <Button kind="danger" renderIcon={FaFireFlameSimple} inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')} > OFF*</Button>
+      <Button kind="primary" renderIcon={FaFireFlameSimple} inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')} > OFF*</Button>
       <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')} > AUTO</Button>
     </div>
 
@@ -155,7 +155,7 @@ function GreenhouseHeat() {
     heaterButton = <div>
       <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater1" name="heaterOn" value="ON" onClick={(e) => setHeater('ON')}> ON</Button>
       <Button kind="tertiary" renderIcon={FaFireFlameSimple} inputid="heater2" name="heaterOff" value="OFF" onClick={(e) => setHeater('OFF')}> OFF</Button>
-      <Button kind="danger" renderIcon={FaFireFlameSimple} inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')}  > AUTO*</Button>
+      <Button kind="primary" renderIcon={FaFireFlameSimple} inputid="heater3" name="heaterAuto" value="AUTO" onClick={(e) => setHeater('AUTO')}  > AUTO*</Button>
     </div>
   }
 
