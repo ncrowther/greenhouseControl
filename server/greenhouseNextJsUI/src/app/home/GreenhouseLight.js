@@ -145,7 +145,7 @@ function GreenhouseLight() {
   let lightButton = {}
   if (light === 'ON') {
     lightButton = <div>
-      <Button kind="tertiary" renderIcon={CiLight} inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')} outlined> ON*</Button>
+      <Button kind="danger" renderIcon={CiLight} inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')} > ON*</Button>
       <Button kind="tertiary" renderIcon={CiLight} inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')}> OFF</Button>
       <Button kind="tertiary" renderIcon={CiLight} inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')}  > AUTO</Button>
     </div>
@@ -153,7 +153,7 @@ function GreenhouseLight() {
   else if (light === 'OFF') {
     lightButton = <div>
       <Button kind="tertiary" renderIcon={CiLight} inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')}> ON</Button>
-      <Button kind="tertiary" renderIcon={CiLight} inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')} outlined> OFF*</Button>
+      <Button kind="danger" renderIcon={CiLight} inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')} > OFF*</Button>
       <Button kind="tertiary" renderIcon={CiLight} inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')}  > AUTO</Button>
     </div>
   }
@@ -161,7 +161,7 @@ function GreenhouseLight() {
     lightButton = <div>
       <Button kind="tertiary" renderIcon={CiLight} inputid="light1" name="lightOn" value="ON" onClick={(e) => setLight('ON')}> ON</Button>
       <Button kind="tertiary" renderIcon={CiLight} inputid="light2" name="lightOff" value="OFF" onClick={(e) => setLight('OFF')}> OFF</Button>
-      <Button kind="tertiary" renderIcon={CiLight} inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')} outlined > AUTO*</Button>
+      <Button kind="danger" renderIcon={CiLight} inputid="light3" name="lightAuto" value="AUTO" onClick={(e) => setLight('AUTO')} > AUTO*</Button>
     </div>
 
   }

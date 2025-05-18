@@ -141,7 +141,7 @@ function GreenhouseIrrigation() {
   let pumpButton = {}
   if (pump === 'ON') {
     pumpButton = <div>
-      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')} outlined > ON*</Button>
+      <Button kind="danger" renderIcon={IoRainyOutline} inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')} > ON*</Button>
       <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')}> OFF</Button>
       <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')}> AUTO</Button>
     </div>
@@ -149,15 +149,15 @@ function GreenhouseIrrigation() {
   else if (pump === 'OFF') {
     pumpButton = <div>
       <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')}> ON</Button>
-      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')} outlined > OFF*</Button>
-      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')}> AUTO*</Button>
+      <Button kind="danger" renderIcon={IoRainyOutline} inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')} > OFF*</Button>
+      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')}> AUTO</Button>
     </div>
   }
   else {
     pumpButton = <div>
       <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump1" name="pumpOn" value="ON" onClick={(e) => setPump('ON')}> ON</Button>
       <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump2" name="pumpOff" value="OFF" onClick={(e) => setPump('OFF')}> OFF</Button>
-      <Button kind="tertiary" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')} outlined > AUTO*</Button>
+      <Button kind="danger" renderIcon={IoRainyOutline} inputid="pump3" name="pumpAuto" value="AUTO" onClick={(e) => setPump('AUTO')} > AUTO*</Button>
     </div>
   }
 
