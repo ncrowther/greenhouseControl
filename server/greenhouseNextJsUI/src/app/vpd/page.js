@@ -2,101 +2,46 @@
 
 import React, { useState, useEffect } from 'react';
 import { Grid } from '@carbon/react';
-import { Chart } from 'primereact/chart';
-const endpoints = require('../endpoints.js')
+//import { Chart } from 'primereact/chart';
+import { LineChart } from '@carbon/charts-react';
+import options1 from './options.js';
+import '@carbon/charts-react/styles.css';
+const endpoints = require('../endpoints.js');
 
 function VpdPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
-  const [chartData, setChartData] = useState({});
-  const [chartOptions, setChartOptions] = useState({});
+  const [chartData, setChartData] = useState([]);
+  const [chartOptions, setChartOptions] = useState(options1);
 
   useEffect(() => {
     async function getTelemetryData() {
-
       await fetch(endpoints.dataServiceEndpoint, {
-        method: "get",
+        method: 'get',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       })
         .then((response) => {
           if (response.status == 200) {
             response.json().then((docs) => {
-
-              const labels = docs.Docs.reduce((labels, obj) => {
-                labels.push(obj._id)
-                return labels;
-              }, []);
-
               const vpdReadings = docs.Docs.reduce((vpdReadings, obj) => {
-                var vpd = obj.vpd
-                vpdReadings.push(vpd)
+                var vpd = { group: 'VPD', date: obj._id, value: obj.vpd };
+                vpdReadings.push(vpd);
                 return vpdReadings;
               }, []);
 
-              const documentStyle = getComputedStyle(document.documentElement);
-              const textColor = documentStyle.getPropertyValue('--text-color');
-              const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-              const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-              const data = {
-                labels: labels,
+              console.log(JSON.stringify(vpdReadings));
 
-                datasets: [
-                  {
-                    label: 'Vapor Pressure Deficit.  Plant stress below 0.4 or over 1.6',
-                    data: vpdReadings,
-                    fill: false,
-                    borderColor: documentStyle.getPropertyValue('--blue-500'),
-                    tension: 0.4
-                  }
-                ]
-              };
-              const options = {
-                maintainAspectRatio: false,
-                aspectRatio: 0.6,
-                plugins: {
-                  legend: {
-                    labels: {
-                      color: textColor
-                    }
-                  }
-                },
-                scales: {
-                  x: {
-                    ticks: {
-                      color: textColorSecondary
-                    },
-                    grid: {
-                      color: surfaceBorder
-                    }
-                  },
-                  y: {
-                    ticks: {
-                      color: textColorSecondary
-                    },
-                    grid: {
-                      color: surfaceBorder
-                    }
-                  }
-                }
-              };
-
-              setChartData(data);
-              setChartOptions(options);
+              setChartData(vpdReadings);
+              setChartOptions(options1);
             }, []);
-
           }
         })
         .catch((err) => {
           console.log(err);
-          return (
-            <Grid className="temphum-page">
-              Loading
-            </Grid>
-          );
+          return <Grid>Loading</Grid>;
         });
-
 
       setLoading(false);
     }
@@ -105,22 +50,17 @@ function VpdPage() {
   }, []);
 
   if (loading) {
-    return (
-      <Grid className="vpd-page">
-        Loading
-      </Grid>
-    );
+    return <Grid>Loading</Grid>;
   }
 
   if (error) {
-    return `Error! ${error}`;
+    return <Grid>{error};</Grid>;
   }
 
   return (
-    <div className="vpd-page">
-      <Chart type="line" data={chartData} options={chartOptions} />
-    </div>
-  )
-
+    <Grid>
+      <LineChart data={chartData} options={chartOptions} />
+    </Grid>
+  );
 }
 export default VpdPage;

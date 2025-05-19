@@ -1,120 +1,64 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  Link,
-  DataTableSkeleton,
-  Pagination,
-  Column,
-  Grid,
-} from '@carbon/react';
-import { Chart } from 'primereact/chart';
-const endpoints = require('../endpoints.js')
+import { Grid } from '@carbon/react';
+//import { Chart } from 'primereact/chart';
+import { LineChart } from '@carbon/charts-react';
+import options1 from './options.js';
+import '@carbon/charts-react/styles.css';
+const endpoints = require('../endpoints.js');
 
 function TempHumPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
-  const [chartData, setChartData] = useState({});
-  const [chartOptions, setChartOptions] = useState({});
-
+  const [chartData, setChartData] = useState([]);
+  const [chartOptions, setChartOptions] = useState(options1);
 
   useEffect(() => {
     async function getTelemetryData() {
-
       await fetch(endpoints.dataServiceEndpoint, {
-        method: "get",
+        method: 'get',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       })
         .then((response) => {
           if (response.status == 200) {
             response.json().then((docs) => {
-              //setRows(getRowItems(data.Docs));
-
-              const labels = docs.Docs.reduce((labels, obj) => {
-                labels.push(obj._id)
-                return labels;
-              }, []);
-
-              const temperatureReadings = docs.Docs.reduce((temperature, obj) => {
-                temperature.push(obj.temperature)
-                return temperature;
-              }, []);
+              const temperatureReadings = docs.Docs.reduce(
+                (temperature, obj) => {
+                  var temp = {
+                    group: 'Temperature',
+                    date: obj._id,
+                    value: obj.temperature,
+                  };
+                  temperature.push(temp);
+                  return temperature;
+                },
+                []
+              );
 
               const humidityReadings = docs.Docs.reduce((humidity, obj) => {
-                humidity.push(obj.humidity)
+                var hum = {
+                  group: 'Humidity',
+                  date: obj._id,
+                  value: obj.humidity,
+                };
+                humidity.push(hum);
                 return humidity;
               }, []);
 
-              const documentStyle = getComputedStyle(document.documentElement);
-              const textColor = documentStyle.getPropertyValue('--text-color');
-              const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-              const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-              const data = {
-                labels: labels,
-                datasets: [
-                  {
-                    label: 'Degrees C',
-                    data: temperatureReadings,
-                    fill: false,
-                    borderColor: documentStyle.getPropertyValue('--blue-500'),
-                    tension: 0.4
-                  },
-                  {
-                    label: 'Humidity %',
-                    data: humidityReadings,
-                    fill: false,
-                    borderColor: documentStyle.getPropertyValue('--red-500'),
-                    tension: 0.4
-                  }
-                ]
-              };
-              const options = {
-                maintainAspectRatio: false,
-                aspectRatio: 0.6,
-                plugins: {
-                  legend: {
-                    labels: {
-                      color: textColor
-                    }
-                  }
-                },
-                scales: {
-                  x: {
-                    ticks: {
-                      color: textColorSecondary
-                    },
-                    grid: {
-                      color: surfaceBorder
-                    }
-                  },
-                  y: {
-                    ticks: {
-                      color: textColorSecondary
-                    },
-                    grid: {
-                      color: surfaceBorder
-                    }
-                  }
-                }
-              };
+              const mergedData = temperatureReadings.concat(humidityReadings);
 
-              setChartData(data);
-              setChartOptions(options);
+              setChartData(mergedData);
+              setChartOptions(options1);
             }, []);
-
           }
         })
         .catch((err) => {
           console.log(err);
-          return (
-            <Grid className="temphum-page">
-              Loading
-            </Grid>
-          );
+          return <Grid>{err}</Grid>;
         });
-
 
       setLoading(false);
     }
@@ -123,24 +67,17 @@ function TempHumPage() {
   }, []);
 
   if (loading) {
-    return (
-      <Grid className="temphum-page">
-        Loading
-      </Grid>
-    );
+    return <Grid>Loading</Grid>;
   }
 
   if (error) {
-    return `Error! ${error}`;
+    return <Grid>{error};</Grid>;
   }
 
   return (
-    <Grid className="temphum-page">
-    <div className="card">
-      <Chart type="line" data={chartData} options={chartOptions} />
-    </div>
+    <Grid>
+      <LineChart data={chartData} options={chartOptions} />
     </Grid>
-  )
-
+  );
 }
 export default TempHumPage;
