@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Grid } from '@carbon/react';
-//import { Chart } from 'primereact/chart';
+import { Grid, Loading } from '@carbon/react';
 import { LineChart } from '@carbon/charts-react';
 import options1 from './options.js';
 import '@carbon/charts-react/styles.css';
@@ -50,7 +49,7 @@ function VpdPage() {
   }, []);
 
   if (loading) {
-    return <Grid>Loading</Grid>;
+    return <Loading active className="some-class" description="Loading" />;
   }
 
   if (error) {
