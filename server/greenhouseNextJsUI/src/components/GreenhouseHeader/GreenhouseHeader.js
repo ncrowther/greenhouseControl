@@ -56,7 +56,7 @@ const GreenhouseHeader = () => (
           <SideNavItems>
             <HeaderSideNavItems>
               <Link href="/temphum" passHref legacyBehavior>
-                <HeaderMenuItem>Temperature/Humidity</HeaderMenuItem>
+                <HeaderMenuItem>Climate</HeaderMenuItem>
               </Link>
               <Link href="/vpd" passHref legacyBehavior>
                 <HeaderMenuItem>Vpd</HeaderMenuItem>
@@ -64,11 +64,8 @@ const GreenhouseHeader = () => (
               <Link href="/co2" passHref legacyBehavior>
                 <HeaderMenuItem>Co2</HeaderMenuItem>
               </Link>
-              <Link href="/timelapse1" passHref legacyBehavior>
-                <HeaderMenuItem>Cam 1</HeaderMenuItem>
-              </Link>
-              <Link href="/timelapse2" passHref legacyBehavior>
-                <HeaderMenuItem>Cam 2</HeaderMenuItem>
+              <Link href="/timelapse" passHref legacyBehavior>
+                <HeaderMenuItem>Cam</HeaderMenuItem>
               </Link>
               <Link href="/telemetry" passHref legacyBehavior>
                 <HeaderMenuItem>Telemetry</HeaderMenuItem>
