@@ -47,7 +47,32 @@ function TempHumPage() {
                 return humidity;
               }, []);
 
-              const mergedData = temperatureReadings.concat(humidityReadings);
+              const vpd_normalization = 10;
+              const vpdReadings = docs.Docs.reduce((vpdReadings, obj) => {
+                var vpd = {
+                  group: 'Vpd',
+                  date: obj._id,
+                  value: obj.vpd * vpd_normalization,
+                };
+                vpdReadings.push(vpd);
+                return vpdReadings;
+              }, []);
+
+              const co2_normalization = 10;
+              const co2Readings = docs.Docs.reduce((co2Readings, obj) => {
+                var co2 = {
+                  group: 'Co2',
+                  date: obj._id,
+                  value: obj.co2 / co2_normalization,
+                };
+                co2Readings.push(co2);
+                return co2Readings;
+              }, []);
+
+              const mergedData = temperatureReadings
+                .concat(humidityReadings)
+                .concat(vpdReadings)
+                .concat(co2Readings);
 
               setChartData(mergedData);
               setChartOptions(options1);

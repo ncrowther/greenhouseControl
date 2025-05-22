@@ -33,13 +33,7 @@ const GreenhouseHeader = () => (
         </Link>
         <HeaderNavigation aria-label="Carbon Tutorial">
           <Link href="/temphum" passHref legacyBehavior>
-            <HeaderMenuItem>Climate</HeaderMenuItem>
-          </Link>
-          <Link href="/vpd" passHref legacyBehavior>
-            <HeaderMenuItem>Vpd</HeaderMenuItem>
-          </Link>
-          <Link href="/co2" passHref legacyBehavior>
-            <HeaderMenuItem>Co2</HeaderMenuItem>
+            <HeaderMenuItem>Chart</HeaderMenuItem>
           </Link>
           <Link href="/timelapse" passHref legacyBehavior>
             <HeaderMenuItem>Cam</HeaderMenuItem>
@@ -56,13 +50,7 @@ const GreenhouseHeader = () => (
           <SideNavItems>
             <HeaderSideNavItems>
               <Link href="/temphum" passHref legacyBehavior>
-                <HeaderMenuItem>Climate</HeaderMenuItem>
-              </Link>
-              <Link href="/vpd" passHref legacyBehavior>
-                <HeaderMenuItem>Vpd</HeaderMenuItem>
-              </Link>
-              <Link href="/co2" passHref legacyBehavior>
-                <HeaderMenuItem>Co2</HeaderMenuItem>
+                <HeaderMenuItem>Chart</HeaderMenuItem>
               </Link>
               <Link href="/timelapse" passHref legacyBehavior>
                 <HeaderMenuItem>Cam</HeaderMenuItem>
