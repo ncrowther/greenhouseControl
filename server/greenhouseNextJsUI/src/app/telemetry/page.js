@@ -8,7 +8,7 @@ import {
   Column,
   Grid,
 } from '@carbon/react';
-const endpoints = require('../endpoints.js')
+const endpoints = require('../endpoints.js');
 
 import React, { useEffect, useState } from 'react';
 
@@ -22,8 +22,12 @@ const headers = [
     header: 'Humidity',
   },
   {
-    key: 'temperature',
-    header: 'Temperature',
+    key: 'airTemperature',
+    header: 'Air Temperature',
+  },
+  {
+    key: 'leafTemperature',
+    header: 'Leaf Temperature',
   },
   {
     key: 'co2',
@@ -32,7 +36,7 @@ const headers = [
   {
     key: 'vpd',
     header: 'Vpd',
-  }
+  },
 ];
 
 const LinkList = ({ url, homepageUrl }) => (
@@ -50,10 +54,13 @@ const LinkList = ({ url, homepageUrl }) => (
 );
 
 const getRowItems = (rows) =>
-  rows.slice(0).reverse().map((row) => ({
-    id: row._id,
-    ...row,
-  }));
+  rows
+    .slice(0)
+    .reverse()
+    .map((row) => ({
+      id: row._id,
+      ...row,
+    }));
 
 function RepoPage() {
   const [firstRowIndex, setFirstRowIndex] = useState(0);
@@ -64,11 +71,10 @@ function RepoPage() {
 
   useEffect(() => {
     async function getData() {
-
       await fetch(`${endpoints.dataServiceEndpoint}`, {
-        method: "get",
+        method: 'get',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       })
         .then((response) => {
@@ -82,7 +88,6 @@ function RepoPage() {
           console.log(err);
           setError('Error obtaining repository data');
         });
-
 
       setLoading(false);
     }
@@ -111,10 +116,7 @@ function RepoPage() {
   return (
     <Grid className="repo-page">
       <Column lg={16} md={8} sm={4} className="repo-page__r1">
-        <TelemetryTable
-          headers={headers}
-          rows={rows}
-        />
+        <TelemetryTable headers={headers} rows={rows} />
         <Pagination
           totalItems={rows.length}
           backwardText="Previous page"

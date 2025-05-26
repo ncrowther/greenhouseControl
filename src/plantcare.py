@@ -398,16 +398,15 @@ class Pump(OnOFFAutoController):
     def control(self, temperature, rtc):
         
         MIN_WATERING_TEMP = 10
+        WATERING_PERIOD = 30 # seconds
+        
         timeNow = rtc.getTimeStr()
         
         print("Pump state %s" %self.status())    
         
-        if ( (temperature > MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):
-            t = int(pow(temperature, 3) * 3)
-            wateringPeriod = int(t/1000)
-                            
+        if ( (temperature > MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):            
             self.setState(OnOffState.ON)                          
-            self.watering(wateringPeriod)         
+            self.watering(WATERING_PERIOD)         
      
     def setTimes(self, wateringTimes):
         self.WATERING_TIMES = wateringTimes

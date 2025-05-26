@@ -205,7 +205,6 @@ class PlantServer(object):
         
         print('Start logger...')
         
-        timestamp = "DATA SERVICE ERROR"
         try: 
         
             self.connect_to_network()
@@ -224,7 +223,6 @@ class PlantServer(object):
             
             
     # This code is a function that logs data to the Greenhouse Data Service. 
-    # The response from the server is returned that includes timestamp
     def logData(self, airTemperature, leafTemperature, humidity, co2, vpd):
         
         print("Logging data...")

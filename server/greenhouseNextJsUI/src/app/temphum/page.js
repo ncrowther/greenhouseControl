@@ -24,15 +24,28 @@ function TempHumPage() {
         .then((response) => {
           if (response.status == 200) {
             response.json().then((docs) => {
-              const temperatureReadings = docs.Docs.reduce(
-                (temperature, obj) => {
+              const airTemperatureReadings = docs.Docs.reduce(
+                (airTemperature, obj) => {
                   var temp = {
-                    group: 'Temperature',
+                    group: 'airTemperature',
                     date: obj._id,
-                    value: obj.temperature,
+                    value: obj.airTemperature,
                   };
-                  temperature.push(temp);
-                  return temperature;
+                  airTemperature.push(temp);
+                  return airTemperature;
+                },
+                []
+              );
+
+              const leafTemperatureReadings = docs.Docs.reduce(
+                (leafTemperature, obj) => {
+                  var temp = {
+                    group: 'leafTemperature',
+                    date: obj._id,
+                    value: obj.leafTemperature,
+                  };
+                  leafTemperature.push(temp);
+                  return leafTemperature;
                 },
                 []
               );
@@ -69,7 +82,8 @@ function TempHumPage() {
                 return co2Readings;
               }, []);
 
-              const mergedData = temperatureReadings
+              const mergedData = airTemperatureReadings
+                .concat(leafTemperatureReadings)
                 .concat(humidityReadings)
                 .concat(vpdReadings)
                 .concat(co2Readings);
