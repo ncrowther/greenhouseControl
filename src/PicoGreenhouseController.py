@@ -9,7 +9,7 @@ import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
-GREENHOUSE_DATASERVICE = 'https://foxhound-hip-initially.ngrok-free.app' #'http://192.168.1.33:3000' 
+GREENHOUSE_DATASERVICE = 'http://192.168.1.33:3000' 
         
 """
 This code is a Python program that controls a plant care system. 
@@ -32,6 +32,7 @@ class PlantServer(object):
         if self.ipAddress == None:
             self.plantCare = PlantCare(None)         
             self.displayError(99, "No WIFI")
+            halt
         else:
             self.plantCare = PlantCare(self.ipAddress)
             
@@ -44,43 +45,36 @@ class PlantServer(object):
     Returns:
     str: The IP address of the connected network.
     """    
-    def connect_to_network(self):
-
-        print('Check Network...')    
+    def connect_to_network(self):  
         
-        # Check if already connected
-        print("Connect to Wi-Fi....")
+        try:        
+            # Check if already connected
+            print("Connect to Wi-Fi....")
+            
+            self.wlan.active(True)
+            self.wlan.config(pm = 0xa11140) # Disable power-save mode
+            self.wlan.connect(self.ssid, self.password)
         
-        self.wlan.active(True)
-        self.wlan.config(pm = 0xa11140) # Disable power-save mode
-        self.wlan.connect(self.ssid, self.password)
+            while True:
 
-        attempt = 0
-        MAX_TRIES = 50
-        
-        while True:
-            #if self.wlan.status() < 0 or self.wlan.status() >= 3:
-            #   break
-            #max_wait -= 1
-            print('waiting for connection...')
-            time.sleep(2)
+                print('waiting for connection...')
+                time.sleep(6)
 
-            if self.wlan.status() != 3:
-                print('Network connection failed') 
-            else:
-                print('********************************************WIFI CONNECTED')
-                status = self.wlan.ifconfig()
-                ip = status[0]
-                print('ip = ' + ip)
-                self.ipAddress = ip
+                if (self.wlan.status() == 3):                        
+                    print('******** WIFI CONNECTED ********')
+
+                    status = self.wlan.ifconfig()
+                    ip = status[0]
+                    print('ip = ' + ip)
+                    self.ipAddress = ip
                     
-                status = self.wlan.ifconfig()
-                return status[0]
-        
-            if (attempt < MAX_TRIES):
-                attempt = attempt + 1
-            else:
-                return None
+                    print('IP address: '  + self.ipAddress)
+                    
+                    return self.ipAddress
+            
+        except Exception as e:
+            print('Attempting connection') 
+
         
     """
     Configure the plant care system based on the configuration stored in the Greenhouse Data Service.
@@ -103,14 +97,16 @@ class PlantServer(object):
         try:
             resp = get( request_url, timeout=200)
             response = resp.text
-            
-            print(response)
             resp.close()
             
+            print("************RESPONSE **********" + response)
+      
             jsonData = json.loads(response)
             print(jsonData)
+            
             timestamp = jsonData["timestamp"]
             print("timestamp: " + timestamp)
+            
             # Config stored inside doc          
             doc = jsonData["doc"]
 
@@ -214,12 +210,11 @@ class PlantServer(object):
         
             self.connect_to_network()
                              
-            time = self.plantCare.getSystemTime()
             temperatureData = self.plantCare.getTemperatureData()
             humidityData = self.plantCare.getHumidityData()
             co2Data = self.plantCare.getCo2Data()
             vpd = self.plantCare.getVpdData()
-            self.logData(time, temperatureData[0], temperatureData[1], humidityData[0], co2Data[0], vpd)
+            self.logData(temperatureData[0], temperatureData[1], humidityData[0], co2Data[0], vpd)
                 
         except Exception as err:
             sys.print_exception(err)
@@ -230,16 +225,15 @@ class PlantServer(object):
             
     # This code is a function that logs data to the Greenhouse Data Service. 
     # The response from the server is returned that includes timestamp
-    def logData(self, timestamp, airTemperature, leafTemperature, humidity, co2, vpd):
+    def logData(self, airTemperature, leafTemperature, humidity, co2, vpd):
         
-        print("Logging data at " + str(timestamp))
+        print("Logging data...")
         
         header = {
           'Content-Type': 'application/json',
           }
         
         payload = json.dumps({
-          "timestamp": timestamp,
           "airTemperature": airTemperature,
           "leafTemperature": leafTemperature,          
           "humidity": humidity,
