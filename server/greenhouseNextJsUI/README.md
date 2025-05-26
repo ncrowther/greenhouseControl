@@ -8,6 +8,7 @@ UI using IBM Carbon Design System React components.
 
 Build and start
 
+Enter Bash shell.
 Install the Next.js app’s dependencies with:
 
 yarn
