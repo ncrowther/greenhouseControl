@@ -9,7 +9,7 @@ import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
-GREENHOUSE_DATASERVICE = 'http://192.168.1.33:3000' #'https://e577-195-149-14-243.ngrok-free.app' #https://ph8pr72f-3000.uks1.devtunnels.ms' #'https://lz4fm5hn-3000.uks1.devtunnels.ms'
+GREENHOUSE_DATASERVICE = 'https://foxhound-hip-initially.ngrok-free.app' #'http://192.168.1.33:3000' 
         
 """
 This code is a Python program that controls a plant care system. 
@@ -219,7 +219,7 @@ class PlantServer(object):
             humidityData = self.plantCare.getHumidityData()
             co2Data = self.plantCare.getCo2Data()
             vpd = self.plantCare.getVpdData()
-            self.logData(time, temperatureData[0], humidityData[0], co2Data[0], vpd)
+            self.logData(time, temperatureData[0], temperatureData[1], humidityData[0], co2Data[0], vpd)
                 
         except Exception as err:
             sys.print_exception(err)
@@ -229,8 +229,8 @@ class PlantServer(object):
             
             
     # This code is a function that logs data to the Greenhouse Data Service. 
-    # The response from the server is returned.
-    def logData(self, timestamp, temperature, humidity, co2, vpd):
+    # The response from the server is returned that includes timestamp
+    def logData(self, timestamp, airTemperature, leafTemperature, humidity, co2, vpd):
         
         print("Logging data at " + str(timestamp))
         
@@ -240,7 +240,8 @@ class PlantServer(object):
         
         payload = json.dumps({
           "timestamp": timestamp,
-          "temperature": temperature,
+          "airTemperature": airTemperature,
+          "leafTemperature": leafTemperature,          
           "humidity": humidity,
           "co2": co2,
           "vpd": vpd

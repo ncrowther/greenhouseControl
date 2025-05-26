@@ -8,7 +8,7 @@
 Raspberry Pico Driver for the Sensirion MLX90614 Temperature Sensor
 
 
-* Author(s): Nigel T. Crowther
+* Author(s): Adapted for Pico by Nigel T. crowther.  Original from Pimoroni for Raspbery Pi  
 * Date: 13-Feb-2025
 
 
@@ -133,6 +133,11 @@ class MLX90614:
     def get_obj_temp(self):
         data = self.read_reg(self.MLX90614_TOBJ1)
         return self.data_to_temp(data)
+    
+    def getObjectTemperature(self):
+        objectTemp = round(sensor.get_obj_temp(),2)
+        return objectTemp
+        
     
 if __name__ == "__main__":
     

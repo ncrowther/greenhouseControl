@@ -110,19 +110,18 @@ function TimelapsePage(camId) {
         item={itemTemplate}
         thumbnail={thumbnailTemplate}
         circular
-        autoPlay
         transitionInterval={timelapsePeriod}
       />
       <br></br>
       <Galleria
         value={images2}
+        activeIndex={0}
         responsiveOptions={responsiveOptions}
         numVisible={5}
         style={{ maxWidth: '480px' }}
         item={itemTemplate}
         thumbnail={thumbnailTemplate}
         circular
-        autoPlay
         transitionInterval={timelapsePeriod}
       />
     </Grid>

@@ -8,9 +8,6 @@
 @use '@/app/telemetry/telemetry-page';
 @use '@/app/config/config-page';
 @use '@/app/temphum/temphum-page';
-@use '@/app/vpd/vpd-page';
-@use '@/app/status/status-page';
-@use '@/app/co2/co2-page';
 @use '@/app/timelapse/timelapse-page';
 
 /// Remove overrides once Carbon bugs are fixed upstream.

@@ -653,8 +653,8 @@ class PlantCare(object):
     
 
     # define temperature range
-    MIN_TEMPERATURE  = 20
-    MAX_TEMPERATURE = 40
+    MIN_TEMPERATURE  = 15
+    MAX_TEMPERATURE = 30
         
     def __init__(self, ip):
         
@@ -755,7 +755,8 @@ class PlantCare(object):
         return self.heater.settings()        
         
     def getTemperatureData(self):
-        return [self.probe.temperature, self.probe.highTemp, self.probe.lowTemp]
+        # Air temp in [0] and leaf temp in [1]
+        return [self.probe.temperature, self.heatSensor.getObjectTemperature(), self.probe.highTemp, self.probe.lowTemp]
     
     def getHumidityData(self):
         return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
@@ -819,7 +820,6 @@ class PlantCare(object):
             print("controlLights...")
             self.light.control(self.rtc)        
             
-         
             #print("read temp and humidity...")
             self.probe.measureIt(self.rtc)
             
@@ -832,8 +832,7 @@ class PlantCare(object):
             humidity = self.probe.humidity
             print("Humidity: "+ str(humidity))
 
-            #leafTemperature = airTemperature - 1.5
-            leafTemperature = round(self.heatSensor.get_obj_temp(),2)
+            leafTemperature = self.heatSensor.getObjectTemperature()
         
             print("Air Temp:",airTemperature,"C")
             print("Leaf Temp:", leafTemperature,"C")
