@@ -13,6 +13,7 @@ from machine_i2c_lcd import I2cLcd
 import breakout_scd41
 from pimoroni_i2c import PimoroniI2C
 from MLX90614 import MLX90614
+import asyncio
 
 #################################################
 ### Greenouse controller for Rasberry Pi Pico ###
@@ -384,29 +385,29 @@ class Pump(OnOFFAutoController):
         self.pump_a.duty_u16(0)
         self.pump_b.duty_u16(0)
               
-    def watering(self, wateringPeriod):
-        print("Watering Period %s seconds " %wateringPeriod )    
-        time.sleep(wateringPeriod)
+    async def watering(self, wateringPeriod):
+        print("Watering Period %s seconds " %wateringPeriod )
+        
+        self.setState(OnOffState.ON) 
+        await asyncio.sleep_ms(wateringPeriod)
+        
         print("Watering Period OFF ")
         self.setState(OnOffState.OFF)
         
-        # Sleep for a minute before turning back to AUTO mode so that we dont run again in the same time period
-        time.sleep_ms(ONE_MINUTE)
-        print("Watering sleep Period OFF ")
-        self.setState(OnOffState.AUTO)
+        # Set back to Auto for next time
+        self.setState(OnOffState.AUTO)   
               
     def control(self, temperature, rtc):
         
         MIN_WATERING_TEMP = 10
-        WATERING_PERIOD = 30 # seconds
+        WATERING_PERIOD = 60 # seconds
         
         timeNow = rtc.getTimeStr()
         
         print("Pump state %s" %self.status())    
         
-        if ( (temperature > MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):            
-            self.setState(OnOffState.ON)                          
-            self.watering(WATERING_PERIOD)         
+        if ( (temperature > MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
+            asyncio.create_task(self.watering(WATERING_PERIOD))
      
     def setTimes(self, wateringTimes):
         self.WATERING_TIMES = wateringTimes
