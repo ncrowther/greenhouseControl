@@ -116,12 +116,7 @@ class PlantServer(object):
             plantCare.setLightOnOffTime(onTime, offTime)
             
             lightState = doc["lightState"]
-            plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState      
-
-            wateringTimes = doc["wateringTimes"]
-            wateringPeriod = doc["wateringPeriod"]
-            wateringMinTemp = doc["wateringMinTemp"]            
-            plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)            
+            plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState                
             
             pumpState = doc["pumpState"]
             plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
@@ -136,7 +131,12 @@ class PlantServer(object):
             plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
             
             temperatureRange = doc["temperatureRange"]            
-            plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])            
+            plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
+            
+            wateringTimes = doc["wateringTimes"]
+            wateringPeriod = 600 #doc["wateringPeriod"]
+            wateringMinTemp = 10 #doc["wateringMinTemp"]            
+            plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)              
         
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
@@ -282,3 +282,4 @@ def main():
         #machine.reset()
 
 main()
+

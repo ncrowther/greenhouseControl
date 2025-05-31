@@ -71,8 +71,8 @@ class OnOFFAutoController:
             self.on()
         elif (state == OnOffState.OFF):
             self.off()
-        elif (state == OnOffState.AUTO):
-            self.off()                 
+        #elif (state == OnOffState.AUTO):
+            # Do nothing               
    
         self.state = state                    
             
@@ -343,6 +343,8 @@ class LinearActuator(object):
         
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 2
+        
+        print("Window control: " + self.status()  + " " + str(temperature) + ">" + str(maxTemperature))
         
         # Open
         if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
@@ -657,7 +659,7 @@ class PlantCare(object):
 
     # define temperature range
     MIN_TEMPERATURE  = 15
-    MAX_TEMPERATURE = 30
+    MAX_TEMPERATURE = 24
         
     def __init__(self, ip):
         
