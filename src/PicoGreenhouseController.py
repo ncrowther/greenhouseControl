@@ -282,5 +282,3 @@ def main():
         #machine.reset()
 
 main()
-
-

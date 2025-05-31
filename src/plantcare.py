@@ -407,8 +407,8 @@ class Pump(OnOFFAutoController):
         
         print("Pump state %s" %self.status())    
         
-        if ( (temperature > MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
-            asyncio.create_task(self.watering(WATERING_PERIOD))
+        if ( (temperature > self.MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
+            asyncio.create_task(self.watering(self.WATERING_PERIOD))
      
     def setTimes(self, wateringTimes, period, minTemp):
         self.WATERING_TIMES = wateringTimes
@@ -878,5 +878,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
