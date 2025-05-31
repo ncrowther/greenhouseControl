@@ -70,7 +70,9 @@ class OnOFFAutoController:
         if (state == OnOffState.ON):
             self.on()
         elif (state == OnOffState.OFF):
-            self.off()            
+            self.off()
+        elif (state == OnOffState.AUTO):
+            self.off()                 
    
         self.state = state                    
             
@@ -389,7 +391,7 @@ class Pump(OnOFFAutoController):
         print("Watering Period %s seconds " %wateringPeriod )
         
         self.setState(OnOffState.ON) 
-        await asyncio.sleep_ms(wateringPeriod)
+        await asyncio.sleep_ms(wateringPeriod * 1000)
         
         print("Watering Period OFF ")
         self.setState(OnOffState.OFF)
