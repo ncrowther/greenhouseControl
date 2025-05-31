@@ -367,6 +367,8 @@ class Pump(OnOFFAutoController):
 
     #### DEFINE WATERING TIMES HERE ####
     WATERING_TIMES = ["10:00", "12:00", "21:00"]
+    WATERING_PERIOD = 600 # seconds
+    MIN_WATERING_TEMP = 10
 
     def __init__(self):
         #Define pins for Pump
@@ -400,10 +402,7 @@ class Pump(OnOFFAutoController):
         self.setState(OnOffState.AUTO)   
               
     def control(self, temperature, rtc):
-        
-        MIN_WATERING_TEMP = 10
-        WATERING_PERIOD = 60 # seconds
-        
+
         timeNow = rtc.getTimeStr()
         
         print("Pump state %s" %self.status())    
@@ -411,8 +410,10 @@ class Pump(OnOFFAutoController):
         if ( (temperature > MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
             asyncio.create_task(self.watering(WATERING_PERIOD))
      
-    def setTimes(self, wateringTimes):
+    def setTimes(self, wateringTimes, period, minTemp):
         self.WATERING_TIMES = wateringTimes
+        self.WATERING_PERIOD = period
+        self.MIN_WATERING_TEMP = minTemp
        
 class Co2Probe(object):
   
@@ -791,8 +792,15 @@ class PlantCare(object):
         self.MIN_TEMPERATURE = min
         self.MAX_TEMPERATURE = max        
     
-    def setWateringTimes(self, wateringTimes):
-        self.pump.setTimes(wateringTimes)
+    def setWateringTimes(self, wateringTimes, period, minTemp):
+        
+        if (period == None):
+            period = 600 # Seconds
+            
+        if (minTemp == None):
+            minTemp = 10 # C
+            
+        self.pump.setTimes(wateringTimes, period, minTemp)
     
     def displayError(self, code, message):
         self.lcd.showError(code, message)

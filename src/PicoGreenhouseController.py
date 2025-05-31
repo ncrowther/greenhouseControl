@@ -118,8 +118,10 @@ class PlantServer(object):
             lightState = doc["lightState"]
             plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState      
 
-            wateringTimes = doc["wateringTimes"]       
-            plantCare.setWateringTimes(wateringTimes)            
+            wateringTimes = doc["wateringTimes"]
+            wateringPeriod = doc["wateringPeriod"]
+            wateringMinTemp = doc["wateringMinTemp"]            
+            plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)            
             
             pumpState = doc["pumpState"]
             plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
