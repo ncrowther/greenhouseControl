@@ -344,6 +344,7 @@ class LinearActuator(object):
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 2
         
+        #maxTemperature = 20
         print("Window control: " + self.status()  + " " + str(temperature) + ">" + str(maxTemperature))
         
         # Open
@@ -368,9 +369,8 @@ class Pump(OnOFFAutoController):
     # PWM dual power switch
 
     #### DEFINE WATERING TIMES HERE ####
-    WATERING_TIMES = ["10:00", "12:00", "21:00"]
-    WATERING_PERIOD = 600 # seconds
-    MIN_WATERING_TEMP = 10
+    WATERING_TIMES = [10, 13, 21]
+    WATERING_PERIOD = 20 # minutes
 
     def __init__(self):
         #Define pins for Pump
@@ -404,18 +404,38 @@ class Pump(OnOFFAutoController):
         self.setState(OnOffState.AUTO)   
               
     def control(self, temperature, rtc):
+        
+        print("Pump state %s" %self.status())
+        
+        if (OnOffState.AUTO == self.status()):
 
-        timeNow = rtc.getTimeStr()
+            for h in self.WATERING_TIMES:
+                                
+                # Define pump on/off time
+                PUMP_ON_HOUR  = h # 24 hour
+ 
+                PUMP_ON_TIME  = time.mktime((2000, 01, 01, PUMP_ON_HOUR, 00, 00, 0, 0))
+                PUMP_OFF_TIME = time.mktime((2000, 01, 01, PUMP_ON_HOUR, self.WATERING_PERIOD, 00, 0, 0))                     
+                print("Pump on: " + str(PUMP_ON_HOUR)+ "h for " + str(self.WATERING_PERIOD) + "m")
+                    
+                if (rtc.timeInRange(PUMP_ON_TIME, PUMP_OFF_TIME)):
+                    print("Pump time on %s" %h)
+                    self.setState(OnOffState.ON)          
+                    self.setState(OnOffState.AUTO)
+                    return
+                    
+                if (not rtc.timeInRange(PUMP_ON_TIME, PUMP_OFF_TIME)):
+                    print("Pump time off %s" %h)
+                    self.setState(OnOffState.OFF)
+                    self.setState(OnOffState.AUTO)
+                               
         
-        print("Pump state %s" %self.status())    
-        
-        if ( (temperature > self.MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
-            asyncio.create_task(self.watering(self.WATERING_PERIOD))
+        #if ( (temperature > self.MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
+         #   asyncio.create_task(self.watering(self.WATERING_PERIOD))
      
     def setTimes(self, wateringTimes, period, minTemp):
         self.WATERING_TIMES = wateringTimes
         self.WATERING_PERIOD = period
-        self.MIN_WATERING_TEMP = minTemp
        
 class Co2Probe(object):
   

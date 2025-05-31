@@ -134,8 +134,8 @@ class PlantServer(object):
             plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
             
             wateringTimes = doc["wateringTimes"]
-            wateringPeriod = 600 #doc["wateringPeriod"]
-            wateringMinTemp = 10 #doc["wateringMinTemp"]            
+            wateringPeriod = 20 #doc["wateringPeriod"] mins
+            wateringMinTemp = 10 #doc["wateringMinTemp"]     C       
             plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)              
         
         except Exception as e:
