@@ -189,7 +189,7 @@ class PlantServer(object):
             print("TIME: " + str(timestamp))
             
             # If there is no timestamp, dont log, otherwise log every LOG_TIME mins
-            if (timestamp && (count % LOG_TIME == 0)):
+            if (timestamp and (count % LOG_TIME == 0)):
                 self.plantCare.setDateTime(timestamp)
                 self.logger()                    
                 
