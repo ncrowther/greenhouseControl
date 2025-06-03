@@ -22,9 +22,9 @@ import asyncio
 #################################################
 
 # Define midnight reset period
-RESET_HOUR = 00 # 24 hour
-RESET_ON_TIME  = time.mktime((2000, 01, 01, RESET_HOUR, 00, 00, 0, 0))
-RESET_OFF_TIME = time.mktime((2000, 01, 01, RESET_HOUR, 01, 00, 0, 0))
+RESET_HOUR = 0 # 24 hour
+RESET_ON_TIME  = time.mktime((2000, 1, 1, RESET_HOUR, 0, 0, 0, 0))
+RESET_OFF_TIME = time.mktime((2000, 1, 1, RESET_HOUR, 1, 0, 0, 0))
 
 # Define millisecond amounts
 ONE_MINUTE = 60000
@@ -235,10 +235,10 @@ class LightSwitch(OnOFFAutoController):
     # Relay light switch
 
     # Define light on and off times
-    LIGHT_ON_HOUR  = 09 # 24 hour
+    LIGHT_ON_HOUR  = 9 # 24 hour
     LIGHT_OFF_HOUR = 19 # 24 hour
-    LIGHT_ON_TIME  = time.mktime((2000, 01, 01, LIGHT_ON_HOUR, 00, 00, 0, 0))
-    LIGHT_OFF_TIME = time.mktime((2000, 01, 01, LIGHT_OFF_HOUR, 00, 00, 0, 0))
+    LIGHT_ON_TIME  = time.mktime((2000, 1, 1, LIGHT_ON_HOUR, 0, 0, 0, 0))
+    LIGHT_OFF_TIME = time.mktime((2000, 1, 1, LIGHT_OFF_HOUR, 0, 0, 0, 0))
 
     def __init__(self):
         # GPIO pin number  relay is connected to
@@ -250,8 +250,8 @@ class LightSwitch(OnOFFAutoController):
         # redefine light on and off times
         self.LIGHT_ON_HOUR  = int(onTime) # 24 hour
         self.LIGHT_OFF_HOUR = int(offTime) # 24 hour
-        self.LIGHT_ON_TIME  = time.mktime((2000, 01, 01, self.LIGHT_ON_HOUR, 00, 00, 0, 0))
-        self.LIGHT_OFF_TIME = time.mktime((2000, 01, 01, self.LIGHT_OFF_HOUR, 00, 00, 0, 0))                    
+        self.LIGHT_ON_TIME  = time.mktime((2000, 1, 1, self.LIGHT_ON_HOUR, 0, 0, 0, 0))
+        self.LIGHT_OFF_TIME = time.mktime((2000, 1, 1, self.LIGHT_OFF_HOUR, 0, 0, 0, 0))                    
             
     def on(self):
         print("Light ON")
@@ -531,7 +531,7 @@ class Clock(object):
         hour = int("%02x" % hour)
         minute = int("%02x" % minute)   
            
-        timeInSeconds = time.mktime((2000, 01, 01, hour, minute, 00, 0, 0))
+        timeInSeconds = time.mktime((2000, 1, 1, hour, minute, 0, 0, 0))
         
         return timeInSeconds    
     

@@ -149,7 +149,7 @@ class PlantServer(object):
                 resp.close()
                 gc.collect()
                            
-                return timestamp
+                return None
            
     """
     This function displays an error message with a specific code and message.
@@ -188,12 +188,13 @@ class PlantServer(object):
             
             print("TIME: " + str(timestamp))
             
-            self.plantCare.careforplants()
-            
-            if (count % LOG_TIME == 0):
+            # If there is no timestamp, dont log, otherwise log every LOG_TIME mins
+            if (timestamp && (count % LOG_TIME == 0)):
                 self.plantCare.setDateTime(timestamp)
                 self.logger()                    
                 
+            self.plantCare.careforplants()
+            
             time.sleep(SLEEP_TIME)
             
             count = count + 1
@@ -273,7 +274,6 @@ def main():
     try: 
         plantServer = PlantServer()    
         plantServer.care()
-        
 
     except Exception as err:
         sys.print_exception(err)
@@ -282,5 +282,3 @@ def main():
         #machine.reset()
 
 main()
-
-
