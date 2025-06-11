@@ -64,7 +64,7 @@ function TimelapsePage(camId) {
         })
         .catch((err) => {
           console.log(err);
-          return <Grid className="temphum-page">Loading</Grid>;
+          return <Grid className="timelapse-page">Loading</Grid>;
         });
 
       camId = 2;
@@ -83,7 +83,7 @@ function TimelapsePage(camId) {
         })
         .catch((err) => {
           console.log(err);
-          return <Grid className="temphum-page">Loading</Grid>;
+          return <Grid className="timelapse-page">Loading</Grid>;
         });
 
       setLoading(false);
@@ -93,7 +93,7 @@ function TimelapsePage(camId) {
   }, []);
 
   if (loading) {
-    return <Loading active className="some-class" description="Loading" />;
+    return <Loading active className="timelapse-class" description="Loading" />;
   }
 
   if (error) {
@@ -103,7 +103,7 @@ function TimelapsePage(camId) {
   return (
     <Grid className="timelapse-page">
       <Galleria
-        value={images1}
+        value={images2}
         responsiveOptions={responsiveOptions}
         numVisible={5}
         style={{ maxWidth: '480px' }}
@@ -112,9 +112,9 @@ function TimelapsePage(camId) {
         circular
         transitionInterval={timelapsePeriod}
       />
-      <br></br>
+
       <Galleria
-        value={images2}
+        value={images1}
         activeIndex={0}
         responsiveOptions={responsiveOptions}
         numVisible={5}
