@@ -1,7 +1,7 @@
 import sys
 import math
 import traceback
-from machine import Pin, PWM, ADC, I2C
+from machine import Pin, PWM, ADC, I2C, SoftI2C
 import dht
 from micropython_sht20 import sht20
 import time
@@ -14,6 +14,7 @@ import breakout_scd41
 from pimoroni_i2c import PimoroniI2C
 from MLX90614 import MLX90614
 import asyncio
+from bh1750 import BH1750
 
 #################################################
 ### Greenouse controller for Rasberry Pi Pico ###
@@ -28,8 +29,6 @@ RESET_OFF_TIME = time.mktime((2000, 1, 1, RESET_HOUR, 1, 0, 0, 0))
 
 # Define millisecond amounts
 ONE_MINUTE = 60000
-
-# class syntax
 
 class OnOffState():
     ON = "ON"
@@ -65,6 +64,10 @@ class OnOFFAutoController:
         
     def setState(self, state):
         
+        if not hasattr(OnOffState, state) : 
+            print('**Invalid state:' + str(state))
+            return
+        
         print('**Set state:' + str(self.state) + "->" + str(state))
         
         if (state == OnOffState.ON):
@@ -79,6 +82,56 @@ class OnOFFAutoController:
     def status(self):
         return self.state
 
+#
+## BH1750 light lux sensor probe
+#
+class LuxProbe(object):
+  
+    def __init__(self):
+    
+        # setup the I2C communication for the Light sensor
+        I2C_SDA = 20
+        I2C_SCL = 21
+        
+        #  I2C Pins
+        i2c = SoftI2C(scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400000)
+        
+        scan = i2c.scan()
+        print("I2c LED scan: ", scan)
+
+        # Create BH1750 object
+        self.light_sensor = BH1750(bus=i2c, addr=0x23)
+        
+        self.lux = 0        
+        self.highlux = 0
+        self.lowlux = 100
+        
+        
+    def measureIt(self, rtc):   
+    
+        try:
+            print('measureIt lux')
+            
+            self.lux = self.light_sensor.luminance(BH1750.CONT_HIRES_1)
+            
+            # Reset stats at midnight
+            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
+                print("Reset stats")
+                self.highlux = 0
+                self.lowlux = 100000
+                
+            # Set lux high score
+            if (self.lux > self.highlux):
+                self.highlux = self.lux
+            
+            if (self.lux < self.lowlux):
+                self.lowlux = self.lux
+                
+            
+        except Exception as e:
+            print("Error in Lux probe:", e)
+            
+            
 #
 ## SH20 temperature humidity probe
 #
@@ -817,7 +870,7 @@ class PlantCare(object):
     def setWateringTimes(self, wateringTimes, period, minTemp):
         
         if (period == None):
-            period = 600 # Seconds
+            period = 60 # Seconds
             
         if (minTemp == None):
             minTemp = 10 # C
