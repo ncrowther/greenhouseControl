@@ -91,7 +91,7 @@ class PlantServer(object):
         
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
         resp = None
-        timestamp = '2000-01-01T13:14:39.216Z'
+        timestamp = '2000-01-01T00:00:00.000Z'
         
         gc.collect() 
         resp = None
@@ -120,7 +120,7 @@ class PlantServer(object):
                 resp.close()
                 gc.collect()
                            
-                return timestamp
+                return None
 
     """
     Reonfigure the plant care system based on the configuration passed in.
@@ -202,7 +202,7 @@ class PlantServer(object):
             timestamp = self.configure()
             print("************* TIME: " + str(timestamp))
 
-            # If no timestamp, dont log, otherwise log every LOG_TIME mins
+            # If timestamp exists then log every LOG_TIME mins
             if (timestamp and (count % LOG_TIME == 0)):
                 self.logger()
                 self.plantCare.setDateTime(timestamp)

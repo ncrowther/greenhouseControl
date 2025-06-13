@@ -740,6 +740,9 @@ class PlantCare(object):
         self.ip = ip
         self.vpd = 0
         
+        # There is a conflict between the Lux sensor and clock.  Need to init lux first
+        self.luxProbe = LuxProbe()
+                
         self.rtc = Clock()
         
         ## Creat the objects to be controlled
