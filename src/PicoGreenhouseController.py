@@ -32,7 +32,7 @@ class PlantServer(object):
         if self.ipAddress == None:
             self.plantCare = PlantCare(None)         
             self.displayError(99, "No WIFI")
-            halt
+            sys.exit(retval=-1)
         else:
             self.plantCare = PlantCare(self.ipAddress)
             
@@ -85,8 +85,10 @@ class PlantServer(object):
     Returns:
         str: The timestamp of the last successful configuration.
     """
-    def configure(self, plantCare, count):
+    def configure(self):
                
+        plantCare = self.plantCare
+        
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
         resp = None
         timestamp = '2000-01-01T13:14:39.216Z'
@@ -102,41 +104,10 @@ class PlantServer(object):
             print("************RESPONSE **********" + response)
       
             jsonData = json.loads(response)
-            print(jsonData)
-            
             timestamp = jsonData["timestamp"]
-            print("timestamp: " + timestamp)
+            print("timestamp: " + timestamp) 
             
-            # Config stored inside doc          
-            doc = jsonData["doc"]
-
-            lightOnOff = doc["lightOnOff"]
-            onTime = lightOnOff[0]
-            offTime = lightOnOff[1]        
-            plantCare.setLightOnOffTime(onTime, offTime)
-            
-            lightState = doc["lightState"]
-            plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState                
-            
-            pumpState = doc["pumpState"]
-            plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
-            
-            fanState = doc["fanState"]
-            plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState
-            
-            heaterState = doc["heaterState"]
-            plantCare.setHeater(heaterState)  # must be same as PlantCare.OnOffState                
-            
-            windowState = doc["windowState"]
-            plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
-            
-            temperatureRange = doc["temperatureRange"]            
-            plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
-            
-            wateringTimes = doc["wateringTimes"]
-            wateringPeriod = 20 #doc["wateringPeriod"] mins
-            wateringMinTemp = 10 #doc["wateringMinTemp"]     C       
-            plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)              
+            self.reconfigure(plantCare, jsonData)               
         
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
@@ -150,6 +121,48 @@ class PlantServer(object):
                 gc.collect()
                            
                 return timestamp
+
+    """
+    Reonfigure the plant care system based on the configuration passed in.
+
+    Args:
+        plantCare (PlantCare): The plant care system to configure.
+        jsonData: The new configuration
+
+    """
+    def reconfigure(self, plantCare, jsonData):
+            
+            # Config stored inside doc          
+        doc = jsonData["doc"]
+
+        lightOnOff = doc["lightOnOff"]
+        onTime = lightOnOff[0]
+        offTime = lightOnOff[1]        
+        plantCare.setLightOnOffTime(onTime, offTime)
+            
+        lightState = doc["lightState"]
+        plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState                
+            
+        pumpState = doc["pumpState"]
+        plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
+            
+        fanState = doc["fanState"]
+        plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState
+            
+        heaterState = doc["heaterState"]
+        plantCare.setHeater(heaterState)  # must be same as PlantCare.OnOffState                
+            
+        windowState = doc["windowState"]
+        plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
+            
+        temperatureRange = doc["temperatureRange"]            
+        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
+            
+        wateringTimes = doc["wateringTimes"]
+        wateringPeriod = 20 #doc["wateringPeriod"] mins
+        wateringMinTemp = 10 #doc["wateringMinTemp"]     C       
+        plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)
+
            
     """
     This function displays an error message with a specific code and message.
@@ -183,20 +196,19 @@ class PlantServer(object):
         
         while True:
 
+            self.plantCare.careforplants()
+            
             # get config data
-            timestamp = self.configure(self.plantCare, count)
-            
+            timestamp = self.configure()
             print("************* TIME: " + str(timestamp))
-            
-            # If there is no timestamp, dont log, otherwise log every LOG_TIME mins
+
+            # If no timestamp, dont log, otherwise log every LOG_TIME mins
             if (timestamp and (count % LOG_TIME == 0)):
                 self.logger()
                 self.plantCare.setDateTime(timestamp)
-                
-            self.plantCare.careforplants()
-            
+
             time.sleep(SLEEP_TIME)
-            
+
             count = count + 1
                             
         

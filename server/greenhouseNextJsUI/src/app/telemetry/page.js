@@ -37,6 +37,10 @@ const headers = [
     key: 'vpd',
     header: 'Vpd',
   },
+  {
+    key: 'lux',
+    header: 'Lux',
+  },
 ];
 
 const LinkList = ({ url, homepageUrl }) => (

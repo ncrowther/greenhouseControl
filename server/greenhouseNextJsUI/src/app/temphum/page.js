@@ -82,11 +82,27 @@ function TempHumPage() {
                 return co2Readings;
               }, []);
 
+              const luxReadings = docs.Docs.reduce((luxReadings, obj) => {
+                let lux = 0;
+                if (obj.lux > 0) {
+                  lux = Math.sqrt(obj.lux / 4);
+                }
+                var luxPlot = {
+                  group: 'lux',
+                  date: obj._id,
+                  value: lux,
+                };
+
+                luxReadings.push(luxPlot);
+                return luxReadings;
+              }, []);
+
               const mergedData = airTemperatureReadings
                 .concat(leafTemperatureReadings)
                 .concat(humidityReadings)
                 .concat(vpdReadings)
-                .concat(co2Readings);
+                .concat(co2Readings)
+                .concat(luxReadings);
 
               setChartData(mergedData);
               setChartOptions(options1);
