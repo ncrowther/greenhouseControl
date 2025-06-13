@@ -97,7 +97,7 @@ class PlantServer(object):
         resp = None
         response = "ERROR"
         try:
-            resp = get( request_url, timeout=200)
+            resp = get( request_url, timeout=2000)
             response = resp.text
             resp.close()
             
@@ -113,7 +113,7 @@ class PlantServer(object):
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
                 print(resp)
                 resp.close()
-            print(e)
+            print("CONNECTION ERROR " + str(e))
         finally:
             if resp:
                 print(resp)
@@ -190,12 +190,13 @@ class PlantServer(object):
         print('Start care...')
         
         SLEEP_TIME = 5
-        LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
+        LOG_TIME = 1 # 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
         count = 0
         
         while True:
 
+            print("Care")
             self.plantCare.careforplants()
             
             # get config data
@@ -296,6 +297,4 @@ def main():
         #machine.reset()
 
 main()
-
-
 

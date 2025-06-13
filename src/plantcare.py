@@ -921,7 +921,7 @@ class PlantCare(object):
         # Look after plants
         try:
             
-            self.rtc = Clock()           
+            print("clock...")           
             timestamp = self.rtc.getDateTimeStr() 
             print(timestamp)
             
@@ -970,7 +970,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
 
