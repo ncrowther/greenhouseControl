@@ -94,17 +94,18 @@ class LuxProbe(object):
         I2C_SCL = 21
         
         #  I2C Pins
-        i2c = SoftI2C(scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400000)
+        i2c = SoftI2C(scl=Pin(I2C_SCL), sda=Pin(I2C_SDA))
         
         scan = i2c.scan()
-        print("I2c LED scan: ", scan)
+        print("I2c lux scan: ", scan)
 
         # Create BH1750 object
-        self.light_sensor = BH1750(bus=i2c, addr=0x23)
+        self.light_sensor = BH1750(bus=i2c, addr=0x5c)
+        self.light_sensor.reset()
         
         self.lux = 0        
-        self.highlux = 0
-        self.lowlux = 100
+        self.highLux = 0
+        self.lowLux = 100
         
         
     def measureIt(self, rtc):   
@@ -112,21 +113,23 @@ class LuxProbe(object):
         try:
             print('measureIt lux')
             
+            #self.light_sensor.reset()
+            #time.sleep(2)
             self.lux = self.light_sensor.luminance(BH1750.CONT_HIRES_1)
             
             # Reset stats at midnight
-            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
-                print("Reset stats")
-                self.highlux = 0
-                self.lowlux = 100000
+            #if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
+            #    print("Reset stats")
+            #    self.highLux = 0
+            #    self.lowLux = 100000
                 
             # Set lux high score
-            if (self.lux > self.highlux):
-                self.highlux = self.lux
+            if (self.lux > self.highLux):
+                self.highLux = self.lux
             
-            if (self.lux < self.lowlux):
-                self.lowlux = self.lux
-                
+            if (self.lux < self.lowLux):
+                self.lowLux = self.lux
+                    
             
         except Exception as e:
             print("Error in Lux probe:", e)
@@ -672,7 +675,7 @@ class Lcd(object):
         
         self.lcd.putstr("Hello RPi Pico!\n")
         
-    def showData(self, probe, co2probe, rtc, vpd, leafTemperature, airTemperature):
+    def showData(self, probe, co2probe, rtc, vpd, leafTemperature, airTemperature, lux):
                 
         # Display time & temp on the LCD screen
                 
@@ -697,13 +700,13 @@ class Lcd(object):
             self.screen = 2
             
         elif (self.screen == 2):
-            highStr = "Hi: " + str(probe.highTemp) + "C"
-            lowStr =  "Lo: " + str(probe.lowTemp) + "C"
+            highlowStr = "H" + str(probe.highTemp) + " L" + str(probe.lowTemp) + "C"
+            luxStr =  str(lux) + " lux"
             
             self.lcd.clear()
-            self.lcd.putstr(highStr)
+            self.lcd.putstr(highlowStr)
             self.lcd.putstr("\n")
-            self.lcd.putstr(lowStr)                               
+            self.lcd.putstr(luxStr)                               
             self.screen = 3
             
         elif (self.screen == 3):
@@ -743,9 +746,10 @@ class PlantCare(object):
         
         ## Creat the objects to be controlled
         self.light = LightSwitch()
+        
         self.probe = TemperatureHumidityProbe()
         self.co2probe = Co2Probe()
-    
+
         self.pump = Pump()
         self.fan = Fan()
         self.windows = LinearActuator()
@@ -779,6 +783,10 @@ class PlantCare(object):
         
     def setDateTime(self, datetime):              
         # Set internal clock
+        
+        # BUG needto reset the clock
+        self.rtc = Clock()
+        
         # datetime "2024-11-10T19:26:35.927Z"
         if (datetime == None):
             datetime = "2000-01-01T01:01:01.927Z"
@@ -838,9 +846,16 @@ class PlantCare(object):
     
     def getHumidityData(self):
         return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
- 
+  
     def getCo2Data(self):
-        return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]
+        return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]    
+ 
+    def getluxData(self): 
+        self.luxProbe = LuxProbe()
+        self.luxProbe.measureIt(None)
+        print("*************** Luminance: {:.2f} lux".format(self.luxProbe.lux))
+              
+        return [self.luxProbe.lux, self.luxProbe.highLux, self.luxProbe.lowLux]              
     
     def getVpdData(self):
         return self.vpd    
@@ -898,16 +913,18 @@ class PlantCare(object):
           
         print("careforplants...")
         # Look after plants
-        try:        
+        try:
+            
+            self.rtc = Clock()           
             timestamp = self.rtc.getDateTimeStr() 
             print(timestamp)
             
             print("controlLights...")
             self.light.control(self.rtc)        
-            
+                     
             #print("read temp and humidity...")
-            self.probe.measureIt(self.rtc)
-            
+            self.probe.measureIt(self.rtc)            
+               
             #print("Read co2...")
             self.co2probe.measureIt(self.rtc)
             print("co2: " + str(self.co2probe.co2))
@@ -934,10 +951,11 @@ class PlantCare(object):
             self.pump.control(leafTemperature, self.rtc)
             
             print("display data...")
-            self.lcd.showData(self.probe, self.co2probe, self.rtc, self.vpd, leafTemperature, airTemperature)        
+            self.lcd.showData(self.probe, self.co2probe, self.rtc, self.vpd, leafTemperature, airTemperature, self.luxProbe.lux)         
 
         except HardwareError as e:
-            traceback.print_exception(e)           
+            print("Exception: " + str(e))
+         
             self.cleanUp()
             self.lcd.showError(e.error_code, e.message)
             sys.exit("Terminated")
@@ -947,9 +965,13 @@ class PlantCare(object):
 def main():
     
     plantCare = PlantCare("192.168.1.1")
-    
+             
     while True:
         plantCare.careforplants()
 
 if __name__ == "__main__":
     main()
+
+
+
+

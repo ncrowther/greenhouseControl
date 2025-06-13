@@ -149,7 +149,7 @@ class PlantServer(object):
                 resp.close()
                 gc.collect()
                            
-                return None
+                return timestamp
            
     """
     This function displays an error message with a specific code and message.
@@ -186,12 +186,12 @@ class PlantServer(object):
             # get config data
             timestamp = self.configure(self.plantCare, count)
             
-            print("TIME: " + str(timestamp))
+            print("************* TIME: " + str(timestamp))
             
             # If there is no timestamp, dont log, otherwise log every LOG_TIME mins
             if (timestamp and (count % LOG_TIME == 0)):
+                self.logger()
                 self.plantCare.setDateTime(timestamp)
-                self.logger()                    
                 
             self.plantCare.careforplants()
             
@@ -216,7 +216,8 @@ class PlantServer(object):
             humidityData = self.plantCare.getHumidityData()
             co2Data = self.plantCare.getCo2Data()
             vpd = self.plantCare.getVpdData()
-            self.logData(temperatureData[0], temperatureData[1], humidityData[0], co2Data[0], vpd)
+            lux = self.plantCare.getluxData()
+            self.logData(temperatureData[0], temperatureData[1], humidityData[0], co2Data[0], vpd, lux[0])
                 
         except Exception as err:
             sys.print_exception(err)
@@ -226,7 +227,7 @@ class PlantServer(object):
             
             
     # This code is a function that logs data to the Greenhouse Data Service. 
-    def logData(self, airTemperature, leafTemperature, humidity, co2, vpd):
+    def logData(self, airTemperature, leafTemperature, humidity, co2, vpd, lux):
         
         print("Logging data...")
         
@@ -239,7 +240,8 @@ class PlantServer(object):
           "leafTemperature": leafTemperature,          
           "humidity": humidity,
           "co2": co2,
-          "vpd": vpd
+          "vpd": vpd,
+          "lux": lux          
         })
         
         request_url = GREENHOUSE_DATASERVICE + '/doc'
@@ -282,4 +284,6 @@ def main():
         #machine.reset()
 
 main()
+
+
 
