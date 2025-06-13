@@ -113,15 +113,14 @@ class LuxProbe(object):
         try:
             print('measureIt lux')
             
-            #self.light_sensor.reset()
-            #time.sleep(2)
-            self.lux = self.light_sensor.luminance(BH1750.CONT_HIRES_1)
+
+            self.lux = round(self.light_sensor.luminance(BH1750.CONT_HIRES_1))
             
             # Reset stats at midnight
-            #if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
-            #    print("Reset stats")
-            #    self.highLux = 0
-            #    self.lowLux = 100000
+            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
+                print("Reset stats")
+                self.highLux = 0
+                self.lowLux = 100000
                 
             # Set lux high score
             if (self.lux > self.highLux):
@@ -400,7 +399,6 @@ class LinearActuator(object):
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 2
         
-        #maxTemperature = 20
         print("Window control: " + self.status()  + " " + str(temperature) + ">" + str(maxTemperature))
         
         # Open
@@ -426,7 +424,7 @@ class Pump(OnOFFAutoController):
 
     #### DEFINE WATERING TIMES HERE ####
     WATERING_TIMES = [10, 13, 21]
-    WATERING_PERIOD = 20 # minutes
+    WATERING_PERIOD = 2 # minutes
 
     def __init__(self):
         #Define pins for Pump
@@ -747,7 +745,7 @@ class PlantCare(object):
         ## Creat the objects to be controlled
         self.light = LightSwitch()
         
-        self.probe = TemperatureHumidityProbe()
+        self.thProbe = TemperatureHumidityProbe()
         self.co2probe = Co2Probe()
 
         self.pump = Pump()
@@ -842,17 +840,22 @@ class PlantCare(object):
         
     def getTemperatureData(self):
         # Air temp in [0] and leaf temp in [1]
-        return [self.probe.temperature, self.heatSensor.getObjectTemperature(), self.probe.highTemp, self.probe.lowTemp]
+        return [self.thProbe.temperature, self.heatSensor.getObjectTemperature(), self.thProbe.highTemp, self.thProbe.lowTemp]
     
     def getHumidityData(self):
-        return [self.probe.humidity, self.probe.highHumidity, self.probe.lowHumidity]    
+        return [self.thProbe.humidity, self.thProbe.highHumidity, self.thProbe.lowHumidity]    
   
     def getCo2Data(self):
+        
+        #print("Read co2...")
+        self.co2probe.measureIt(self.rtc)
+        print("co2: " + str(self.co2probe.co2))        
+        
         return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]    
  
     def getluxData(self): 
         self.luxProbe = LuxProbe()
-        self.luxProbe.measureIt(None)
+        self.luxProbe.measureIt(self.rtc)
         print("*************** Luminance: {:.2f} lux".format(self.luxProbe.lux))
               
         return [self.luxProbe.lux, self.luxProbe.highLux, self.luxProbe.lowLux]              
@@ -923,16 +926,9 @@ class PlantCare(object):
             self.light.control(self.rtc)        
                      
             #print("read temp and humidity...")
-            self.probe.measureIt(self.rtc)            
-               
-            #print("Read co2...")
-            self.co2probe.measureIt(self.rtc)
-            print("co2: " + str(self.co2probe.co2))
-            
-            airTemperature = self.probe.temperature
-            
-            humidity = self.probe.humidity
-            print("Humidity: "+ str(humidity))
+            self.thProbe.measureIt(self.rtc)                    
+            airTemperature = self.thProbe.temperature   
+            humidity = self.thProbe.humidity
 
             leafTemperature = self.heatSensor.getObjectTemperature()
         
@@ -951,7 +947,7 @@ class PlantCare(object):
             self.pump.control(leafTemperature, self.rtc)
             
             print("display data...")
-            self.lcd.showData(self.probe, self.co2probe, self.rtc, self.vpd, leafTemperature, airTemperature, self.luxProbe.lux)         
+            self.lcd.showData(self.thProbe, self.co2probe, self.rtc, self.vpd, leafTemperature, airTemperature, self.luxProbe.lux)         
 
         except HardwareError as e:
             print("Exception: " + str(e))
