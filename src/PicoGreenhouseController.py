@@ -35,6 +35,8 @@ class PlantServer(object):
             sys.exit(retval=-1)
         else:
             self.plantCare = PlantCare(self.ipAddress)
+            timestamp = self.configure()
+            self.plantCare.setDateTime(timestamp)
             
     """
     Connect to a Wi-Fi network.
@@ -91,7 +93,7 @@ class PlantServer(object):
         
         request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
         resp = None
-        timestamp = '2000-01-01T00:00:00.000Z'
+        timestamp = None
         
         gc.collect() 
         resp = None
@@ -120,7 +122,7 @@ class PlantServer(object):
                 resp.close()
                 gc.collect()
                            
-                return None
+                return timestamp
 
     """
     Reonfigure the plant care system based on the configuration passed in.
@@ -190,7 +192,7 @@ class PlantServer(object):
         print('Start care...')
         
         SLEEP_TIME = 5
-        LOG_TIME = 1 # 90 # log period in seconds = SLEEP_TIME * LOG_TIME
+        LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
         count = 0
         
@@ -297,4 +299,8 @@ def main():
         #machine.reset()
 
 main()
+
+
+
+
 
