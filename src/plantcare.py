@@ -891,7 +891,7 @@ class PlantCare(object):
     def setWateringTimes(self, wateringTimes, period, minTemp):
         
         if (period == None):
-            period = 60 # Seconds
+            period = 1 # Minutes
             
         if (minTemp == None):
             minTemp = 10 # C

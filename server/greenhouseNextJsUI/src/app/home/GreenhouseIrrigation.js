@@ -275,7 +275,7 @@ function GreenhouseIrrigation() {
           ariaLabelInput="Lower bound"
           invalidText="Invalid value"
           labelText=""
-          max={60}
+          max={59}
           min={0}
           step={1}
           unstable_ariaLabelInputUpper="Upper bound"

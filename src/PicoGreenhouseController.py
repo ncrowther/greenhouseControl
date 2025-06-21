@@ -159,10 +159,10 @@ class PlantServer(object):
             
         temperatureRange = doc["temperatureRange"]            
         plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
-            
-        wateringTimes = doc["wateringTimes"]
-        wateringPeriod = 20 #doc["wateringPeriod"] mins
-        wateringMinTemp = 10 #doc["wateringMinTemp"]     C       
+
+        wateringPeriod = doc["wateringDuration"]  	# minutes
+        wateringTimes = doc["wateringTimes"]  		# list of three start times in 24H format
+        wateringMinTemp = 5       					# Not implemented
         plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)
 
            
