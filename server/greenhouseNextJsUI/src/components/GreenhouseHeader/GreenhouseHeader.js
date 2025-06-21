@@ -35,6 +35,9 @@ const GreenhouseHeader = () => (
           <Link href="/temphum" passHref legacyBehavior>
             <HeaderMenuItem>Chart</HeaderMenuItem>
           </Link>
+          <Link href="/lux" passHref legacyBehavior>
+            <HeaderMenuItem>Lux</HeaderMenuItem>
+          </Link>
           <Link href="/timelapse" passHref legacyBehavior>
             <HeaderMenuItem>Cam</HeaderMenuItem>
           </Link>
