@@ -20,6 +20,7 @@ function GreenhouseHeat() {
   const [heater, setHeater] = useState('OFF');
   const [fan, setFan] = useState('OFF');
   const [pump, setPump] = useState('OFF');
+  const [pumpOnDuration, setPumpOnDuration] = useState(0);
   const [pumpOnTime1, setPumpOnTime1] = useState(0);
   const [pumpOnTime2, setPumpOnTime2] = useState(0);
   const [pumpOnTime3, setPumpOnTime3] = useState(0);
@@ -32,8 +33,9 @@ function GreenhouseHeat() {
       lightState: light,
       lightOnOff: [lightOnTime, lightOffTime],
       pumpState: pump,
+      fanState: fan,
       heaterState: heater,
-      heaterState: heater,
+      wateringDuration: pumpOnDuration,
       wateringTimes: [pumpOnTime1, pumpOnTime2, pumpOnTime3],
       windowState: window,
       temperatureRange: [lowTemp, highTemp],
@@ -67,6 +69,7 @@ function GreenhouseHeat() {
                 setLightOnTime(configData.lightOnOff[0]);
                 setLightOffTime(configData.lightOnOff[1]);
 
+                setPumpOnDuration(configData.wateringDuration);
                 setPumpOnTime1(configData.wateringTimes[0]);
                 setPumpOnTime2(configData.wateringTimes[1]);
                 setPumpOnTime3(configData.wateringTimes[2]);
