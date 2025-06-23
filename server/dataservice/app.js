@@ -20,6 +20,7 @@ const cloudantLib = require('./database/cloudantDb.js')
 const session = require('express-session')
 const { CloudantV1 } = require('@ibm-cloud/cloudant')
 const cors = require('cors');
+var moment = require('moment');
 
 const service = CloudantV1.newInstance()
 
@@ -58,14 +59,20 @@ app.post('/doc', async (req, res) => {
 
   const newDoc = req.body;
 
-  var timestamp = new Date();
+  // var timestamp = new Date();
+
+  var time = moment();
+  var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+  console.log(timestamp);
 
   const doc = {
     "_id": timestamp,
-    "temperature": newDoc.temperature,
+    "airTemperature": newDoc.airTemperature,
+    "leafTemperature": newDoc.leafTemperature,
     "humidity": newDoc.humidity,
     "co2": newDoc.co2,
-    "vpd": newDoc.vpd
+    "vpd": newDoc.vpd,
+    "lux": newDoc.lux
   }
 
   console.log(JSON.stringify(doc));
