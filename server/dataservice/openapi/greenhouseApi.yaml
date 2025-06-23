@@ -1,0 +1,308 @@
+openapi: 3.0.2
+info:
+  title: Greenhouse Control API
+  description: |
+    API for managing greenhouse sensor data, configuration, and camera photos.
+  termsOfService: http://IBM.io/terms/
+  contact:
+    email: ncrowther@uk.ibm.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/
+tags:
+  - name: Sensor
+    description: Sensor data endpoints
+  - name: Config
+    description: Configuration endpoints
+  - name: Photo
+    description: Camera photo endpoints
+paths:
+  /doc:
+    post:
+      tags:
+        - Sensor
+      summary: Create a new sensor log document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorLogRequest'
+      responses:
+        '200':
+          description: Document created
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '2024-08-21T13:00:00'
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /docs:
+    get:
+      tags:
+        - Sensor
+      summary: Get all sensor log documents
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorLogList'
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /config:
+    post:
+      tags:
+        - Config
+      summary: Set or update configuration
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigRequest'
+      responses:
+        '200':
+          description: Configuration updated
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags:
+        - Config
+      summary: Get configuration by id
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Configuration object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /photo:
+    post:
+      tags:
+        - Photo
+      summary: Store a photo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoRequest'
+      responses:
+        '200':
+          description: Photo stored
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '2024-08-21T13:00:00Z'
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags:
+        - Photo
+      summary: Get latest photo for a camera
+      parameters:
+        - name: camId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Latest photo object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoResponse'
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /photos:
+    get:
+      tags:
+        - Photo
+      summary: Get all photos for a camera
+      parameters:
+        - name: camId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of photo objects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoList'
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    SensorLogRequest:
+      type: object
+      properties:
+        airTemperature:
+          type: number
+        leafTemperature:
+          type: number
+        humidity:
+          type: number
+        co2:
+          type: number
+        vpd:
+          type: number
+        lux:
+          type: number
+    SensorLog:
+      type: object
+      properties:
+        _id:
+          type: string
+        airTemperature:
+          type: number
+        leafTemperature:
+          type: number
+        humidity:
+          type: number
+        co2:
+          type: number
+        vpd:
+          type: number
+        lux:
+          type: number
+    SensorLogList:
+      type: object
+      properties:
+        Docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SensorLog'
+    ConfigRequest:
+      type: object
+      properties:
+        lightState:
+          $ref: '#/components/schemas/OnOffState'
+        lightOnOff:
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2
+        pumpState:
+          $ref: '#/components/schemas/OnOffState'
+        fanState:
+          $ref: '#/components/schemas/OnOffState'
+        heaterState:
+          $ref: '#/components/schemas/OnOffState'
+        wateringDuration:
+          type: number
+        wateringTimes:
+          type: array
+          items:
+            type: number
+          minItems: 3
+          maxItems: 3
+        windowState:
+          $ref: '#/components/schemas/WindowState'
+        temperatureRange:
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2
+    ConfigResponse:
+      type: object
+      properties:
+        doc:
+          type: object
+        timestamp:
+          type: string
+    PhotoRequest:
+      type: object
+      properties:
+        cam:
+          type: integer
+        photo:
+          type: string
+          description: Base64-encoded image or similar
+    PhotoResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+        photo:
+          type: string
+        timestamp:
+          type: string
+    PhotoList:
+      type: object
+      properties:
+        Docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhotoResponse'
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+    OnOffState:
+      type: string
+      enum:
+        - ON
+        - OFF
+        - AUTO
+    WindowState:
+      type: string
+      enum:
+        - OPEN
+        - CLOSED
+        - AUTO          

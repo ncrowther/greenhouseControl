@@ -117,15 +117,47 @@ app.get('/docs', async (req, res) => {
 
 })
 
+
 // ///////////////////// Set Config ////////////////////
 app.post('/config', async (req, res) => {
 
-  const id = req.query.id;
-  const newDoc = req.body;
+  console.log('Write config');
+
+  var time = moment();
+  var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+  console.log(timestamp);
+
+  const id =  "default" //req.query.id;
+  const inputDoc = req.body;
+
+  // Hint: This is the doc that is required for input from the OpenAPI spec
+  const newDoc = {
+    "lightState": inputDoc.lightState,
+    "lightOnOff": [
+      inputDoc.lightOnOff[0],
+      inputDoc.lightOnOff[1]
+    ],
+    "pumpState": inputDoc.pumpState,
+    "fanState": inputDoc.fanState,
+    "heaterState": inputDoc.heaterState,
+    "wateringDuration": inputDoc.wateringDuration,
+    "wateringTimes": [
+      inputDoc.wateringTimes[0],
+      inputDoc.wateringTimes[1],
+      inputDoc.wateringTimes[2]
+    ],
+    "windowState": inputDoc.windowState,
+    "temperatureRange": [
+      inputDoc.temperatureRange[0],
+      inputDoc.temperatureRange[1]
+    ],
+    "lastUpdate": timestamp
+  }
 
   console.log('Set Config: ' + JSON.stringify(newDoc))
 
   updateDoc(res, configDbName, id, newDoc)
+  
 
 })
 
@@ -289,7 +321,7 @@ async function updateDoc(res, dbName, id, newDoc) {
       res.send(doc);
 
     }, function (err) {
-      console.error('[App] Cloudant DB Failure in post config: ' + err)
+      console.error('[App] Cloudant DB Failure in update doc: ' + err)
       res.status(500);
       res.set('Access-Control-Allow-Origin', '*');
       res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
