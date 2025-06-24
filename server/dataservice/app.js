@@ -117,6 +117,189 @@ app.get('/docs', async (req, res) => {
 
 })
 
+// ///////////////////// Set Light ////////////////////
+app.post('/light', async (req, res) => {
+
+  const inputDoc = req.body;
+
+  console.log('Set Light ' + JSON.stringify(inputDoc));
+
+  const id = "default"
+  console.log('Get light for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
+
+    var time = moment();
+    var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+    console.log(timestamp);
+
+    const newDoc = {
+      "lightState": inputDoc.lightState,
+      "lightOnOff": [
+        inputDoc.lightOnOff[0],
+        inputDoc.lightOnOff[1]
+      ],
+      "pumpState": originalDoc.pumpState,
+      "fanState": originalDoc.fanState,
+      "heaterState": originalDoc.heaterState,
+      "wateringDuration": originalDoc.wateringDuration,
+      "wateringTimes": [
+        originalDoc.wateringTimes[0],
+        originalDoc.wateringTimes[1],
+        originalDoc.wateringTimes[2]
+      ],
+      "windowState": originalDoc.windowState,
+      "temperatureRange": [
+        originalDoc.temperatureRange[0],
+        originalDoc.temperatureRange[1]
+      ],
+      "lastUpdate": timestamp
+    }
+
+    console.log('Set Config: ' + JSON.stringify(newDoc))
+
+    updateDoc(res, configDbName, id, newDoc)
+
+  })
+})
+
+// ///////////////////// Set Heat ////////////////////
+app.post('/heat', async (req, res) => {
+
+  const inputDoc = req.body;
+
+  console.log('Set Heat ' + JSON.stringify(inputDoc));
+
+  const id = "default"
+  console.log('Get heat for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
+
+    var time = moment();
+    var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+    console.log(timestamp);
+
+    const newDoc = {
+      "lightState": originalDoc.lightState,
+      "lightOnOff": [
+        originalDoc.lightOnOff[0],
+        originalDoc.lightOnOff[1]
+      ],
+      "pumpState": originalDoc.pumpState,
+      "fanState": originalDoc.fanState,
+      "heaterState": inputDoc.heaterState,
+      "wateringDuration": originalDoc.wateringDuration,
+      "wateringTimes": [
+        originalDoc.wateringTimes[0],
+        originalDoc.wateringTimes[1],
+        originalDoc.wateringTimes[2]
+      ],
+      "windowState": originalDoc.windowState,
+      "temperatureRange": [
+        inputDoc.minTemp,
+        originalDoc.temperatureRange[1]
+      ],
+      "lastUpdate": timestamp
+    }
+
+    console.log('Set Config: ' + JSON.stringify(newDoc))
+
+    updateDoc(res, configDbName, id, newDoc)
+
+  })
+})
+
+// ///////////////////// Set Irrigation ////////////////////
+app.post('/irrigation', async (req, res) => {
+
+  const inputDoc = req.body;
+
+  console.log('Set irrigation ' + JSON.stringify(inputDoc));
+
+  const id = "default"
+  console.log('Get irrigation for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
+
+    var time = moment();
+    var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+    console.log(timestamp);
+
+    const newDoc = {
+      "lightState": originalDoc.lightState,
+      "lightOnOff": [
+        originalDoc.lightOnOff[0],
+        originalDoc.lightOnOff[1]
+      ],
+      "pumpState": inputDoc.pumpState,
+      "fanState": originalDoc.fanState,
+      "heaterState": originalDoc.heaterState,
+      "wateringDuration": inputDoc.wateringDuration,
+      "wateringTimes": [
+        inputDoc.timeHH1,
+        inputDoc.timeHH2,
+        inputDoc.timeHH3
+      ],
+      "windowState": originalDoc.windowState,
+      "temperatureRange": [
+        originalDoc.temperatureRange[0],
+        originalDoc.temperatureRange[1]
+      ],
+      "lastUpdate": timestamp
+    }
+
+    console.log('Set Config: ' + JSON.stringify(newDoc))
+
+    updateDoc(res, configDbName, id, newDoc)
+
+  })
+})
+
+// ///////////////////// Set Cooling ////////////////////
+app.post('/cool', async (req, res) => {
+
+  const inputDoc = req.body;
+
+  console.log('Set cooling ' + JSON.stringify(inputDoc));
+
+  const id = "default"
+  console.log('Get config for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
+
+    var time = moment();
+    var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+    console.log(timestamp);
+
+    const newDoc = {
+      "lightState": originalDoc.lightState,
+      "lightOnOff": [
+        originalDoc.lightOnOff[0],
+        originalDoc.lightOnOff[1]
+      ],
+      "pumpState": originalDoc.pumpState,
+      "fanState": inputDoc.fanState,
+      "heaterState": originalDoc.heaterState,
+      "wateringDuration": originalDoc.wateringDuration,
+      "wateringTimes": [
+        originalDoc.wateringTimes[0],
+        originalDoc.wateringTimes[1],
+        originalDoc.wateringTimes[2]
+      ],
+      "windowState": inputDoc.windowState,
+      "temperatureRange": [
+        originalDoc.temperatureRange[0],
+        inputDoc.maxTemp
+      ],
+      "lastUpdate": timestamp
+    }
+
+    console.log('Set Config: ' + JSON.stringify(newDoc))
+
+    updateDoc(res, configDbName, id, newDoc)
+
+  })
+})
 
 // ///////////////////// Set Config ////////////////////
 app.post('/config', async (req, res) => {
@@ -127,7 +310,7 @@ app.post('/config', async (req, res) => {
   var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
   console.log(timestamp);
 
-  const id =  "default" //req.query.id;
+  const id = "default" //req.query.id;
   const inputDoc = req.body;
 
   // Hint: This is the doc that is required for input from the OpenAPI spec
@@ -157,14 +340,14 @@ app.post('/config', async (req, res) => {
   console.log('Set Config: ' + JSON.stringify(newDoc))
 
   updateDoc(res, configDbName, id, newDoc)
-  
+
 
 })
 
 // //////////////// Get Config ////////////////////////
 app.get('/config', async (req, res) => {
 
-  const id = req.query.id;
+  const id = "default" //req.query.id;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (doc) {

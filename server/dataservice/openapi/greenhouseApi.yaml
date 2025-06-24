@@ -11,7 +11,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-  - url: http://localhost:3000/
+  - url: https://bs1lhv1m-3000.uks1.devtunnels.ms/
 tags:
   - name: Sensor
     description: Sensor data endpoints
@@ -63,6 +63,110 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /light:
+    post:
+      tags:
+        - Light
+      summary: Set light
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/LightConfig'    
+      responses:
+        '200':
+          description: Configuration updated
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'       
+  /heat:
+    post:
+      tags:
+        - Heat
+      summary: Set heating
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/HeatConfig'    
+      responses:
+        '200':
+          description: Configuration updated
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'              
+  /cool:
+    post:
+      tags:
+        - Heat
+      summary: Set cooling
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/CoolConfig'    
+      responses:
+        '200':
+          description: Configuration updated
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'                  
+  /irrigation:
+    post:
+      tags:
+        - Irrigation
+      summary: Set irrigation
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/IrrigationConfig'    
+      responses:
+        '200':
+          description: Configuration updated
+        '500':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'                  
   /config:
     post:
       tags:
@@ -225,6 +329,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SensorLog'
+    LightConfig:
+      type: object
+      properties:
+        lightState:
+          $ref: '#/components/schemas/OnOffState'
+        lightOnOff:
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2     
+    HeatConfig:
+      type: object
+      properties:
+        heaterState:
+          $ref: '#/components/schemas/OnOffState'
+        minTemp:
+          type: integer
+    CoolConfig:
+      type: object
+      properties:
+        fanState:
+          $ref: '#/components/schemas/OnOffState'
+        windowState:
+          $ref: '#/components/schemas/WindowState'          
+        maxTemp:
+          type: integer          
+    IrrigationConfig:
+      type: object
+      properties:
+        pumpState:
+          $ref: '#/components/schemas/OnOffState'
+        wateringDuration:
+          type: integer               
+        timeHH1:
+          type: integer        
+        timeHH2:
+          type: integer  
+        timeHH3:
+          type: integer            
     ConfigRequest:
       type: object
       properties:
