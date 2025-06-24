@@ -136,8 +136,8 @@ app.post('/light', async (req, res) => {
     const newDoc = {
       "lightState": inputDoc.lightState,
       "lightOnOff": [
-        inputDoc.lightOnOff[0],
-        inputDoc.lightOnOff[1]
+        inputDoc.lightOnHH,
+        inputDoc.lightOffHH
       ],
       "pumpState": originalDoc.pumpState,
       "fanState": originalDoc.fanState,

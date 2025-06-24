@@ -118,7 +118,7 @@ paths:
   /cool:
     post:
       tags:
-        - Heat
+        - Cool
       summary: Set cooling
       parameters:
         - name: id
@@ -334,12 +334,10 @@ components:
       properties:
         lightState:
           $ref: '#/components/schemas/OnOffState'
-        lightOnOff:
-          type: array
-          items:
-            type: number
-          minItems: 2
-          maxItems: 2     
+        lightOnHH:
+          type: integer
+        lightOffHH:
+          type: integer          
     HeatConfig:
       type: object
       properties:
