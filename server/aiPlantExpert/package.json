@@ -1,0 +1,21 @@
+{
+  "name": "ibm-questiongen-openapi-3-0",
+  "version": "1.0.15",
+  "description": "This is a Question Generator API using Watsonx AI   Some useful links: - [The QuestionGen repository](https://github.com/IBM-api/IBM-QuestionGen) - [The source API definition for the QuestionGen](https://github.com/IBM-api/IBM-QuestionGen/blob/master/src/main/resources/openapi.yaml)",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "connect": "^3.2.0",
+    "js-yaml": "^3.3.0",
+    "oas3-tools": "^2.2.3",
+    "request": "^2.88.2"
+  }
+}
