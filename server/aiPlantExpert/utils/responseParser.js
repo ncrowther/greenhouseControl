@@ -5,10 +5,10 @@ class GreenhouseSettings {
         this.lowTemp = 0;
         this.highHumidity = 0;
         this.lowHumidity = 0;
-        this.lux;
-        this.lightOn;
-        this.lightOff;
-        this.wateringDuration = "";
+        this.lux = 0;
+        this.lightOn = 0;
+        this.lightOff = 0;
+        this.wateringDuration = 0;
         this.waterTime1 = 0;
         this.waterTime2 = 0;
         this.waterTime3 = 0;
@@ -66,12 +66,9 @@ var extractData = exports.extractData = function (generatedResponse) {
                 const match = temperature.match(/(\d+)\s*-\s*(\d+)/);
 
                 if (match) {
-                    const low = match[1];
-                    const high = match[2];
-                    console.log(`Low: ${low}, High: ${high}`);
-
-                    lowTemp = match[1];
-                    highTemp = match[2];
+                    lowTemp = Number(match[1]);
+                    highTemp = Number(match[2]);
+                    console.log(`Low: ${lowTemp}, High: ${highTemp}`);
                 }
 
                 pos++;
@@ -95,12 +92,9 @@ var extractData = exports.extractData = function (generatedResponse) {
                 const match = humidity.match(/(\d+)\s*-\s*(\d+)/);
 
                 if (match) {
-                    const low = match[1];
-                    const high = match[2];
-                    console.log(`Low: ${low}, High: ${high}`);
-
-                    lowHumidity = match[1];
-                    highHumidity = match[2];
+                    lowHumidity = Number(match[1]);
+                    highHumidity = Number(match[2]);
+                    console.log(`Low: ${lowHumidity}, High: ${highHumidity}`);
                 }
 
                 pos++;
@@ -157,9 +151,9 @@ var extractData = exports.extractData = function (generatedResponse) {
 
     function extractWatering(answerParts) {
         let wateringDuration = 1;
-        let waterTime1 = "8";
-        let waterTime2 = "8";
-        let waterTime3 = "8";
+        let waterTime1 = 8;
+        let waterTime2 = 8;
+        let waterTime3 = 8;
 
         const wateringTok = "Watering";
         let pos = 0;
@@ -181,23 +175,23 @@ var extractData = exports.extractData = function (generatedResponse) {
 
                     if (wateringDuration === 'HIGH') {
                         wateringDuration = 6
-                        waterTime1 = "8";
-                        waterTime2 = "12";
-                        waterTime3 = "18";
+                        waterTime1 = 8;
+                        waterTime2 = 12;
+                        waterTime3 = 18;
                     }
 
                     if (wateringDuration === 'MEDIUM') {
                         wateringDuration = 3
-                        waterTime1 = "8";
-                        waterTime2 = "12";
-                        waterTime3 = "12";
+                        waterTime1 = 8;
+                        waterTime2 = 12;
+                        waterTime3 = 12;
                     }
 
                     if (wateringDuration === 'LOW') {
                         wateringDuration = 1
-                        waterTime1 = "8";
-                        waterTime2 = "8";
-                        waterTime3 = "8";
+                        waterTime1 = 8;
+                        waterTime2 = 8;
+                        waterTime3 = 8;
                     }
                 }
 

@@ -75,15 +75,49 @@ components:
     Request:
       type: object
       properties:
-        prompt:
+        plant:
           type: string
-          example: Create a Question about Ben Cornwell
+          example: Cactus
     Response:
       type: object
       properties:
-        Temperature:
+        generated:
           type: string
-          example: 15 - 25C                             
+          example: "\n\n| Condition          | Value         |\n|--------------------|--------------|\n| Temperature range  | 10-18°C      |\n| Light              | Full sun     |\n| Humidity           | 60-70%       |\n| Watering level     | Medium       |"       
+        lux:
+          type: string
+          example: 1000
+        lightOn:
+          type: number
+          example: 8   
+        lightOff:
+          type: number
+          example: 21    
+        highTemp:
+          type: number
+          example: 25  
+        lowTemp:
+          type: number
+          example: 25     
+        highHumidity:
+          type: number
+          example: 80       
+        lowHumidity:
+          type: number
+          example: 25     
+        wateringDuration:
+          type: number
+          example: 2          
+        waterTime1:
+          type: number
+          example: 8              
+        waterTime2:
+          type: number
+          example: 8       
+        waterTime3:
+          type: number
+          example: 8                                                                    
+
   securitySchemes:
     basic_auth:
       type: http
