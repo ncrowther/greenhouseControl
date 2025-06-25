@@ -36,7 +36,7 @@ const options = {
   }
 };
 
-const openApiSpec = path.join(__dirname, 'api/openapi.yaml');
+const openApiSpec = path.join(__dirname, 'api/plantExpertApi.yaml');
 
 // Initialize the Swagger middleware
 const expressAppConfig = oas3Tools.expressAppConfig(openApiSpec, options);
