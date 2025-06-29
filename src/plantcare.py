@@ -318,10 +318,10 @@ class LinearActuator(object):
     # Linear Actuator for window
 
     # Define window pulse count and length
-    MAX_ACTUATOR_ANGLE = 100
+    MAX_ACTUATOR_ANGLE = 180
     MIN_ACTUATOR_ANGLE = 0
-    PULSE_TIME = 2000  
-    PULSE_DEGREE_CHANGE = 25
+    PULSE_TIME = 200  
+    PULSE_DEGREE_CHANGE = 2
     
     def __init__(self):
         # GPIO pin + window is connected to
