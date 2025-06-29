@@ -101,7 +101,7 @@ class LuxProbe(object):
 
         # Create BH1750 object
         self.light_sensor = BH1750(bus=i2c, addr=0x5c)
-        self.light_sensor.reset()
+        time.sleep_ms(200)
         
         self.lux = 0        
         self.highLux = 0
@@ -110,29 +110,10 @@ class LuxProbe(object):
         
     def measureIt(self, rtc):   
     
-        try:
-            print('measureIt lux')
-            
-
-            self.lux = round(self.light_sensor.luminance(BH1750.CONT_HIRES_1))
-            
-            # Reset stats at midnight
-            if (rtc.timeInRange(RESET_ON_TIME, RESET_OFF_TIME)):
-                print("Reset stats")
-                self.highLux = 0
-                self.lowLux = 100000
-                
-            # Set lux high score
-            if (self.lux > self.highLux):
-                self.highLux = self.lux
-            
-            if (self.lux < self.lowLux):
-                self.lowLux = self.lux
-                    
-            
-        except Exception as e:
-            print("Error in Lux probe:", e)
-            
+        print('measureIt lux')
+        
+        self.lux = round(self.light_sensor.luminance(BH1750.CONT_HIRES_1))
+                  
             
 #
 ## SH20 temperature humidity probe
@@ -850,16 +831,27 @@ class PlantCare(object):
   
     def getCo2Data(self):
         
-        #print("Read co2...")
-        self.co2probe.measureIt(self.rtc)
-        print("co2: " + str(self.co2probe.co2))        
-        
-        return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]    
+        try:
+            self.co2probe.measureIt(self.rtc)
+            print("co2: " + str(self.co2probe.co2))
+            
+        except Exception as err:
+            sys.print_exception(err)
+            print(f"Co2 probe: {err=}, {type(err)=}")
+            self.co2probe.co2 = -1
+              
+        return [self.co2probe.co2, self.co2probe.highCo2, self.co2probe.lowCo2]   
  
-    def getluxData(self): 
-        self.luxProbe = LuxProbe()
-        self.luxProbe.measureIt(self.rtc)
-        print("*************** Luminance: {:.2f} lux".format(self.luxProbe.lux))
+    def getluxData(self):
+        
+        try:
+            self.luxProbe = LuxProbe()
+            self.luxProbe.measureIt(self.rtc)
+            print("*************** Luminance: {:.2f} lux".format(self.luxProbe.lux))
+        except Exception as err:
+            sys.print_exception(err)
+            print(f"Lux probe: {err=}, {type(err)=}")
+            self.luxProbe.lux = -1
               
         return [self.luxProbe.lux, self.luxProbe.highLux, self.luxProbe.lowLux]              
     
@@ -951,7 +943,7 @@ class PlantCare(object):
             
             print("display data...")
             self.lcd.showData(self.thProbe, self.co2probe, self.rtc, self.vpd, leafTemperature, airTemperature, self.luxProbe.lux)         
-
+            
         except HardwareError as e:
             print("Exception: " + str(e))
          
@@ -970,5 +962,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
