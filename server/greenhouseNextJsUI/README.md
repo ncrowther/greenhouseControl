@@ -11,13 +11,7 @@ Build and start
 Enter Bash shell.
 Install the Next.js app’s dependencies with:
 
-yarn
-
-After the dependencies are installed, create a build with:
-
-yarn build
-
-## Start
+## Quick Start
 
 Run in Dev mode:
 
@@ -41,9 +35,10 @@ Configure paths in `jsconfig.json`
 
 ### Deployment to code engine on IBM Cloud
 
-1. Open Rancher WSL shell from VSC
+1. Open WSL shell from VSC
 
-   Yarn build
+   yarn clean
+   yarn build
 
 2. Login to IBM Cloud.
 
@@ -65,7 +60,7 @@ Configure paths in `jsconfig.json`
 
 6. Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
 
-7. Using the same bash shell, deploy the sample application to your docker repo:
+7. Using the bash shell, deploy the sample application to your docker repo:
 
 ./CEbuild
 
@@ -73,11 +68,11 @@ Configure paths in `jsconfig.json`
 
 ./CErun
 
-10. Open the URL using the IBM Cloud Code Engine route for the refunds application
+10. Open the URL using the IBM Cloud Code Engine route for the application
 
 ## License
 
-Copyright (c) 2024 IBM Corporation
+Copyright (c) 2025 IBM Corporation
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
