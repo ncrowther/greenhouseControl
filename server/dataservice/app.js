@@ -120,9 +120,13 @@ app.get('/docs', async (req, res) => {
 // ///////////////////// Set Light ////////////////////
 app.post('/light', async (req, res) => {
 
+
   const inputDoc = req.body;
 
   console.log('Set Light ' + JSON.stringify(inputDoc));
+
+  const settings = req.query.id;
+  console.log('Settings ' + settings);
 
   const id = "default"
   console.log('Get light for ' + id)
