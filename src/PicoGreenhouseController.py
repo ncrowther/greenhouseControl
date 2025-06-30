@@ -237,7 +237,7 @@ class PlantServer(object):
         except Exception as err:
             sys.print_exception(err)
             print(f"Unexpected {err=}, {type(err)=}")
-            self.displayError(123, "WIFI ERROR")
+            self.displayError(123, "SYSTEM ERROR")
             machine.reset()
             
             
@@ -299,8 +299,3 @@ def main():
         #machine.reset()
 
 main()
-
-
-
-
-

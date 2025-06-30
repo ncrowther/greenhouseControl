@@ -21,7 +21,9 @@ class LuxProbe(object):
         print("I2c LED scan: ", scan)
 
         # Create BH1750 object
-        self.light_sensor = BH1750(bus=i2c, addr=0x23)
+        self.light_sensor = BH1750(bus=i2c, addr=0x5c)#addr=addr=0x23)
+        
+        time.sleep_ms(200)
         
         self.lux = 0        
         self.highlux = 0
