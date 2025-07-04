@@ -20,6 +20,7 @@
     "@carbon/pictograms-react": "^11.50.0",
     "@carbon/react": "^1.35.0",
     "@octokit/core": "4.2.0",
+    "build": "^0.1.4",
     "carbon-tutorial-nextjs": "file:",
     "chart.js": "^4.4.9",
     "eslint": "8.44.0",
