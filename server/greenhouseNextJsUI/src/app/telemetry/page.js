@@ -7,6 +7,7 @@ import {
   Pagination,
   Column,
   Grid,
+  ToastNotification,
 } from '@carbon/react';
 const endpoints = require('../endpoints.js');
 
@@ -57,6 +58,69 @@ const LinkList = ({ url, homepageUrl }) => (
   </ul>
 );
 
+const getNotifications = (rows) => {
+  const MAX_TEMPERATURE = 27.0;
+  const MIN_TEMPERATURE = 14.0;
+
+  const notifications = [];
+  let maxViolation = null;
+  let minViolation = null;
+
+  for (const row of rows) {
+    const airTemperature = row.airTemperature;
+    if (airTemperature) {
+      if (airTemperature > MAX_TEMPERATURE) {
+        if (!maxViolation || airTemperature > maxViolation.temperature) {
+          maxViolation = { temperature: airTemperature, row };
+        }
+      }
+      if (airTemperature < MIN_TEMPERATURE) {
+        if (!minViolation || airTemperature < minViolation.temperature) {
+          minViolation = { temperature: airTemperature, row };
+        }
+      }
+    }
+  }
+
+  if (maxViolation) {
+    notifications.push(
+      <ToastNotification
+        key="max-temperature"
+        aria-label="closes notification"
+        caption={maxViolation.row._id}
+        kind="warning"
+        onClose={() => {}}
+        onCloseButtonClick={() => {}}
+        role="status"
+        statusIconDescription="notification"
+        subtitle={`${maxViolation.temperature}C above ${MAX_TEMPERATURE}C`}
+        timeout={60000}
+        title="Max temperature alert"
+      />
+    );
+  }
+
+  if (minViolation) {
+    notifications.push(
+      <ToastNotification
+        key="min-temperature"
+        aria-label="closes notification"
+        caption={minViolation.row._id}
+        kind="warning"
+        onClose={() => {}}
+        onCloseButtonClick={() => {}}
+        role="status"
+        statusIconDescription="notification"
+        subtitle={`${minViolation.temperature}C below ${MIN_TEMPERATURE}C`}
+        timeout={60000}
+        title="Min temperature alert"
+      />
+    );
+  }
+
+  return notifications;
+};
+
 const getRowItems = (rows) =>
   rows
     .slice(0)
@@ -72,6 +136,7 @@ function RepoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [rows, setRows] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     async function getData() {
@@ -85,6 +150,7 @@ function RepoPage() {
           if (response.status == 200) {
             response.json().then((data) => {
               setRows(getRowItems(data.Docs));
+              setNotifications(getNotifications(data.Docs));
             });
           }
         })
@@ -119,6 +185,8 @@ function RepoPage() {
 
   return (
     <Grid className="repo-page">
+      {notifications}
+
       <Column lg={16} md={8} sm={4} className="repo-page__r1">
         <TelemetryTable headers={headers} rows={rows} />
         <Pagination
