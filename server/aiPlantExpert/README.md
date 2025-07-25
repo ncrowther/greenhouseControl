@@ -36,11 +36,11 @@ This project leverages the mega-awesome [swagger-tools](https://github.com/apige
 
     ibmcloud ce project select -n [PROJECT_NAME]
 
-5.	Start Podman Desktop
+5.	Start docker Desktop
 
-7.	Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Podman registry.
+7.	Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your docker registry.
 
-8.	Using the same bash shell, deploy the sample application to your Podman repo:
+8.	Using the same bash shell, deploy the sample application to your docker repo:
 
 ./CEbuild
 

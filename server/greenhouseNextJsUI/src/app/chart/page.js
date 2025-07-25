@@ -7,7 +7,7 @@ import options1 from './options.js';
 import '@carbon/charts-react/styles.css';
 const endpoints = require('../endpoints.js');
 
-function TempHumPage() {
+function ChartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [chartData, setChartData] = useState([]);
@@ -291,4 +291,4 @@ function TempHumPage() {
     </Grid>
   );
 }
-export default TempHumPage;
+export default ChartPage;
