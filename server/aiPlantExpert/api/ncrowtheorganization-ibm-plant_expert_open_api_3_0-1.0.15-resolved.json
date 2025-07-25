@@ -20,7 +20,7 @@
   },
   "servers": [
     {
-      "url": "https://7a3b-195-149-7-19.ngrok-free.app"
+      "url": "https://plantai.1fc3gg6j1yh7.eu-gb.codeengine.appdomain.cloud"
     }
   ],
   "security": [

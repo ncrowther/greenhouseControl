@@ -30,15 +30,15 @@ This project leverages the mega-awesome [swagger-tools](https://github.com/apige
 
 3.	In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups.  Select the resource group for Code Engine. E.g. default
 
-    ibmcloud target -g default
+    ibmcloud target -g asc_watsonx
 
 4.	Select the code engine project:  
 
     ibmcloud ce project select -n [PROJECT_NAME]
 
-5.	Start Docker Desktop
+5.	Start docker Desktop
 
-7.	Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
+7.	Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your docker registry.
 
 8.	Using the same bash shell, deploy the sample application to your docker repo:
 
@@ -48,7 +48,7 @@ This project leverages the mega-awesome [swagger-tools](https://github.com/apige
 
 ./CErun
 
-10.	Open the URL using the IBM Cloud Code Engine route for the refunds application
+10.	Open the URL using the IBM Cloud Code Engine route for the application
 
 
 ## License
