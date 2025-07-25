@@ -9,7 +9,7 @@ import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
-GREENHOUSE_DATASERVICE = 'http://192.168.1.33:3000' 
+GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
         
 """
 This code is a Python program that controls a plant care system. 
@@ -19,9 +19,8 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    ssid = 'TALKTALKE0F9AF_EXT'
-    #ssid = 'TALKTALKE0F9AF'
-    password = 'H6K8EK9M'  
+    ssid = 'VM7763450_EXT'
+    password = 'udWrTpeejf86gugx'     
     ipAddress = "ERR"
         
     def __init__(self):
@@ -29,10 +28,12 @@ class PlantServer(object):
         self.wlan = network.WLAN(network.STA_IF)
         self.ipAddress = self.connect_to_network()
         
+        print("***IP: " + str(self.ipAddress))
+        
         if self.ipAddress == None:
             self.plantCare = PlantCare(None)         
             self.displayError(99, "No WIFI")
-            sys.exit(retval=-1)
+            sys.exit()
         else:
             self.plantCare = PlantCare(self.ipAddress)
             timestamp = self.configure()
@@ -56,12 +57,14 @@ class PlantServer(object):
             self.wlan.active(True)
             self.wlan.config(pm = 0xa11140) # Disable power-save mode
             self.wlan.connect(self.ssid, self.password)
-        
+            
             while True:
 
                 print('waiting for connection...')
                 time.sleep(6)
 
+                print('Wlan status:' + str(self.wlan.status()))
+                
                 if (self.wlan.status() == 3):                        
                     print('******** WIFI CONNECTED ********')
 
