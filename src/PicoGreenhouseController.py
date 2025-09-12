@@ -63,9 +63,11 @@ class PlantServer(object):
                 print('waiting for connection...')
                 time.sleep(6)
 
-                print('Wlan status:' + str(self.wlan.status()))
+                print('Wlan status:' + self.getWlanStatus())
                 
-                if (self.wlan.status() == 3):                        
+                wlanStatus = self.wlan.status()
+                
+                if (wlanStatus == network.STAT_GOT_IP):                        
                     print('******** WIFI CONNECTED ********')
 
                     status = self.wlan.ifconfig()
@@ -78,8 +80,34 @@ class PlantServer(object):
                     return self.ipAddress
             
         except Exception as e:
-            print('Attempting connection') 
+            
+            err = self.getWlanStatus()
+                
+            print('Error: ' + err) 
 
+    """
+    Get Wireless lan connection status
+    """
+    def getWlanStatus(self):
+        
+            err = "Unknown error"
+            wlanStatus = self.wlan.status()
+            if (wlanStatus == network.STAT_IDLE):
+                err = "- no connection and no activity"
+
+            if (wlanStatus == network.STAT_CONNECTING):
+                err = "– connecting in progress"
+
+            if (wlanStatus ==  network.STAT_WRONG_PASSWORD):
+                err = "– failed due to incorrect password"
+
+            if (wlanStatus ==  network.STAT_NO_AP_FOUND):
+                err = "– failed because no access point replied"
+
+            if (wlanStatus ==  network.STAT_CONNECT_FAIL):
+                err = "– failed due to other problems"
+                
+            return err
         
     """
     Configure the plant care system based on the configuration stored in the Greenhouse Data Service.
@@ -302,3 +330,4 @@ def main():
         #machine.reset()
 
 main()
+
