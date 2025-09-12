@@ -70,15 +70,6 @@ function ChartPage() {
     setLuxChecked(luxChecked);
   };
 
-  const getRowItems = (rows) =>
-    rows
-      .slice(0)
-      .reverse()
-      .map((row) => ({
-        id: row._id,
-        ...row,
-      }));
-
   useEffect(() => {
     async function getTelemetryData() {
       await fetch(endpoints.dataServiceEndpoint, {

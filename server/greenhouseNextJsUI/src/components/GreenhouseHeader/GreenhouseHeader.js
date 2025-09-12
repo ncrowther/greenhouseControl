@@ -38,6 +38,9 @@ const GreenhouseHeader = () => (
           <Link href="/chart" passHref legacyBehavior>
             <HeaderMenuItem>Chart</HeaderMenuItem>
           </Link>
+          <Link href="/allotment" passHref legacyBehavior>
+            <HeaderMenuItem>Allotment</HeaderMenuItem>
+          </Link>
           <Link href="/timelapse" passHref legacyBehavior>
             <HeaderMenuItem>Cam</HeaderMenuItem>
           </Link>
@@ -57,6 +60,9 @@ const GreenhouseHeader = () => (
               </Link>
               <Link href="/chart" passHref legacyBehavior>
                 <HeaderMenuItem>Chart</HeaderMenuItem>
+              </Link>
+              <Link href="/allotment" passHref legacyBehavior>
+                <HeaderMenuItem>Allotment</HeaderMenuItem>
               </Link>
               <Link href="/timelapse" passHref legacyBehavior>
                 <HeaderMenuItem>Cam</HeaderMenuItem>

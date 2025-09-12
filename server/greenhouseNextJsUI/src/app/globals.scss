@@ -7,7 +7,7 @@
 @use '@/app/home/landing-page';
 @use '@/app/telemetry/telemetry-page';
 @use '@/app/config/config-page';
-@use '@/app/temphum/temphum-page';
+@use '@/app/chart/chart-page';
 @use '@/app/timelapse/timelapse-page';
 
 /// Remove overrides once Carbon bugs are fixed upstream.

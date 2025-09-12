@@ -6,25 +6,10 @@ import { Galleria } from 'primereact/galleria';
 const endpoints = require('../endpoints.js');
 
 function TimelapsePage(camId) {
-  const timelapsePeriod = 300;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [images1, setimages1] = useState(null);
   const [images2, setimages2] = useState(null);
-  const responsiveOptions = [
-    {
-      breakpoint: '991px',
-      numVisible: 12,
-    },
-    {
-      breakpoint: '767px',
-      numVisible: 12,
-    },
-    {
-      breakpoint: '575px',
-      numVisible: 12,
-    },
-  ];
 
   const itemTemplate = (item) => {
     return (
@@ -32,16 +17,6 @@ function TimelapsePage(camId) {
         src={'data:image/jpeg;base64,' + item.photo}
         alt={item.timestamp}
         style={{ width: '100%', display: 'block' }}
-      />
-    );
-  };
-
-  const thumbnailTemplate = (item) => {
-    return (
-      <img
-        src={'data:image/jpeg;base64,' + item.photo}
-        alt={item.timestamp}
-        style={{ width: '10%', height: '10%' }}
       />
     );
   };
@@ -104,25 +79,18 @@ function TimelapsePage(camId) {
     <Grid className="timelapse-page">
       <Galleria
         value={images2}
-        responsiveOptions={responsiveOptions}
-        numVisible={5}
         style={{ maxWidth: '480px' }}
         item={itemTemplate}
-        thumbnail={thumbnailTemplate}
-        circular
-        transitionInterval={timelapsePeriod}
+        autoPlay
+        transitionInterval={250}
       />
 
       <Galleria
         value={images1}
-        activeIndex={0}
-        responsiveOptions={responsiveOptions}
-        numVisible={5}
         style={{ maxWidth: '480px' }}
         item={itemTemplate}
-        thumbnail={thumbnailTemplate}
-        circular
-        transitionInterval={timelapsePeriod}
+        autoPlay
+        transitionInterval={250}
       />
     </Grid>
   );
