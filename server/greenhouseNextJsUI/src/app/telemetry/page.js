@@ -59,8 +59,8 @@ const LinkList = ({ url, homepageUrl }) => (
 );
 
 const getNotifications = (rows) => {
-  const MAX_TEMPERATURE = 27.0;
-  const MIN_TEMPERATURE = 14.0;
+  const MAX_TEMPERATURE = 40.0;
+  const MIN_TEMPERATURE = 0.0;
 
   const notifications = [];
   let maxViolation = null;

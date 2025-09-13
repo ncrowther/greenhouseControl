@@ -1,10 +1,5 @@
 'use client';
 
-import GreenhouseLight from './GreenhouseLight.js';
-import GreenhouseHeat from './GreenhouseHeat.js';
-import GreenhouseCool from './GreenhouseCool.js';
-import GreenhouseIrrigation from './GreenhouseIrrigation.js';
-
 import {
   Breadcrumb,
   Tabs,
@@ -29,10 +24,6 @@ export default function LandingPage() {
         <Tabs defaultSelectedIndex={0}>
           <TabList className="tabs-group" aria-label="Page navigation">
             <Tab>About</Tab>
-            <Tab>Light</Tab>
-            <Tab>Min</Tab>
-            <Tab>Max</Tab>
-            <Tab>Water</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -44,94 +35,6 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   Welcome to Greenhouse Control
-                </Column>
-                <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
-                  <Image
-                    className="landing-page__illo"
-                    src="/tab-illo.png"
-                    alt="Carbon illustration"
-                    width={240}
-                    height={480}
-                  />
-                </Column>
-              </Grid>
-            </TabPanel>
-            <TabPanel>
-              <Grid className="tabs-group-content">
-                <Column
-                  lg={16}
-                  md={8}
-                  sm={4}
-                  className="landing-page__tab-content"
-                >
-                  <br></br>
-                  <GreenhouseLight />
-                </Column>
-                <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
-                  <Image
-                    className="landing-page__illo"
-                    src="/tab-illo.png"
-                    alt="Carbon illustration"
-                    width={240}
-                    height={480}
-                  />
-                </Column>
-              </Grid>
-            </TabPanel>
-            <TabPanel>
-              <Grid className="tabs-group-content">
-                <Column
-                  lg={16}
-                  md={8}
-                  sm={4}
-                  className="landing-page__tab-content"
-                >
-                  <br></br>
-                  <GreenhouseHeat />
-                </Column>
-                <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
-                  <Image
-                    className="landing-page__illo"
-                    src="/tab-illo.png"
-                    alt="Carbon illustration"
-                    width={240}
-                    height={480}
-                  />
-                </Column>
-              </Grid>
-            </TabPanel>
-            <TabPanel>
-              <Grid className="tabs-group-content">
-                <Column
-                  lg={16}
-                  md={8}
-                  sm={4}
-                  className="landing-page__tab-content"
-                >
-                  <br></br>
-                  <GreenhouseCool />
-                </Column>
-                <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
-                  <Image
-                    className="landing-page__illo"
-                    src="/tab-illo.png"
-                    alt="Carbon illustration"
-                    width={240}
-                    height={480}
-                  />
-                </Column>
-              </Grid>
-            </TabPanel>
-            <TabPanel>
-              <Grid className="tabs-group-content">
-                <Column
-                  lg={16}
-                  md={8}
-                  sm={4}
-                  className="landing-page__tab-content"
-                >
-                  <br></br>
-                  <GreenhouseIrrigation />
                 </Column>
                 <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
                   <Image

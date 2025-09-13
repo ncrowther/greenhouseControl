@@ -2,18 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
-import { Button, Grid, Column } from '@carbon/react';
-import { BiWindow } from 'react-icons/bi';
-import { PiFanFill } from 'react-icons/pi';
 
 const config = require('../config/config.js');
+import { BiWindow } from 'react-icons/bi';
+import { PiFanFill } from 'react-icons/pi';
+import { Button, Grid, Column } from '@carbon/react';
+import '@carbon/charts-react/styles.css';
 const endpoints = require('../endpoints.js');
 
-/**
- * Set the greenhouse config
- * @returns {JSX.Element} The component.
- */
-function GreenhouseCool() {
+function Cool() {
   const [highTemp, setHighTemp] = useState('0');
   const [lowTemp, setLowTemp] = useState('0');
   const [light, setLight] = useState('OFF');
@@ -210,7 +207,7 @@ function GreenhouseCool() {
           DWN
         </Button>
         <Button
-          kind="primary"
+          kind="tertiary"
           renderIcon={BiWindow}
           inputid="windowAuto"
           name="windowAuto"
@@ -343,39 +340,46 @@ function GreenhouseCool() {
   }
 
   return (
-    <Column>
-      <form onSubmit={(e) => handleOnSubmit(e)}>
-        <h4>Window</h4>
-        {windowButton}
+    <Grid>
+      <Column lg={1} md={1} sm={1}>
+        {/* Empty first column */}
+      </Column>
 
-        <br></br>
+      <Column lg={5} md={5} sm={5}>
+        <form onSubmit={(e) => handleOnSubmit(e)}>
+          <br></br>
+          <h4>Window:</h4>
+          {windowButton}
 
-        <h4>Fan</h4>
-        {fanButton}
+          <br></br>
 
-        <br></br>
-        <br></br>
+          <h4>Fan:</h4>
+          {fanButton}
 
-        <h4>Max</h4>
-        <Knob
-          value={highTemp}
-          onChange={(e) => setHighTemp(e.value)}
-          min={5}
-          max={50}
-          valueTemplate={'{value}C'}
-          valueColor="red"
-          rangeColor="lightgray"
-        />
+          <br></br>
+          <br></br>
 
-        <Button
-          kind="primary"
-          onClick={(e) => handleOnSubmit(e)}
-          iconDescription="Set"
-        >
-          Set
-        </Button>
-      </form>
-    </Column>
+          <h4>Max:</h4>
+          <Knob
+            value={highTemp}
+            onChange={(e) => setHighTemp(e.value)}
+            min={5}
+            max={50}
+            valueTemplate={'{value}C'}
+            valueColor="red"
+            rangeColor="lightgray"
+          />
+
+          <Button
+            kind="primary"
+            onClick={(e) => handleOnSubmit(e)}
+            iconDescription="Set"
+          >
+            Set
+          </Button>
+        </form>
+      </Column>
+    </Grid>
   );
 }
-export default GreenhouseCool;
+export default Cool;

@@ -35,11 +35,20 @@ const GreenhouseHeader = () => (
           <Link href="/light" passHref legacyBehavior>
             <HeaderMenuItem>Light</HeaderMenuItem>
           </Link>
+          <Link href="/cool" passHref legacyBehavior>
+            <HeaderMenuItem>Cool</HeaderMenuItem>
+          </Link>
+          <Link href="/heat" passHref legacyBehavior>
+            <HeaderMenuItem>Heat</HeaderMenuItem>
+          </Link>
+          <Link href="/water" passHref legacyBehavior>
+            <HeaderMenuItem>Water</HeaderMenuItem>
+          </Link>
           <Link href="/chart" passHref legacyBehavior>
-            <HeaderMenuItem>Chart</HeaderMenuItem>
+            <HeaderMenuItem>Greenhouse</HeaderMenuItem>
           </Link>
           <Link href="/allotment" passHref legacyBehavior>
-            <HeaderMenuItem>Allotment</HeaderMenuItem>
+            <HeaderMenuItem>Polytunnel</HeaderMenuItem>
           </Link>
           <Link href="/timelapse" passHref legacyBehavior>
             <HeaderMenuItem>Cam</HeaderMenuItem>
@@ -58,11 +67,20 @@ const GreenhouseHeader = () => (
               <Link href="/light" passHref legacyBehavior>
                 <HeaderMenuItem>Light</HeaderMenuItem>
               </Link>
+              <Link href="/cool" passHref legacyBehavior>
+                <HeaderMenuItem>Cool</HeaderMenuItem>
+              </Link>
+              <Link href="/heat" passHref legacyBehavior>
+                <HeaderMenuItem>Heat</HeaderMenuItem>
+              </Link>
+              <Link href="/water" passHref legacyBehavior>
+                <HeaderMenuItem>Water</HeaderMenuItem>
+              </Link>
               <Link href="/chart" passHref legacyBehavior>
-                <HeaderMenuItem>Chart</HeaderMenuItem>
+                <HeaderMenuItem>Greenhouse</HeaderMenuItem>
               </Link>
               <Link href="/allotment" passHref legacyBehavior>
-                <HeaderMenuItem>Allotment</HeaderMenuItem>
+                <HeaderMenuItem>Polytunnel</HeaderMenuItem>
               </Link>
               <Link href="/timelapse" passHref legacyBehavior>
                 <HeaderMenuItem>Cam</HeaderMenuItem>

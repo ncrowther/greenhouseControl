@@ -3,15 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
 import { FaFireFlameSimple } from 'react-icons/fa6';
-import { Button, Grid, Column } from '@carbon/react';
 const config = require('../config/config.js');
+import { Button, Grid, Column } from '@carbon/react';
+import '@carbon/charts-react/styles.css';
 const endpoints = require('../endpoints.js');
 
-/**
- * Set the greenhouse config
- * @returns {JSX.Element} The component.
- */
-function GreenhouseHeat() {
+function Heat() {
   const [highTemp, setHighTemp] = useState('0');
   const [lowTemp, setLowTemp] = useState('0');
   const [light, setLight] = useState('OFF');
@@ -220,34 +217,42 @@ function GreenhouseHeat() {
   }
 
   return (
-    <Column>
-      <form onSubmit={(e) => handleOnSubmit(e)}>
-        <h4>Heater</h4>
-        {heaterButton}
+    <Grid>
+      <Column lg={1} md={1} sm={1}>
+        {/* Empty first column */}
+      </Column>
 
-        <br></br>
-        <br></br>
+      <Column lg={5} md={5} sm={5}>
+        <form onSubmit={(e) => handleOnSubmit(e)}>
+          <br></br>
+          <h4>Heat:</h4>
+          {heaterButton}
 
-        <h4>Min</h4>
-        <Knob
-          value={lowTemp}
-          onChange={(e) => setLowTemp(e.value)}
-          min={5}
-          max={50}
-          valueTemplate={'{value}C'}
-          valueColor="blue"
-          rangeColor="lightgray"
-        />
+          <br></br>
+          <br></br>
 
-        <Button
-          kind="primary"
-          onClick={(e) => handleOnSubmit(e)}
-          iconDescription="Set"
-        >
-          Set
-        </Button>
-      </form>
-    </Column>
+          <h4>Min:</h4>
+          <Knob
+            value={lowTemp}
+            onChange={(e) => setLowTemp(e.value)}
+            min={5}
+            max={50}
+            valueTemplate={'{value}C'}
+            valueColor="blue"
+            rangeColor="lightgray"
+          />
+
+          <Button
+            kind="primary"
+            onClick={(e) => handleOnSubmit(e)}
+            iconDescription="Set"
+          >
+            Set
+          </Button>
+        </form>
+      </Column>
+    </Grid>
   );
 }
-export default GreenhouseHeat;
+
+export default Heat;

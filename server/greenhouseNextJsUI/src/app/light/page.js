@@ -1,87 +1,58 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Grid, Loading, Checkbox, CheckboxGroup } from '@carbon/react';
-import { LineChart } from '@carbon/charts-react';
-import options1 from './options.js';
+import { Knob } from 'primereact/knob';
+import { CiLight } from 'react-icons/ci';
+const config = require('../config/config.js');
+import { Button, Grid, Column } from '@carbon/react';
 import '@carbon/charts-react/styles.css';
 const endpoints = require('../endpoints.js');
 
 function LightPage() {
+  const [highTemp, setHighTemp] = useState('0');
+  const [lowTemp, setLowTemp] = useState('0');
+  const [light, setLight] = useState('OFF');
+  const [lightOnTime, setLightOnTime] = useState('00:00');
+  const [lightOffTime, setLightOffTime] = useState('00:00');
+  const [heater, setHeater] = useState('OFF');
+  const [fan, setFan] = useState('OFF');
+  const [pump, setPump] = useState('OFF');
+  const [pumpOnDuration, setPumpOnDuration] = useState(0);
+  const [pumpOnTime1, setPumpOnTime1] = useState('00:00');
+  const [pumpOnTime2, setPumpOnTime2] = useState('00:00');
+  const [pumpOnTime3, setPumpOnTime3] = useState('00:00');
+  const [window, setWindow] = useState('DOWN');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
-  const [chartData, setChartData] = useState([]);
-  const [airTemperatureData, setAirTemperatureData] = useState([]);
-  const [leafTemperatureData, setLeafTemperatureData] = useState([]);
-  const [humidityData, setHumidityData] = useState([]);
-  const [vpdData, setVpdData] = useState([]);
-  const [co2Data, setCo2Data] = useState([]);
-  const [luxData, setLuxData] = useState([]);
-  const [chartOptions, setChartOptions] = useState(options1);
-  const [leafTemperatureChecked, setLeafTemperatureChecked] = useState(false);
-  const [airTemperatureChecked, setAirTemperatureChecked] = useState(false);
-  const [humidityChecked, setHumidityChecked] = useState(false);
-  const [vpdChecked, setVpdChecked] = useState(false);
-  const [co2Checked, setCo2Checked] = useState(false);
-  const [luxChecked, setLuxChecked] = useState(false);
 
-  const refreshChart = (
-    airChecked,
-    leafChecked,
-    humidityChecked,
-    vpdChecked,
-    co2Checked,
-    luxChecked
-  ) => {
-    //this will reload the page with the new selection
-    let data = [];
+  const handleOnSubmit = (event) => {
+    // Prevent default refresh
+    event.preventDefault();
 
-    if (airChecked) {
-      data = data.concat(airTemperatureData);
-    }
-
-    if (leafChecked) {
-      data = data.concat(leafTemperatureData);
-    }
-
-    if (humidityChecked) {
-      data = data.concat(humidityData);
-    }
-
-    if (vpdChecked) {
-      data = data.concat(vpdData);
-    }
-
-    if (co2Checked) {
-      data = data.concat(co2Data);
-    }
-
-    if (luxChecked) {
-      data = data.concat(luxData);
-    }
-
-    setChartData(data);
-
-    setAirTemperatureChecked(airChecked);
-    setLeafTemperatureChecked(leafChecked);
-    setHumidityChecked(humidityChecked);
-    setVpdChecked(vpdChecked);
-    setCo2Checked(co2Checked);
-    setLuxChecked(luxChecked);
+    writeConfig(event);
   };
 
-  const getRowItems = (rows) =>
-    rows
-      .slice(0)
-      .reverse()
-      .map((row) => ({
-        id: row._id,
-        ...row,
-      }));
+  const writeConfig = (event) => {
+    let configData = JSON.stringify({
+      lightState: light,
+      lightOnOff: [lightOnTime, lightOffTime],
+      pumpState: pump,
+      fanState: fan,
+      heaterState: heater,
+      wateringDuration: pumpOnDuration,
+      wateringTimes: [pumpOnTime1, pumpOnTime2, pumpOnTime3],
+      windowState: window,
+      temperatureRange: [lowTemp, highTemp],
+    });
+
+    console.log('Got: ' + JSON.stringify(configData));
+
+    config.writeConfig(configData);
+  };
 
   useEffect(() => {
-    async function getTelemetryData() {
-      await fetch(endpoints.dataServiceEndpoint, {
+    async function getConfigData() {
+      await fetch(endpoints.configServiceEndpoint, {
         method: 'get',
         headers: {
           'Content-Type': 'application/json',
@@ -89,206 +60,217 @@ function LightPage() {
       })
         .then((response) => {
           if (response.status == 200) {
-            response.json().then((docs) => {
-              const airTemperatureReadings = docs.Docs.reduce(
-                (airTemperature, obj) => {
-                  var temp = {
-                    group: 'airTemperature',
-                    date: obj._id,
-                    value: obj.airTemperature,
-                  };
-                  airTemperature.push(temp);
-                  return airTemperature;
-                },
-                []
-              );
-              setAirTemperatureData(airTemperatureReadings);
+            response.json().then((data) => {
+              const configData = data.doc;
 
-              const leafTemperatureReadings = docs.Docs.reduce(
-                (leafTemperature, obj) => {
-                  var temp = {
-                    group: 'leafTemperature',
-                    date: obj._id,
-                    value: obj.leafTemperature,
-                  };
-                  leafTemperature.push(temp);
-                  return leafTemperature;
-                },
-                []
-              );
-              setLeafTemperatureData(leafTemperatureReadings);
+              console.log('*******' + JSON.stringify(configData));
 
-              const humidityReadings = docs.Docs.reduce((humidity, obj) => {
-                var hum = {
-                  group: 'Humidity',
-                  date: obj._id,
-                  value: obj.humidity,
-                };
-                humidity.push(hum);
-                return humidity;
-              }, []);
-              setHumidityData(humidityReadings);
+              if (configData) {
+                setLowTemp(configData.temperatureRange[0]);
+                setHighTemp(configData.temperatureRange[1]);
 
-              const vpdReadings = docs.Docs.reduce((vpdReadings, obj) => {
-                var vpd = {
-                  group: 'Vpd',
-                  date: obj._id,
-                  value: obj.vpd,
-                };
-                vpdReadings.push(vpd);
-                return vpdReadings;
-              }, []);
-              setVpdData(vpdReadings);
+                setLight(configData.lightState);
+                setLightOnTime(configData.lightOnOff[0]);
+                setLightOffTime(configData.lightOnOff[1]);
 
-              const co2Readings = docs.Docs.reduce((co2Readings, obj) => {
-                var co2 = {
-                  group: 'Co2',
-                  date: obj._id,
-                  value: obj.co2,
-                };
-                co2Readings.push(co2);
-                return co2Readings;
-              }, []);
-              setCo2Data(co2Readings);
+                setPumpOnDuration(configData.wateringDuration);
+                setPumpOnTime1(configData.wateringTimes[0]);
+                setPumpOnTime2(configData.wateringTimes[1]);
+                setPumpOnTime3(configData.wateringTimes[2]);
 
-              const luxReadings = docs.Docs.reduce((luxReadings, obj) => {
-                let lux = 0;
-                if (obj.lux > 0) {
-                  lux = Math.sqrt(obj.lux / 4);
-                  // lux = obj.lux;
-                }
-                var luxPlot = {
-                  group: 'lux',
-                  date: obj._id,
-                  value: lux,
-                };
-                luxReadings.push(luxPlot);
-                return luxReadings;
-              }, []);
-              setLuxData(luxReadings);
-
-              setChartOptions(options1);
+                setHeater(configData.heaterState);
+                setFan(configData.fanState);
+                setPump(configData.pumpState);
+                setWindow(configData.windowState);
+              }
             }, []);
           }
         })
         .catch((err) => {
           console.log(err);
-          return <Grid>{err}</Grid>;
+          return <Grid className="config-page">Loading</Grid>;
         });
 
       setLoading(false);
     }
 
-    getTelemetryData();
+    getConfigData();
   }, []);
 
   if (loading) {
-    return <Loading active className="some-class" description="Loading" />;
+    return <Grid className="config-page">Loading</Grid>;
   }
 
   if (error) {
-    return <Grid>{error};</Grid>;
+    return `Error! ${error}`;
+  }
+
+  // Set light buttons and highlight the one that is enabled
+  let lightButton = {};
+  if (light === 'ON') {
+    lightButton = (
+      <div>
+        <Button
+          kind="primary"
+          renderIcon={CiLight}
+          inputid="light1"
+          name="lightOn"
+          value="ON"
+          onClick={(e) => setLight('ON')}
+        >
+          {' '}
+          ON*
+        </Button>
+        <Button
+          kind="tertiary"
+          renderIcon={CiLight}
+          inputid="light2"
+          name="lightOff"
+          value="OFF"
+          onClick={(e) => setLight('OFF')}
+        >
+          {' '}
+          OFF
+        </Button>
+        <Button
+          kind="tertiary"
+          renderIcon={CiLight}
+          inputid="light3"
+          name="lightAuto"
+          value="AUTO"
+          onClick={(e) => setLight('AUTO')}
+        >
+          {' '}
+          AUTO
+        </Button>
+      </div>
+    );
+  } else if (light === 'OFF') {
+    lightButton = (
+      <div>
+        <Button
+          kind="tertiary"
+          renderIcon={CiLight}
+          inputid="light1"
+          name="lightOn"
+          value="ON"
+          onClick={(e) => setLight('ON')}
+        >
+          {' '}
+          ON
+        </Button>
+        <Button
+          kind="primary"
+          renderIcon={CiLight}
+          inputid="light2"
+          name="lightOff"
+          value="OFF"
+          onClick={(e) => setLight('OFF')}
+        >
+          {' '}
+          OFF*
+        </Button>
+        <Button
+          kind="tertiary"
+          renderIcon={CiLight}
+          inputid="light3"
+          name="lightAuto"
+          value="AUTO"
+          onClick={(e) => setLight('AUTO')}
+        >
+          {' '}
+          AUTO
+        </Button>
+      </div>
+    );
+  } else {
+    lightButton = (
+      <div>
+        <Button
+          kind="tertiary"
+          renderIcon={CiLight}
+          inputid="light1"
+          name="lightOn"
+          value="ON"
+          onClick={(e) => setLight('ON')}
+        >
+          {' '}
+          ON
+        </Button>
+        <Button
+          kind="tertiary"
+          renderIcon={CiLight}
+          inputid="light2"
+          name="lightOff"
+          value="OFF"
+          onClick={(e) => setLight('OFF')}
+        >
+          {' '}
+          OFF
+        </Button>
+        <Button
+          kind="primary"
+          renderIcon={CiLight}
+          inputid="light3"
+          name="lightAuto"
+          value="AUTO"
+          onClick={(e) => setLight('AUTO')}
+        >
+          {' '}
+          AUTO*
+        </Button>
+      </div>
+    );
   }
 
   return (
     <Grid>
-      <CheckboxGroup invalidText="Invalid" warnText="Warning">
-        <Checkbox
-          id="airTemperature"
-          labelText="Air Temperature"
-          checked={airTemperatureChecked}
-          onChange={(_, { checked }) =>
-            refreshChart(
-              checked,
-              leafTemperatureChecked,
-              humidityChecked,
-              vpdChecked,
-              co2Checked,
-              luxChecked
-            )
-          }
-        />
-        <Checkbox
-          id="leafTemperature"
-          labelText="Leaf Temperature"
-          checked={leafTemperatureChecked}
-          onChange={(_, { checked }) =>
-            refreshChart(
-              airTemperatureChecked,
-              checked,
-              humidityChecked,
-              vpdChecked,
-              co2Checked,
-              luxChecked
-            )
-          }
-        />
-        <Checkbox
-          id="humidity"
-          labelText="Humidity"
-          checked={humidityChecked}
-          onChange={(_, { checked }) =>
-            refreshChart(
-              airTemperatureChecked,
-              leafTemperatureChecked,
-              checked,
-              vpdChecked,
-              co2Checked,
-              luxChecked
-            )
-          }
-        />
-        <Checkbox
-          id="Vpd"
-          labelText="Vpd"
-          checked={vpdChecked}
-          onChange={(_, { checked }) =>
-            refreshChart(
-              airTemperatureChecked,
-              leafTemperatureChecked,
-              humidityChecked,
-              checked,
-              co2Checked,
-              luxChecked
-            )
-          }
-        />
-        <Checkbox
-          id="Co2"
-          labelText="Co2"
-          checked={co2Checked}
-          onChange={(_, { checked }) =>
-            refreshChart(
-              airTemperatureChecked,
-              leafTemperatureChecked,
-              humidityChecked,
-              vpdChecked,
-              checked,
-              luxChecked
-            )
-          }
-        />
-        <Checkbox
-          id="Light"
-          labelText="Light"
-          checked={luxChecked}
-          onChange={(_, { checked }) =>
-            refreshChart(
-              airTemperatureChecked,
-              leafTemperatureChecked,
-              humidityChecked,
-              vpdChecked,
-              co2Checked,
-              checked
-            )
-          }
-        />
-      </CheckboxGroup>
+      <Column lg={1} md={1} sm={1}>
+        {/* Empty first column */}
+      </Column>
+      <Column lg={10} md={10} sm={10}>
+        <br></br>
+        <form onSubmit={(e) => handleOnSubmit(e)}>
+          <h4>Light:</h4>
 
-      <Grid>
-        <LineChart data={chartData} options={chartOptions} />
-      </Grid>
+          {lightButton}
+
+          <br></br>
+          <br></br>
+
+          <h4>On:</h4>
+          <Knob
+            value={lightOnTime}
+            onChange={(e) => setLightOnTime(e.value)}
+            min={0}
+            max={24}
+            valueTemplate={'{value}H'}
+            valueColor="orange"
+            rangeColor="lightgray"
+          />
+
+          <h4>Off:</h4>
+          <Knob
+            value={lightOffTime}
+            onChange={(e) => setLightOffTime(e.value)}
+            min={0}
+            max={24}
+            valueTemplate={'{value}H'}
+            valueColor="gray"
+            rangeColor="lightgray"
+          />
+
+          <Button
+            kind="primary"
+            onClick={(e) => handleOnSubmit(e)}
+            iconDescription="Set"
+          >
+            Set
+          </Button>
+        </form>
+      </Column>
     </Grid>
   );
 }
+
 export default LightPage;

@@ -2,28 +2,25 @@
 
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
-import { CiLight } from 'react-icons/ci';
 const config = require('../config/config.js');
+import { IoRainyOutline } from 'react-icons/io5';
+import { Button, Grid, Column, Slider } from '@carbon/react';
+import '@carbon/charts-react/styles.css';
 const endpoints = require('../endpoints.js');
-import { Button, Grid, Column } from '@carbon/react';
 
-/**
- * Set the greenhouse config
- * @returns {JSX.Element} The component.
- */
-function GreenhouseLight() {
+function Water() {
   const [highTemp, setHighTemp] = useState('0');
   const [lowTemp, setLowTemp] = useState('0');
   const [light, setLight] = useState('OFF');
-  const [lightOnTime, setLightOnTime] = useState('00:00');
-  const [lightOffTime, setLightOffTime] = useState('00:00');
+  const [lightOnTime, setLightOnTime] = useState(0);
+  const [lightOffTime, setLightOffTime] = useState(0);
   const [heater, setHeater] = useState('OFF');
   const [fan, setFan] = useState('OFF');
   const [pump, setPump] = useState('OFF');
   const [pumpOnDuration, setPumpOnDuration] = useState(0);
-  const [pumpOnTime1, setPumpOnTime1] = useState('00:00');
-  const [pumpOnTime2, setPumpOnTime2] = useState('00:00');
-  const [pumpOnTime3, setPumpOnTime3] = useState('00:00');
+  const [pumpOnTime1, setPumpOnTime1] = useState(0);
+  const [pumpOnTime2, setPumpOnTime2] = useState(0);
+  const [pumpOnTime3, setPumpOnTime3] = useState(0);
   const [window, setWindow] = useState('DOWN');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -108,78 +105,78 @@ function GreenhouseLight() {
     return `Error! ${error}`;
   }
 
-  // Set light buttons and highlight the one that is enabled
-  let lightButton = {};
-  if (light === 'ON') {
-    lightButton = (
+  // Set pump buttons and highlight the one that is enabled
+  let pumpButton = {};
+  if (pump === 'ON') {
+    pumpButton = (
       <div>
         <Button
           kind="primary"
-          renderIcon={CiLight}
-          inputid="light1"
-          name="lightOn"
+          renderIcon={IoRainyOutline}
+          inputid="pump1"
+          name="pumpOn"
           value="ON"
-          onClick={(e) => setLight('ON')}
+          onClick={(e) => setPump('ON')}
         >
           {' '}
           ON*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light2"
-          name="lightOff"
+          renderIcon={IoRainyOutline}
+          inputid="pump2"
+          name="pumpOff"
           value="OFF"
-          onClick={(e) => setLight('OFF')}
+          onClick={(e) => setPump('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light3"
-          name="lightAuto"
+          renderIcon={IoRainyOutline}
+          inputid="pump3"
+          name="pumpAuto"
           value="AUTO"
-          onClick={(e) => setLight('AUTO')}
+          onClick={(e) => setPump('AUTO')}
         >
           {' '}
           AUTO
         </Button>
       </div>
     );
-  } else if (light === 'OFF') {
-    lightButton = (
+  } else if (pump === 'OFF') {
+    pumpButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light1"
-          name="lightOn"
+          renderIcon={IoRainyOutline}
+          inputid="pump1"
+          name="pumpOn"
           value="ON"
-          onClick={(e) => setLight('ON')}
+          onClick={(e) => setPump('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="primary"
-          renderIcon={CiLight}
-          inputid="light2"
-          name="lightOff"
+          renderIcon={IoRainyOutline}
+          inputid="pump2"
+          name="pumpOff"
           value="OFF"
-          onClick={(e) => setLight('OFF')}
+          onClick={(e) => setPump('OFF')}
         >
           {' '}
           OFF*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light3"
-          name="lightAuto"
+          renderIcon={IoRainyOutline}
+          inputid="pump3"
+          name="pumpAuto"
           value="AUTO"
-          onClick={(e) => setLight('AUTO')}
+          onClick={(e) => setPump('AUTO')}
         >
           {' '}
           AUTO
@@ -187,37 +184,37 @@ function GreenhouseLight() {
       </div>
     );
   } else {
-    lightButton = (
+    pumpButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light1"
-          name="lightOn"
+          renderIcon={IoRainyOutline}
+          inputid="pump1"
+          name="pumpOn"
           value="ON"
-          onClick={(e) => setLight('ON')}
+          onClick={(e) => setPump('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light2"
-          name="lightOff"
+          renderIcon={IoRainyOutline}
+          inputid="pump2"
+          name="pumpOff"
           value="OFF"
-          onClick={(e) => setLight('OFF')}
+          onClick={(e) => setPump('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="primary"
-          renderIcon={CiLight}
-          inputid="light3"
-          name="lightAuto"
+          renderIcon={IoRainyOutline}
+          inputid="pump3"
+          name="pumpAuto"
           value="AUTO"
-          onClick={(e) => setLight('AUTO')}
+          onClick={(e) => setPump('AUTO')}
         >
           {' '}
           AUTO*
@@ -227,46 +224,82 @@ function GreenhouseLight() {
   }
 
   return (
-    <Column>
-      <form onSubmit={(e) => handleOnSubmit(e)}>
-        <h4>Light</h4>
+    <Grid>
+      <Column lg={1} md={1} sm={1}>
+        {/* Empty first column */}
+      </Column>
 
-        {lightButton}
+      <Column lg={5} md={5} sm={5}>
+        <form onSubmit={(e) => handleOnSubmit(e)}>
+          <br></br>
+          <h4>Pump:</h4>
+          {pumpButton}
 
-        <br></br>
-        <br></br>
+          <br></br>
+          <br></br>
+          <div>
+            <h4>T1:</h4>
+            <Knob
+              value={pumpOnTime1}
+              onChange={(e) => setPumpOnTime1(e.value)}
+              min={0}
+              max={23}
+              valueTemplate={'{value}H'}
+              valueColor="green"
+              rangeColor="lightgray"
+            />
 
-        <h4>On</h4>
-        <Knob
-          value={lightOnTime}
-          onChange={(e) => setLightOnTime(e.value)}
-          min={0}
-          max={24}
-          valueTemplate={'{value}H'}
-          valueColor="orange"
-          rangeColor="lightgray"
-        />
+            <h4>T2:</h4>
+            <Knob
+              value={pumpOnTime2}
+              onChange={(e) => setPumpOnTime2(e.value)}
+              min={0}
+              max={23}
+              valueTemplate={'{value}H'}
+              valueColor="green"
+              rangeColor="lightgray"
+            />
 
-        <h4>Off</h4>
-        <Knob
-          value={lightOffTime}
-          onChange={(e) => setLightOffTime(e.value)}
-          min={0}
-          max={24}
-          valueTemplate={'{value}H'}
-          valueColor="gray"
-          rangeColor="lightgray"
-        />
+            <h4>T3:</h4>
+            <Knob
+              value={pumpOnTime3}
+              onChange={(e) => setPumpOnTime3(e.value)}
+              min={0}
+              max={23}
+              valueTemplate={'{value}H'}
+              valueColor="green"
+              rangeColor="lightgray"
+            />
+          </div>
+          <br></br>
+          <br></br>
+          <h4>Duration (Minutes):</h4>
+          <Slider
+            ariaLabelInput="Lower bound"
+            invalidText="Invalid value"
+            labelText=""
+            max={59}
+            min={0}
+            step={1}
+            unstable_ariaLabelInputUpper="Upper bound"
+            value={pumpOnDuration}
+            warnText="Warning message goes here"
+            onChange={(e) => setPumpOnDuration(e.value)}
+          />
 
-        <Button
-          kind="primary"
-          onClick={(e) => handleOnSubmit(e)}
-          iconDescription="Set"
-        >
-          Set
-        </Button>
-      </form>
-    </Column>
+          <br></br>
+          <br></br>
+
+          <Button
+            kind="primary"
+            onClick={(e) => handleOnSubmit(e)}
+            iconDescription="Set"
+          >
+            Set
+          </Button>
+        </form>
+      </Column>
+    </Grid>
   );
 }
-export default GreenhouseLight;
+export default Water;
