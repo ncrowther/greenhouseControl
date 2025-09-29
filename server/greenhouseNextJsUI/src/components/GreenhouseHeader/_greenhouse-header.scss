@@ -16,3 +16,16 @@
     display: none;
   }
 }
+
+// Override MenuButton color to black
+.configuration-menu-button {
+  color: colors.$gray-100 !important;
+
+  &:hover {
+    color: colors.$gray-100 !important;
+  }
+
+  &:focus {
+    color: colors.$gray-100 !important;
+  }
+}

@@ -19,7 +19,7 @@ function ChartPage() {
   const [luxData, setLuxData] = useState([]);
   const [chartOptions, setChartOptions] = useState(options1);
   const [leafTemperatureChecked, setLeafTemperatureChecked] = useState(false);
-  const [airTemperatureChecked, setAirTemperatureChecked] = useState(false);
+  const [airTemperatureChecked, setAirTemperatureChecked] = useState(true);
   const [humidityChecked, setHumidityChecked] = useState(false);
   const [vpdChecked, setVpdChecked] = useState(false);
   const [co2Checked, setCo2Checked] = useState(false);
@@ -159,19 +159,48 @@ function ChartPage() {
               setLuxData(luxReadings);
 
               setChartOptions(options1);
+              setLoading(false);
             }, []);
           }
         })
         .catch((err) => {
           console.log(err);
+          setError(err);
+          setLoading(false);
           return <Grid>{err}</Grid>;
         });
-
-      setLoading(false);
     }
 
     getTelemetryData();
   }, []);
+
+  // Initialize chart when data is loaded
+  useEffect(() => {
+    if (
+      airTemperatureData.length > 0 ||
+      leafTemperatureData.length > 0 ||
+      humidityData.length > 0 ||
+      vpdData.length > 0 ||
+      co2Data.length > 0 ||
+      luxData.length > 0
+    ) {
+      refreshChart(
+        airTemperatureChecked,
+        leafTemperatureChecked,
+        humidityChecked,
+        vpdChecked,
+        co2Checked,
+        luxChecked
+      );
+    }
+  }, [
+    airTemperatureData,
+    leafTemperatureData,
+    humidityData,
+    vpdData,
+    co2Data,
+    luxData,
+  ]);
 
   if (loading) {
     return <Loading active className="some-class" description="Loading" />;

@@ -63,7 +63,7 @@ exports.askPlantQuestion = function (body, projectId, token) {
     console.log("*************askPlantQuestion");
 
     var plant = body.plant;
-    const prompt =  '"You are an expert horticulturalist.  Recommend greenhouse growing conditions for a  plant.  In your anwer specify Temperature range in celcius,  light as full sun, partial shade or full shade, humidity in percent,  watering level as high medium or low.  Supply your answer only in table format.\n\nInput: how to grow a ' + plant + '\nOutput:'
+    const prompt =  '"You are an expert horticulturalist.  Recommend greenhouse growing conditions for a  plant.  In your anwer specify Temperature range in celcius,  light as full sun, partial shade or full shade, humidity in percent,  watering level as high medium or low.  Supply your answer as full helpful description and in table format.\n\nInput: how to grow a ' + plant + '\nOutput:'
 
     console.log('Prompt: ', prompt);
 

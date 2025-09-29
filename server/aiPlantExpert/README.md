@@ -34,13 +34,13 @@ This project leverages the mega-awesome [swagger-tools](https://github.com/apige
 
 4.	Select the code engine project:  
 
-    ibmcloud ce project select -n [PROJECT_NAME]
+    ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
 
-5.	Start docker Desktop
+5.	Start docker (rancher) Desktop (admin)
 
 7.	Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your docker registry.
 
-8.	Using the same bash shell, deploy the sample application to your docker repo:
+8.	Using the  bash shell (admin), deploy the sample application to your docker repo:
 
 ./CEbuild
 
@@ -53,7 +53,7 @@ This project leverages the mega-awesome [swagger-tools](https://github.com/apige
 
 ## License
 
-Copyright (c) 2024 IBM Corporation
+Copyright (c) 2025 IBM Corporation
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

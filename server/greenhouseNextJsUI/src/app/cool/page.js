@@ -207,7 +207,7 @@ function Cool() {
           DWN
         </Button>
         <Button
-          kind="tertiary"
+          kind="primary"
           renderIcon={BiWindow}
           inputid="windowAuto"
           name="windowAuto"

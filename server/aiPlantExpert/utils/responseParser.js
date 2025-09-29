@@ -193,6 +193,8 @@ var extractData = exports.extractData = function (generatedResponse) {
                         waterTime2 = 8;
                         waterTime3 = 8;
                     }
+
+                    break;
                 }
 
                 pos++;

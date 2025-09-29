@@ -44,7 +44,7 @@ function ChartPage() {
 
   useEffect(() => {
     async function getTelemetryData() {
-      await fetch(endpoints.sensecapEndpoint, {
+      await fetch(endpoints.sensecapDatalogEndpoint, {
         method: 'get',
         headers: {
           'Content-Type': 'application/json',
