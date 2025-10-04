@@ -48,11 +48,11 @@ Configure paths in `jsconfig.json`
 
 3. In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups. Select the resource group for Code Engine. E.g. default
 
-   ibmcloud target -g Default
+   ibmcloud target -g asc_watsonx
 
 4. Select the code engine project:
 
-   ibmcloud ce project select -n [PROJECT_NAME]
+   ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
 
 5. Start Docker Desktop
 
