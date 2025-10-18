@@ -7,12 +7,22 @@ from PIL import Image
 from PIL import ImageDraw
 import socket
 
+def checkInternet():
+    try:
+        res = socket.getaddrinfo('google.com',80)
+        return True
+    except:
+        return False
+
 hostname = socket.gethostname()
-IPAddr = socket.gethostbyname(hostname)
+#IPAddr = socket.gethostbyname(hostname)
+IPAddr = hostname
 
 GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
 WAIT_TIME =  60 * 15  # every fifteen mins
+NO_IMAGE = 8000
+
 picam2 = Picamera2()
 
 camera_config = picam2.create_preview_configuration(main={"size":(320,240), "format": "RGB888"})
@@ -25,7 +35,8 @@ while True:
 
     picam2.start()
 
-    sleep(5)
+    while not(checkInternet()):
+        sleep(5)
 
     print("Frame " + str(frame))
 
@@ -66,16 +77,21 @@ while True:
     picam2.stop()
 
     image_64 = base64.b64encode(open(image,"rb").read())
-    
-    #print(image_64)
 
-    url = GREENHOUSE_SERVER_URL + '/photo'
-    myobj = {'_id': frame, 'cam': 1 , 'photo': image_64, 'timestamp': timestamp}
-    try:
-        res = requests.post(url, data = myobj)
-        print("POST:" + str(res))
-    except:
-        print("Failed to send photo")
+    imageLen = len(image_64)
+    print("Image length: {}".format(imageLen))
+
+    if (imageLen < NO_IMAGE):
+        print("Discarding")
+    else:
+        url = GREENHOUSE_SERVER_URL + '/photo'
+        myobj = {'_id': frame, 'cam': 1 , 'photo': image_64, 'timestamp': timestamp}
+        try:
+            res = requests.post(url, data = myobj)
+            print("POST:" + str(res))
+        except Exception as e:
+            print( f'Failed to send photo. {type(e)}: e')
+            print( "Message: {}".format(e))
 
     sleep(WAIT_TIME)
 
