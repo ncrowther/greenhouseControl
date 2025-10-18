@@ -80,8 +80,12 @@ def request(
         host, port = host.split(":", 1)
         port = int(port)
 
+    print("Port:", port)
+    
     ai = usocket.getaddrinfo(host, port, 0, usocket.SOCK_STREAM)
     ai = ai[0]
+    
+    print("Connect address:", ai)
 
     resp_d = None
     if parse_headers is not False:
@@ -201,3 +205,4 @@ def patch(url, **kw):
 
 def delete(url, **kw):
     return request("DELETE", url, **kw)
+

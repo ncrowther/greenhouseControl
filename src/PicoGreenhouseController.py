@@ -2,15 +2,15 @@ import sys
 import network
 import socket
 import time
-from requests_2 import post, get
+from requests import post, get
 import json
 import gc
 import machine
 
 from plantcare import PlantCare, WindowState, OnOffState
 
-GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
-        
+#GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
+GREENHOUSE_DATASERVICE = 'http://86.4.208.162'         
 """
 This code is a Python program that controls a plant care system. 
 It connects to a network, retrieves system time, temperature, humidity, 
@@ -19,8 +19,9 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    ssid = 'VM7763450_EXT'
-    password = 'udWrTpeejf86gugx'     
+    #ssid = 'VM7763450_EXT'
+    ssid = 'MIFI_3880'
+    #password = 'udWrTpeejf86gugx'     
     ipAddress = "ERR"
         
     def __init__(self):
@@ -56,7 +57,7 @@ class PlantServer(object):
             
             self.wlan.active(True)
             self.wlan.config(pm = 0xa11140) # Disable power-save mode
-            self.wlan.connect(self.ssid, self.password)
+            self.wlan.connect(self.ssid) #, self.password)
             
             while True:
 
@@ -86,7 +87,7 @@ class PlantServer(object):
             print('Error: ' + err) 
 
     """
-    Get Wireless lan connection status
+    Get WIreless lan connection status
     """
     def getWlanStatus(self):
         
@@ -222,7 +223,7 @@ class PlantServer(object):
     def care(self):
         print('Start care...')
         
-        SLEEP_TIME = 5
+        SLEEP_TIME = 10
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
         count = 0
