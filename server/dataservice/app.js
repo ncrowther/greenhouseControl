@@ -558,8 +558,17 @@ function getPhotoDb(camId) {
   }
 
   let photoDb = process.env.CAM1_DB_NAME;
+  
   if (camId == 2) {
     photoDb = process.env.CAM2_DB_NAME;
+  }
+
+  if (camId == 3) {
+    photoDb = process.env.CAM3_DB_NAME;
+  }
+
+  if (camId == 4) {
+    photoDb = process.env.CAM4_DB_NAME;
   }
 
   console.log("Selected db " + photoDb)

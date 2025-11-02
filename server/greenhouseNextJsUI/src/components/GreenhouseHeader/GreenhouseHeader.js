@@ -159,7 +159,7 @@ const GreenhouseHeader = () => {
                 <Link href="/chart" passHref legacyBehavior>
                   <HeaderMenuItem>Greenhouse</HeaderMenuItem>
                 </Link>
-                <Link href="/allotment" passHref legacyBehavior>
+                <Link href="/datalogger" passHref legacyBehavior>
                   <HeaderMenuItem>Polytunnel</HeaderMenuItem>
                 </Link>
                 <Link href="/timelapse" passHref legacyBehavior>
