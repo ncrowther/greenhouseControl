@@ -15,8 +15,8 @@ function ChartPage() {
   const [humidityData, setHumidityData] = useState([]);
   const [co2Data, setCo2Data] = useState([]);
   const [chartOptions, setChartOptions] = useState(options1);
-  const [airTemperatureChecked, setAirTemperatureChecked] = useState(false);
-  const [humidityChecked, setHumidityChecked] = useState(false);
+  const [airTemperatureChecked, setAirTemperatureChecked] = useState(true);
+  const [humidityChecked, setHumidityChecked] = useState(true);
   const [co2Checked, setCo2Checked] = useState(false);
 
   const refreshChart = (airChecked, humidityChecked, co2Checked) => {
@@ -145,6 +145,17 @@ function ChartPage() {
 
     getTelemetryData();
   }, []);
+
+  // Initialize chart when data is loaded
+  useEffect(() => {
+    if (
+      airTemperatureData.length > 0 ||
+      humidityData.length > 0 ||
+      co2Data.length > 0
+    ) {
+      refreshChart(airTemperatureChecked, humidityChecked, co2Checked);
+    }
+  }, [airTemperatureData, humidityData, co2Data]);
 
   if (loading) {
     return <Loading active className="some-class" description="Loading" />;

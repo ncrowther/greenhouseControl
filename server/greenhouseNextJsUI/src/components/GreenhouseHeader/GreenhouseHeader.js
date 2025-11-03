@@ -82,7 +82,7 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
             </HeaderMenu>
 
-            <HeaderMenu aria-label="Data" menuLinkName="Data">
+            <HeaderMenu aria-label="Greenhouse" menuLinkName="Greenhouse">
               <HeaderMenuItem
                 Light
                 label="Chart"
@@ -91,16 +91,6 @@ const GreenhouseHeader = () => {
                 }}
               >
                 Chart
-              </HeaderMenuItem>
-
-              <HeaderMenuItem
-                Light
-                label="Cam"
-                onClick={() => {
-                  router.push('/timelapse');
-                }}
-              >
-                Cam
               </HeaderMenuItem>
 
               <HeaderMenuItem
@@ -114,27 +104,37 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
             </HeaderMenu>
 
-            <HeaderMenu aria-label="Poly" menuLinkName="Poly">
+            <HeaderMenu aria-label="Polytunnel" menuLinkName="Polytunnel">
               <HeaderMenuItem
                 Light
-                label="air"
+                label="Air chart"
                 onClick={() => {
                   router.push('/datalogger');
                 }}
               >
-                Air
+                Air Chart
               </HeaderMenuItem>
 
               <HeaderMenuItem
                 Light
-                label="soil"
+                label="Soil chart"
                 onClick={() => {
                   router.push('/soil');
                 }}
               >
-                Soil
+                Soil Chart
               </HeaderMenuItem>
             </HeaderMenu>
+
+            <HeaderMenuItem
+              Light
+              label="Cam"
+              onClick={() => {
+                router.push('/timelapse');
+              }}
+            >
+              Cam
+            </HeaderMenuItem>
           </HeaderNavigation>
 
           <SideNav

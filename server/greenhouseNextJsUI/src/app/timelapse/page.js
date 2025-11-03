@@ -24,6 +24,8 @@ function TimelapsePage(camId) {
   };
 
   const getPhotos = async (camId, setImages) => {
+    const ONE_SECOND = 1000;
+    await new Promise((resolve) => setTimeout(resolve, ONE_SECOND));
     await fetch(`${endpoints.photoServiceEndpoint}?camId=${camId}`, {
       method: 'get',
       headers: {
@@ -67,7 +69,6 @@ function TimelapsePage(camId) {
     <Grid className="timelapse-page">
       <Galleria
         value={images1}
-        style={{ maxWidth: '480px' }}
         item={itemTemplate}
         autoPlay
         transitionInterval={250}
@@ -75,7 +76,6 @@ function TimelapsePage(camId) {
 
       <Galleria
         value={images2}
-        style={{ maxWidth: '480px' }}
         item={itemTemplate}
         autoPlay
         transitionInterval={250}
@@ -83,7 +83,6 @@ function TimelapsePage(camId) {
 
       <Galleria
         value={images3}
-        style={{ maxWidth: '480px' }}
         item={itemTemplate}
         autoPlay
         transitionInterval={250}
@@ -91,7 +90,6 @@ function TimelapsePage(camId) {
 
       <Galleria
         value={images4}
-        style={{ maxWidth: '480px' }}
         item={itemTemplate}
         autoPlay
         transitionInterval={250}

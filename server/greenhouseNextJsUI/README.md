@@ -37,36 +37,50 @@ Configure paths in `jsconfig.json`
 
 1. Open WSL shell from VSC
 
+```bash
    yarn clean
    yarn build
+```
 
 2. Login to IBM Cloud.
 
+```bash
    ibmcloud login --sso
+```
 
-   (if using public account, from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud login -a https://cloud.ibm.com -u passcode -p l6bjKxF0gL)
+(if using public account, from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud login -a https://cloud.ibm.com -u passcode -p l6bjKxF0gL)
 
 3. In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups. Select the resource group for Code Engine. E.g. default
 
+```bash
    ibmcloud target -g asc_watsonx
+```
 
 4. Select the code engine project:
 
+```bash
    ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
+```
 
 5. Start Docker Desktop
 
+```bash
    docker login -u ncrowthe -p C\*\*\*\*!
+```
 
 6. Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
 
 7. Using the bash shell, deploy the sample application to your docker repo:
 
-./CEbuild
+```bash
+   ./CEbuild
+```
 
 9. Deploy the application to Code Engine on IBM Cloud. From the app's folder do:
 
-./CErun
+```bash
+   ./CErun
+```
 
 10. Open the URL using the IBM Cloud Code Engine route for the application
 

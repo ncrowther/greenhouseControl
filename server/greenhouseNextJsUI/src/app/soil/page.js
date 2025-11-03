@@ -15,8 +15,8 @@ function ChartPage() {
   const [soilMoistureData, setsoilMoistureData] = useState([]);
   const [ionsData, setionsData] = useState([]);
   const [chartOptions, setChartOptions] = useState(options1);
-  const [soilTemperatureChecked, setsoilTemperatureChecked] = useState(false);
-  const [soilMoistureChecked, setsoilMoistureChecked] = useState(false);
+  const [soilTemperatureChecked, setsoilTemperatureChecked] = useState(true);
+  const [soilMoistureChecked, setsoilMoistureChecked] = useState(true);
   const [ionsChecked, setionsChecked] = useState(false);
 
   const refreshChart = (
@@ -150,6 +150,17 @@ function ChartPage() {
 
     getTelemetryData();
   }, []);
+
+  // Initialize chart when data is loaded
+  useEffect(() => {
+    if (
+      soilTemperatureData.length > 0 ||
+      soilMoistureData.length > 0 ||
+      ionsData.length > 0
+    ) {
+      refreshChart(soilTemperatureChecked, soilMoistureChecked, ionsChecked);
+    }
+  }, [soilTemperatureData, soilMoistureData, ionsData]);
 
   if (loading) {
     return <Loading active className="some-class" description="Loading" />;

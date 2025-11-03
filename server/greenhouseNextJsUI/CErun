@@ -20,7 +20,7 @@ set -ex
 export REGISTRY=${REGISTRY:-docker.io/ncrowthe}
 
 # Create the app
-ibmcloud ce app create -n greenhousenextui --image ${REGISTRY}/greenhousenextui
+ibmcloud ce app create -n greenhousenextui --min-scale 1 --image ${REGISTRY}/greenhousenextui
 
 # Get the URL of the app for later use
 URL=$(ibmcloud ce app get -n greenhousenextui -o url)
