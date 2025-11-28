@@ -53,12 +53,16 @@ Configure paths in `jsconfig.json`
 3. In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups. Select the resource group for Code Engine. E.g. default
 
 ```bash
-   ibmcloud target -g asc_watsonx
+   ibmcloud resource groups
+
+   ibmcloud target -g [resource_group]
 ```
 
 4. Select the code engine project:
 
 ```bash
+   ibmcloud ce project list
+
    ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
 ```
 

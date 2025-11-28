@@ -369,7 +369,7 @@ class LinearActuator(object):
         if (self.windowAngle >= self.MIN_ACTUATOR_ANGLE):        
             self.up_pin.value(0)  # Set up to OFF state   
             self.down_pin.value(1)  # Set down to ON state
-            time.sleep_ms(self.PULSE_TIME)
+            time.sleep_ms(self.PULSE_TIME + 50) # add a little more pulse time to ensure window closes
             self.down_pin.value(0)  # Set down  to OFF state
             
             # Decrement degrees incline
@@ -449,8 +449,8 @@ class Pump(OnOFFAutoController):
                 # Define pump on/off time
                 PUMP_ON_HOUR  = h # 24 hour
  
-                PUMP_ON_TIME  = time.mktime((2000, 01, 01, PUMP_ON_HOUR, 00, 00, 0, 0))
-                PUMP_OFF_TIME = time.mktime((2000, 01, 01, PUMP_ON_HOUR, self.WATERING_PERIOD, 00, 0, 0))                     
+                PUMP_ON_TIME  = time.mktime((2000, 1, 1, PUMP_ON_HOUR, 0, 0, 0, 0))
+                PUMP_OFF_TIME = time.mktime((2000, 1, 1, PUMP_ON_HOUR, self.WATERING_PERIOD, 0, 0, 0))                     
                 print("Pump on: " + str(PUMP_ON_HOUR)+ "h for " + str(self.WATERING_PERIOD) + "m")
                     
                 if (rtc.timeInRange(PUMP_ON_TIME, PUMP_OFF_TIME)):
