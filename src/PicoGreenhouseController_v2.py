@@ -22,9 +22,10 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    ssid = 'VM7763450'
-    #ssid = 'MIFI_3880'
-    password = 'udWrTpeejf86gugx'     
+    #ssid = 'VM7763450'
+    #password = 'udWrTpeejf86gugx' 
+    ssid = 'MIFI_3880'
+    password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -33,7 +34,7 @@ class PlantServer(object):
         self.statusLight.setConnectingStatus()      
         
         self.wlan = network.WLAN(network.STA_IF)
-        self.ipAddress = self.connect_to_network()
+        self.ipAddress = self.connect_to_network(self.ssid, self.password)
         
         print("***IP: " + str(self.ipAddress))
         
@@ -48,6 +49,50 @@ class PlantServer(object):
             self.plantCare.setDateTime(timestamp)
             
     """
+    Attempt Connection to WIFI
+    """
+    def wifiConnection(self, ssid, password):
+        
+        print("Connect to Wi-Fi: " + ssid)
+                    
+        try:
+            
+            if (password != None):
+                self.wlan.connect(ssid, password)
+            else:
+                self.wlan.connect(ssid)
+                
+            MAX_TRIES = 3
+            for i in range(MAX_TRIES):
+
+                print('Connect attempt {}...'.format(i))
+                time.sleep(6)
+
+                print('Wlan status:' + self.getWlanStatus())
+                
+                wlanStatus = self.wlan.status()
+                
+                if (wlanStatus == network.STAT_GOT_IP):                        
+                    print('******** WIFI CONNECTED ********')
+
+                    status = self.wlan.ifconfig()
+                    ip = status[0]
+                    print('ip = ' + ip)
+                    self.ipAddress = ip
+                    
+                    print('IP address: '  + self.ipAddress)
+                    
+                    return self.ipAddress
+                
+            else:  
+                return None
+            
+        except Exception as e:
+            err = self.getWlanStatus()
+            print('Connection Error: ' + err)
+            return None
+        
+    """
     Connect to a Wi-Fi network.
 
     Parameters:
@@ -56,7 +101,7 @@ class PlantServer(object):
     Returns:
     str: The IP address of the connected network.
     """    
-    def connect_to_network(self):  
+    def connect_to_network(self, ssid, password):  
         
         try:        
             # Check if already connected
@@ -64,7 +109,11 @@ class PlantServer(object):
             
             self.wlan.active(True)
             self.wlan.config(pm = 0xa11140) # Disable power-save mode
-            self.wlan.connect(self.ssid, self.password)
+
+            if (password):
+                self.wlan.connect(ssid, password)
+            else:
+                self.wlan.connect(ssid)
             
             MAX_TRIES = 10
             for i in range(MAX_TRIES):
@@ -92,7 +141,8 @@ class PlantServer(object):
             
             err = self.getWlanStatus()
                 
-            print('Error: ' + err) 
+            print('Error: ' + err)         
+            
 
     """
     Get WIreless lan connection status
@@ -203,7 +253,7 @@ class PlantServer(object):
         
         try: 
         
-            self.connect_to_network()
+            self.connect_to_network(self.ssid, self.password)
                              
             temperatureData = self.plantCare.getTemperatureData()
             humidityData = self.plantCare.getHumidityData()
@@ -265,6 +315,8 @@ class PlantServer(object):
     def care(self):
         print('Start care...')
         
+        statusLight = StatusLight()        
+        
         SLEEP_TIME = 10
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
@@ -280,13 +332,15 @@ class PlantServer(object):
             timestamp = self.configure()
             
             # If timestamp exists then log every LOG_TIME mins
-            if (timestamp and (count % LOG_TIME == 0)):
-                self.logger()
-                self.plantCare.setDateTime(timestamp)            
+            #if (timestamp and (count % LOG_TIME == 0)):
+            #    self.logger()
+            #    self.plantCare.setDateTime(timestamp)            
  
             print('Sleep for {} seconds'.format(SLEEP_TIME))
             
-            time.sleep(SLEEP_TIME)
+            statusLight.setSleepingStatus()                       
+            time.sleep(SLEEP_TIME)           
+            statusLight.setOperationalStatus()
 
             count = count + 1
                             
