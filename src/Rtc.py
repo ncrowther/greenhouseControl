@@ -3,13 +3,9 @@
 from machine import Pin, I2C
 import time
 import binascii
+from Errors import HardwareError
 
-class HardwareError(Exception):
-    def __init__(self, message, error_code):
-        super().__init__(message)
-        self.error_code = error_code
-        self.message = message
-        
+
 """
 class  Clock is used to interact with an I2C clock. 
 The init method initializes the I2C bus and sets the address of the clock. 
@@ -33,7 +29,11 @@ class Clock(object):
         I2C_SDA = 6
         I2C_SCL = 7
 
-        self.bus = I2C(I2C_PORT,scl=Pin(I2C_SCL),sda=Pin(I2C_SDA))
+        try: 
+            self.bus = I2C(I2C_PORT,scl=Pin(I2C_SCL),sda=Pin(I2C_SDA))
+        except Exception as e:
+            print(e)  
+            raise HardwareError("DS18B20 Temperature Probe", 100)                
 
     def set_time(self,new_time):
         
@@ -52,8 +52,9 @@ class Clock(object):
 
             self.bus.writeto_mem(int(self.address),int(self.start_reg),now_time)
 
-        except:
-            raise HardwareError("Ds3231 Clock", 101)        
+        except Exception as e:
+            print(e)  
+            raise HardwareError("DS18B20 Temperature Probe", 100)        
     
     def getDateTime(self):      
         try: 
