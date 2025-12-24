@@ -6,12 +6,11 @@ import binascii
 import machine
 import asyncio
 from StatusLight import StatusLight
-from DS18B20 import TemperatureProbe
+from Sht20Probe import TemperatureHumidityProbe
 from Rtc import Clock
 from Errors import HardwareError
 
 #from Lcd import Lcd
-
 
 #################################################
 ### Greenhouse controller for Rasberry Pi Pico ###
@@ -382,7 +381,7 @@ class PlantCare(object):
             self.rtc = Clock()
             
             # Init temperature probe
-            self.temperatureProbe = TemperatureProbe()            
+            self.temperatureProbe = TemperatureHumidityProbe()            
 
             ## Create the objects to be controlled
             self.windows = LinearActuator()
@@ -446,7 +445,7 @@ class PlantCare(object):
         return self.temperatureProbe.temperature
     
     def getHumidityData(self):
-        return 0 #self.temperatureProbe.humidity       
+        return self.temperatureProbe.humidity       
     
     def setPump(self, state):
         self.pump.setState(state)
@@ -478,9 +477,9 @@ class PlantCare(object):
             timestamp = self.rtc.getDateTimeStr() 
             print(timestamp)
             
-            self.temperatureProbe.measureIt(self.rtc)                    
+            self.temperatureProbe.measureIt()                    
             airTemperature = self.temperatureProbe.temperature
-            humidity = 0 #self.thProbe.humidity              
+            humidity = self.temperatureProbe.humidity              
             
             print("control vents")
             self.windows.control(airTemperature, self.MAX_TEMPERATURE)

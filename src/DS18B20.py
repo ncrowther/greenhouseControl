@@ -10,7 +10,7 @@ class TemperatureProbe(object):
   
     def __init__(self):
         # Initialize the OneWire bus on GPIO pin 12
-        ow = onewire.OneWire(Pin(12))
+        ow = onewire.OneWire(Pin(0))
 
         # Create a DS18X20 instance using the OneWire bus
         self.ds = ds18x20.DS18X20(ow)

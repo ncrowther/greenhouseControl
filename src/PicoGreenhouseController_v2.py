@@ -332,9 +332,9 @@ class PlantServer(object):
             timestamp = self.configure()
             
             # If timestamp exists then log every LOG_TIME mins
-            #if (timestamp and (count % LOG_TIME == 0)):
-            #    self.logger()
-            #    self.plantCare.setDateTime(timestamp)            
+            if (timestamp and (count % LOG_TIME == 0)):
+                self.logger()
+                self.plantCare.setDateTime(timestamp)            
  
             print('Sleep for {} seconds'.format(SLEEP_TIME))
             

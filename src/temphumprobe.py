@@ -1,4 +1,4 @@
-from micropython_sht20 import sht20
+from micropython_sht20 import SHT20
 from machine import Pin, PWM, ADC, I2C
 import time
 
@@ -10,9 +10,9 @@ class TemperatureHumidityProbe(object):
     def __init__(self):
         # setup the I2C communication for the SHT20 sensor
         #  I2C Pins
-        I2C_PORT = 1
-        I2C_SDA = 6
-        I2C_SCL = 7        
+        I2C_PORT = 0
+        I2C_SDA =0
+        I2C_SCL = 1      
 
         i2c = I2C(I2C_PORT, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA))
                                                       
@@ -21,7 +21,7 @@ class TemperatureHumidityProbe(object):
         addr = i2c.scan()[0]
         print("**************************" + str(addr))
 
-        self.sht = sht20.SHT20(i2c)
+        self.sht = SHT20(i2c, addr)
         
         self.temperature = 0        
         self.highTemp = 0
@@ -49,7 +49,7 @@ class TemperatureHumidityProbe(object):
 
         except Exception as e:
             print(e)  
-            raise HardwareError("SHT20 Probe", 100)            
+            #raise HardwareError("SHT20 Probe", 100)            
     
     
             
@@ -59,6 +59,7 @@ def main():
     probe = TemperatureHumidityProbe()
     
     while True:
+        time.sleep(1)
         probe.measureIt()
 
 if __name__ == "__main__":
