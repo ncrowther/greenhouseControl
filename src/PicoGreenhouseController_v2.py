@@ -317,8 +317,7 @@ class PlantServer(object):
         
         statusLight = StatusLight()        
         
-        SLEEP_TIME = 10
-        LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
+        SLEEP_TIME = 10 # seconds
         
         count = 0
         
@@ -328,14 +327,6 @@ class PlantServer(object):
             
             self.plantCare.careforplants()
             
-            # get config data
-            timestamp = self.configure()
-            
-            # If timestamp exists then log every LOG_TIME mins
-            if (timestamp and (count % LOG_TIME == 0)):
-                self.logger()
-                self.plantCare.setDateTime(timestamp)            
- 
             print('Sleep for {} seconds'.format(SLEEP_TIME))
             
             statusLight.setSleepingStatus()                       
