@@ -9,38 +9,20 @@ import '@carbon/charts-react/styles.css';
 const endpoints = require('../endpoints.js');
 
 function Heat() {
-  const [highTemp, setHighTemp] = useState('0');
   const [lowTemp, setLowTemp] = useState('0');
-  const [light, setLight] = useState('OFF');
-  const [lightOnTime, setLightOnTime] = useState(0);
-  const [lightOffTime, setLightOffTime] = useState(0);
   const [heater, setHeater] = useState('OFF');
-  const [fan, setFan] = useState('OFF');
-  const [pump, setPump] = useState('OFF');
-  const [pumpOnDuration, setPumpOnDuration] = useState(0);
-  const [pumpOnTime1, setPumpOnTime1] = useState(0);
-  const [pumpOnTime2, setPumpOnTime2] = useState(0);
-  const [pumpOnTime3, setPumpOnTime3] = useState(0);
-  const [window, setWindow] = useState('DOWN');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
   const handleOnSubmit = (event) => {
     let configData = JSON.stringify({
-      lightState: light,
-      lightOnOff: [lightOnTime, lightOffTime],
-      pumpState: pump,
-      fanState: fan,
       heaterState: heater,
-      wateringDuration: pumpOnDuration,
-      wateringTimes: [pumpOnTime1, pumpOnTime2, pumpOnTime3],
-      windowState: window,
-      temperatureRange: [lowTemp, highTemp],
+      minTemp: lowTemp,
     });
 
     console.log('Got: ' + JSON.stringify(configData));
 
-    config.writeConfig(configData);
+    config.heat(configData);
   };
 
   useEffect(() => {
@@ -60,21 +42,7 @@ function Heat() {
 
               if (configData) {
                 setLowTemp(configData.temperatureRange[0]);
-                setHighTemp(configData.temperatureRange[1]);
-
-                setLight(configData.lightState);
-                setLightOnTime(configData.lightOnOff[0]);
-                setLightOffTime(configData.lightOnOff[1]);
-
-                setPumpOnDuration(configData.wateringDuration);
-                setPumpOnTime1(configData.wateringTimes[0]);
-                setPumpOnTime2(configData.wateringTimes[1]);
-                setPumpOnTime3(configData.wateringTimes[2]);
-
                 setHeater(configData.heaterState);
-                setHeater(configData.heaterState);
-                setPump(configData.pumpState);
-                setWindow(configData.windowState);
               }
             }, []);
           }

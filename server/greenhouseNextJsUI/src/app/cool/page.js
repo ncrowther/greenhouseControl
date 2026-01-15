@@ -12,18 +12,10 @@ const endpoints = require('../endpoints.js');
 
 function Cool() {
   const [highTemp, setHighTemp] = useState('0');
-  const [lowTemp, setLowTemp] = useState('0');
-  const [light, setLight] = useState('OFF');
-  const [lightOnTime, setLightOnTime] = useState('00:00');
-  const [lightOffTime, setLightOffTime] = useState('00:00');
-  const [heater, setHeater] = useState('OFF');
   const [fan, setFan] = useState('OFF');
-  const [pump, setPump] = useState('OFF');
-  const [pumpOnDuration, setPumpOnDuration] = useState(0);
-  const [pumpOnTime1, setPumpOnTime1] = useState('00:00');
-  const [pumpOnTime2, setPumpOnTime2] = useState('00:00');
-  const [pumpOnTime3, setPumpOnTime3] = useState('00:00');
   const [window, setWindow] = useState('DOWN');
+  const [windowRun, setWindowRun] = useState('0');
+  const [windowPause, setWindowPause] = useState('0');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
@@ -32,20 +24,16 @@ function Cool() {
     event.preventDefault();
 
     let configData = JSON.stringify({
-      lightState: light,
-      lightOnOff: [lightOnTime, lightOffTime],
-      pumpState: pump,
-      fanState: fan,
-      heaterState: heater,
-      wateringDuration: pumpOnDuration,
-      wateringTimes: [pumpOnTime1, pumpOnTime2, pumpOnTime3],
       windowState: window,
-      temperatureRange: [lowTemp, highTemp],
+      fanState: fan,
+      windowRun: windowRun,
+      windowPause: windowPause,
+      maxTemp: highTemp,
     });
 
     console.log('Got: ' + JSON.stringify(configData));
 
-    config.writeConfig(configData);
+    config.cool(configData);
   };
 
   useEffect(() => {
@@ -64,22 +52,11 @@ function Cool() {
               console.log('*******' + JSON.stringify(configData));
 
               if (configData) {
-                setLowTemp(configData.temperatureRange[0]);
                 setHighTemp(configData.temperatureRange[1]);
-
-                setLight(configData.lightState);
-                setLightOnTime(configData.lightOnOff[0]);
-                setLightOffTime(configData.lightOnOff[1]);
-
-                setPumpOnDuration(configData.wateringDuration);
-                setPumpOnTime1(configData.wateringTimes[0]);
-                setPumpOnTime2(configData.wateringTimes[1]);
-                setPumpOnTime3(configData.wateringTimes[2]);
-
-                setHeater(configData.heaterState);
                 setFan(configData.fanState);
-                setPump(configData.pumpState);
                 setWindow(configData.windowState);
+                setWindowRun(configData.windowRun);
+                setWindowPause(configData.windowPause);
               }
             }, []);
           }
@@ -348,7 +325,7 @@ function Cool() {
       <Column lg={5} md={5} sm={5}>
         <form onSubmit={(e) => handleOnSubmit(e)}>
           <br></br>
-          <h4>Window:</h4>
+          <h4>Vent:</h4>
           {windowButton}
 
           <br></br>
@@ -359,14 +336,36 @@ function Cool() {
           <br></br>
           <br></br>
 
-          <h4>Max:</h4>
+          <h4>Temperature:</h4>
           <Knob
             value={highTemp}
             onChange={(e) => setHighTemp(e.value)}
             min={5}
-            max={50}
+            max={40}
             valueTemplate={'{value}C'}
             valueColor="red"
+            rangeColor="lightgray"
+          />
+
+          <h4>Vent Run (0 - 60 Sec):</h4>
+          <Knob
+            value={windowRun}
+            onChange={(e) => setWindowRun(e.value)}
+            min={0}
+            max={60}
+            valueTemplate={'{value}'}
+            valueColor="blue"
+            rangeColor="lightgray"
+          />
+
+          <h4>Vent Pause (0 - 120 Sec):</h4>
+          <Knob
+            value={windowPause}
+            onChange={(e) => setWindowPause(e.value)}
+            min={0}
+            max={120}
+            valueTemplate={'{value}'}
+            valueColor="purple"
             rangeColor="lightgray"
           />
 

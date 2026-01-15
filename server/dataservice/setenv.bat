@@ -3,4 +3,6 @@ set CLOUDANT_APIKEY=czz8OBUUT3ZWVeHosqVNQX8fMlTW0BYUAz5cJHrKlPLJ
 set CONFIG_DB_NAME=greenhouseconfig
 set CAM1_DB_NAME=cam1
 set CAM2_DB_NAME=cam2
+set CAM3_DB_NAME=cam3
+set CAM4_DB_NAME=cam4
 set LOG_DB_NAME=greenhouselog
