@@ -320,16 +320,17 @@ class LinearActuator(object):
     # Define window pulse count and length
     MAX_ACTUATOR_ANGLE = 180
     MIN_ACTUATOR_ANGLE = 0
-    PULSE_TIME = 200  
-    PULSE_DEGREE_CHANGE = 2
+    PULSE_DEGREE_CHANGE = 10
+    RUN_SECS = 5
+    PAUSE_SECS = 10
     
     def __init__(self):
         # GPIO pin + window is connected to
-        UP_PIN = 15
+        UP_PIN = 14
         self.up_pin = Pin(UP_PIN, Pin.OUT)
         
         # GPIO pin - window is connected to
-        DOWN_PIN = 14
+        DOWN_PIN = 15
         self.down_pin = Pin(DOWN_PIN, Pin.OUT)
         
         # Degree opening for window
@@ -352,49 +353,82 @@ class LinearActuator(object):
             self.down_pin.value(1)  # Set down to ON state
             self.windowAngle = 0  
             print("Window CLOSED")            
-        
-    def up(self):
-        
-        if (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
-            self.down_pin.value(0)  # Set down to OFF state
-            self.up_pin.value(1)  # Set up to ON state
-            time.sleep_ms(self.PULSE_TIME)
-            self.up_pin.value(0)  # Set up to OFF state
-            
-            # Increment degrees incline
-            self.windowAngle = self.windowAngle + self.PULSE_DEGREE_CHANGE
-        
-    def down(self):
-        
-        if (self.windowAngle >= self.MIN_ACTUATOR_ANGLE):        
-            self.up_pin.value(0)  # Set up to OFF state   
-            self.down_pin.value(1)  # Set down to ON state
-            time.sleep_ms(self.PULSE_TIME + 50) # add a little more pulse time to ensure window closes
-            self.down_pin.value(0)  # Set down  to OFF state
-            
-            # Decrement degrees incline
-            self.windowAngle = self.windowAngle - self.PULSE_DEGREE_CHANGE
             
     def control(self, temperature, maxTemperature):
         
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 2
-        
-        print("Window control: " + self.status()  + " " + str(temperature) + ">" + str(maxTemperature))
-        
+           
         # Open
-        if (OnOffState.AUTO == self.status()) and (temperature >= maxTemperature):
-            self.up() 
+        if (WindowState.AUTO == self.status()) and (temperature > maxTemperature):
+            print("Vent Up: " + str(temperature) + ">" + str(maxTemperature))
+            self.up(self.RUN_SECS, self.PAUSE_SECS)
 
-        # Close 
-        if (OnOffState.AUTO == self.status()) and (temperature < (maxTemperature - DEAD_ZONE)):        
-            self.down()     
+        # Close
+        minTemperature = (maxTemperature - DEAD_ZONE)
+        if (WindowState.AUTO == self.status()) and (temperature < minTemperature):
+            print("Vent Down: " + str(temperature) + "<" + str(minTemperature))
+            self.down(self.RUN_SECS, self.PAUSE_SECS)
 
     def angle(self):
         return self.windowAngle  
 
     def status(self):
         return self.state
+    
+    def setPauseSecs(self, pauseSecs):
+        self.PAUSE_SECS = pauseSecs
+        
+    def setRunSecs(self, runSecs):
+        self.RUN_SECS = runSecs            
+    
+    def up(self, runTimeSeconds, intervalSeconds):
+        
+        if (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
+            
+            self.down_pin.value(0)  # Set down to OFF state
+            self.up_pin.value(1)  # Set up to ON state   
+            
+            print("Run Period %s seconds " %runTimeSeconds )        
+                 
+            time.sleep_ms(runTimeSeconds * 1000)
+            
+            print("Run period OFF ")
+            self.up_pin.value(0)  # Set up to OFF state
+            
+            # Sleep for pause interval
+            print("Interval %s seconds " %intervalSeconds )           
+            time.sleep_ms(intervalSeconds * 1000)        
+            
+            # Increment degrees incline
+            self.windowAngle = self.windowAngle + runTimeSeconds
+            
+            if (self.windowAngle > self.MAX_ACTUATOR_ANGLE):
+                self.windowAngle = self.MAX_ACTUATOR_ANGLE
+                
+            print("Window Angle: " + str(self.windowAngle))              
+        
+    def down(self, runTimeSeconds, intervalSeconds):
+
+        if (self.windowAngle > self.MIN_ACTUATOR_ANGLE):    
+        
+            self.up_pin.value(0)  # Set up to OFF state   
+            self.down_pin.value(1)  # Set down to ON state    
+            
+            print("Run Period %s seconds " %runTimeSeconds )        
+                 
+            time.sleep_ms(runTimeSeconds * 1000)
+            
+            print("Run period OFF ")
+            self.down_pin.value(0)  # Set down to OFF state
+            
+            # Sleep for pause interval
+            print("Interval %s seconds " %intervalSeconds )           
+            time.sleep_ms(intervalSeconds * 1000)  
+
+            # Decrement degrees incline
+            self.windowAngle = abs(self.windowAngle - runTimeSeconds)
+            print("Window Angle: " + str(self.windowAngle))               
         
 """
 The Pump class has methods for controlling the pump's speed, turning it off, and watering the plants. 
@@ -438,7 +472,7 @@ class Pump(OnOFFAutoController):
         # Set back to Auto for next time
         self.setState(OnOffState.AUTO)   
               
-    def control(self, temperature, rtc):
+    def control(self, rtc):
         
         print("Pump state %s" %self.status())
         
@@ -714,7 +748,7 @@ class PlantCare(object):
 
     # define temperature range
     MIN_TEMPERATURE  = 15
-    MAX_TEMPERATURE = 24
+    MAX_TEMPERATURE = 20
         
     def __init__(self, ip):
         
@@ -788,6 +822,12 @@ class PlantCare(object):
         
     def setWindow(self, state):      
         self.windows.setState(state)        
+
+    def setWindowRun(self, runSecs):      
+        self.windows.setRunSecs(runSecs)
+        
+    def setWindowPause(self, pauseSecs):      
+        self.windows.setPauseSecs(pauseSecs)
         
     def setLight(self, state):
         self.light.setState(state)
@@ -932,14 +972,14 @@ class PlantCare(object):
 
             self.vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
                  
-            self.windows.control(airTemperature, self.MAX_TEMPERATURE)
+            self.windows.control(leafTemperature, self.MAX_TEMPERATURE)
                         
-            self.fan.control(airTemperature, self.MAX_TEMPERATURE)
+            self.fan.control(leafTemperature, self.MAX_TEMPERATURE)
             
             self.heater.control(leafTemperature, self.MIN_TEMPERATURE)
             
             print("controlWatering...")
-            self.pump.control(leafTemperature, self.rtc)
+            self.pump.control(self.rtc)
             
             print("display data...")
             self.lcd.showData(self.thProbe, self.co2probe, self.rtc, self.vpd, leafTemperature, airTemperature, self.luxProbe.lux)         
@@ -962,3 +1002,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

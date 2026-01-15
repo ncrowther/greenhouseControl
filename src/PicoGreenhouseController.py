@@ -20,8 +20,11 @@ The program also includes a function to display an error message with a specific
 class PlantServer(object):
     
     #ssid = 'VM7763450_EXT'
-    ssid = 'MIFI_3880'
-    #password = 'udWrTpeejf86gugx'     
+    ssid = 'VM7763450'
+    password = 'udWrTpeejf86gugx'
+    
+    #ssid = 'MIFI_3880'
+    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -57,7 +60,7 @@ class PlantServer(object):
             
             self.wlan.active(True)
             self.wlan.config(pm = 0xa11140) # Disable power-save mode
-            self.wlan.connect(self.ssid) #, self.password)
+            self.wlan.connect(self.ssid, self.password)
             
             while True:
 
@@ -188,7 +191,13 @@ class PlantServer(object):
             
         windowState = doc["windowState"]
         plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
-            
+        
+        windowRun = doc["windowRun"]
+        plantCare.setWindowRun(windowRun)  # must be same as PlantCare.WindowState
+        
+        windowPause = doc["windowPause"]
+        plantCare.setWindowPause(windowPause)  # must be same as PlantCare.WindowState
+        
         temperatureRange = doc["temperatureRange"]            
         plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
 

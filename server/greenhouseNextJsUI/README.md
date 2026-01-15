@@ -48,7 +48,14 @@ Configure paths in `jsconfig.json`
    ibmcloud login --sso
 ```
 
-(if using public account, from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud login -a https://cloud.ibm.com -u passcode -p l6bjKxF0gL)
+(if using public or techsales account, logout of ibm cloud (https://cloud.ibm.com/logout), then IBM Cloud Login:
+
+https://cloud.ibm.com/authorize/itzwatsonx031
+
+Username: student_6954ecabb4@techz12one.ibm.com
+Password: ogk8arxlyrzwyo4
+
+from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud login -a https://cloud.ibm.com -u passcode -p l6bjKxF0gL)
 
 3. In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups. Select the resource group for Code Engine. E.g. default
 

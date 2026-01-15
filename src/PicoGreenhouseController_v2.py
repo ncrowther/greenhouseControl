@@ -232,6 +232,12 @@ class PlantServer(object):
         windowState = doc["windowState"]
         plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
         
+        windowRun = doc["windowRun"]
+        plantCare.setWindowRun(windowRun)  # must be same as PlantCare.WindowState
+        
+        windowPause = doc["windowPause"]
+        plantCare.setWindowPause(windowPause)  # must be same as PlantCare.WindowState        
+        
         pumpState = doc["pumpState"]
         plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
         
