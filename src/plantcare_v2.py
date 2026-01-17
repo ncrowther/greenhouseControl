@@ -9,22 +9,13 @@ from StatusLight import StatusLight
 from Sht20Probe import TemperatureHumidityProbe
 from Rtc import Clock
 from Errors import HardwareError
-
-#from Lcd import Lcd
+from Oled import Oled
 
 #################################################
 ### Greenhouse controller for Rasberry Pi Pico ###
 ### Author: Nigel T. Crowther
 ### Date: 03-Sep-2024
 #################################################
-
-# Define midnight reset period
-RESET_HOUR = 0 # 24 hour
-RESET_ON_TIME  = time.mktime((2000, 1, 1, RESET_HOUR, 0, 0, 0, 0))
-RESET_OFF_TIME = time.mktime((2000, 1, 1, RESET_HOUR, 1, 0, 0, 0))
-
-# Define millisecond amounts
-ONE_MINUTE = 60000
 
 class OnOffState():
     ON = "ON"
@@ -185,10 +176,12 @@ class LinearActuator(object):
         # GPIO pin + window is connected to
         UP_PIN = 14
         self.up_pin = Pin(UP_PIN, Pin.OUT)
+        self.up_pin.value(0)  # Set down to OFF state        
         
         # GPIO pin - window is connected to
         DOWN_PIN = 15
         self.down_pin = Pin(DOWN_PIN, Pin.OUT)
+        self.down_pin.value(0)  # Set down to OFF state        
         
         # Degree opening for window
         self.windowAngle = 0
@@ -208,23 +201,28 @@ class LinearActuator(object):
         elif (state == WindowState.CLOSED):
             self.up_pin.value(0)  # Set up to OFF state        
             self.down_pin.value(1)  # Set down to ON state
-            self.windowAngle = 0  
-            print("Window CLOSED")            
+            self.windowAngle = 15 # Assume its been left slighty ajar so we can close it
+            print("Window CLOSED")
+        elif (state == WindowState.AUTO):
+            self.up_pin.value(0)  # Set up to OFF state        
+            self.down_pin.value(0)  # Set down to ON state
+            print("Window AUTO")               
             
-    def control(self, temperature, maxTemperature):
+    def control(self, temperature, maxTemperature, oled):
         
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 2
            
         # Open
-        if (WindowState.AUTO == self.status()) and (temperature > maxTemperature):
-            print("Vent Up: " + str(temperature) + ">" + str(maxTemperature))
+        if (WindowState.AUTO == self.status()) and (temperature > maxTemperature) and (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
+            oled.showVentStatus("UP", ">", temperature, maxTemperature, self.windowAngle, self.RUN_SECS, self.PAUSE_SECS)
             self.up(self.RUN_SECS, self.PAUSE_SECS)
 
         # Close
         minTemperature = (maxTemperature - DEAD_ZONE)
-        if (WindowState.AUTO == self.status()) and (temperature < minTemperature):
-            print("Vent Down: " + str(temperature) + "<" + str(minTemperature))
+        if (WindowState.AUTO == self.status()) and (temperature < minTemperature) and (self.windowAngle > self.MIN_ACTUATOR_ANGLE):
+            ventStatus = "Dwn: %5.2f < %5.2f %d°" % (temperature, minTemperature, self.windowAngle)
+            oled.showVentStatus("DOWN", "<", temperature, minTemperature, self.windowAngle, self.RUN_SECS, self.PAUSE_SECS)
             self.down(self.RUN_SECS, self.PAUSE_SECS)
 
     def angle(self):
@@ -241,51 +239,44 @@ class LinearActuator(object):
     
     def up(self, runTimeSeconds, intervalSeconds):
         
-        if (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
+        self.down_pin.value(0)  # Set down to OFF state
+        self.up_pin.value(1)  # Set up to ON state   
+        
+        print("Run Period %s seconds " %runTimeSeconds )        
+             
+        time.sleep_ms(runTimeSeconds * 1000)
+        
+        print("Run period OFF ")
+        self.up_pin.value(0)  # Set up to OFF state
+        
+        # Sleep for pause interval
+        print("Interval %s seconds " %intervalSeconds )           
+        time.sleep_ms(intervalSeconds * 1000)        
+        
+        # Increment degrees incline
+        self.windowAngle = self.windowAngle + runTimeSeconds
             
-            self.down_pin.value(0)  # Set down to OFF state
-            self.up_pin.value(1)  # Set up to ON state   
-            
-            print("Run Period %s seconds " %runTimeSeconds )        
-                 
-            time.sleep_ms(runTimeSeconds * 1000)
-            
-            print("Run period OFF ")
-            self.up_pin.value(0)  # Set up to OFF state
-            
-            # Sleep for pause interval
-            print("Interval %s seconds " %intervalSeconds )           
-            time.sleep_ms(intervalSeconds * 1000)        
-            
-            # Increment degrees incline
-            self.windowAngle = self.windowAngle + runTimeSeconds
-            
-            if (self.windowAngle > self.MAX_ACTUATOR_ANGLE):
-                self.windowAngle = self.MAX_ACTUATOR_ANGLE
-                
-            print("Window Angle: " + str(self.windowAngle))              
+        print("Window Angle: " + str(self.windowAngle))              
         
     def down(self, runTimeSeconds, intervalSeconds):
-
-        if (self.windowAngle > self.MIN_ACTUATOR_ANGLE):    
+     
+        self.up_pin.value(0)  # Set up to OFF state   
+        self.down_pin.value(1)  # Set down to ON state    
         
-            self.up_pin.value(0)  # Set up to OFF state   
-            self.down_pin.value(1)  # Set down to ON state    
-            
-            print("Run Period %s seconds " %runTimeSeconds )        
-                 
-            time.sleep_ms(runTimeSeconds * 1000)
-            
-            print("Run period OFF ")
-            self.down_pin.value(0)  # Set down to OFF state
-            
-            # Sleep for pause interval
-            print("Interval %s seconds " %intervalSeconds )           
-            time.sleep_ms(intervalSeconds * 1000)  
+        print("Run Period %s seconds " %runTimeSeconds )        
+             
+        time.sleep_ms(runTimeSeconds * 1000)
+        
+        print("Run period OFF ")
+        self.down_pin.value(0)  # Set down to OFF state
+        
+        # Sleep for pause interval
+        print("Interval %s seconds " %intervalSeconds )           
+        time.sleep_ms(intervalSeconds * 1000)  
 
-            # Decrement degrees incline
-            self.windowAngle = abs(self.windowAngle - runTimeSeconds)
-            print("Window Angle: " + str(self.windowAngle))      
+        # Decrement degrees decline
+        self.windowAngle = abs(self.windowAngle - runTimeSeconds)
+        print("Window Angle: " + str(self.windowAngle))      
        
                     
 """
@@ -329,10 +320,9 @@ The Pump class has methods for controlling the pump's speed, turning it off, and
 It also has a control method that determines when to water the plants based on temperature and time.
 """
 class Pump(OnOFFAutoController):
-    # PWM dual power switch
-
+    
     #### DEFINE WATERING TIMES HERE ####
-    WATERING_TIMES = [10, 13, 21]
+    WATERING_TIMES = [6, 12, 18]
     WATERING_PERIOD = 1 # minutes
 
     def __init__(self):
@@ -390,30 +380,32 @@ class Pump(OnOFFAutoController):
      
     def setTimes(self, wateringTimes, period, minTemp):
         self.WATERING_TIMES = wateringTimes
-        self.WATERING_PERIOD = period
+        self.WATERING_PERIOD = period      
         
 """
 This code controls various devices such as a pump, fan, heater, , and probe. 
-The "careforplants" method performs various tasks such as controlling the lights, temperature, watering, and displaying data on the LCD screen. 
+The "careforplants" method performs various tasks such as controlling the lights, temperature, watering, and displaying data on the Oled screen. 
 It also includes error handling to handle hardware errors and general exceptions.
 """
 class PlantCare(object):
     
-
     # define temperature range
     MIN_TEMPERATURE  = 15
-    MAX_TEMPERATURE = 25
+    MAX_TEMPERATURE = 24
         
     def __init__(self, ip):
         
         try:
             self.ip = ip
-      
+            
             # Clock used to active objects on a schedule 
             self.rtc = Clock()
             
+            # Set up the Oled Display
+            self.oled = Oled()              
+            
             # Init temperature probe
-            self.temperatureProbe = TemperatureHumidityProbe()            
+            self.temperatureProbe = TemperatureHumidityProbe()          
 
             ## Create the objects to be controlled
             self.windows = LinearActuator()
@@ -508,6 +500,8 @@ class PlantCare(object):
     def careforplants(self):
           
         print("careforplants...")
+        
+        screen = 0
      
         # Look after plants
         try:
@@ -520,13 +514,20 @@ class PlantCare(object):
             humidity = self.temperatureProbe.humidity              
             
             print("control vents")
-            self.windows.control(airTemperature, self.MAX_TEMPERATURE)
+            self.windows.control(airTemperature, self.MAX_TEMPERATURE, self.oled)
             
             print("control fans")            
             self.fan.control(airTemperature, self.MAX_TEMPERATURE)            
             
             print("control watering...")
             self.pump.control(airTemperature, self.rtc)
+            
+            print("display data...")        
+  
+            timeStr = self.rtc.getTimeStr()   
+            dateStr = self.rtc.getDateTimeStr()[:10]
+      
+            self.oled.show(dateStr, timeStr, airTemperature, humidity )            
 
           
         except HardwareError as e:
@@ -548,5 +549,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

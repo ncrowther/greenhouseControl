@@ -17,15 +17,15 @@ GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
 """
 This code is a Python program that controls a plant care system. 
 It connects to a network, retrieves system time, temperature, humidity, 
-and CO2 data from the plant care system, and logs the data to a Greenhouse Data Service. 
+from the plant care system
 The program also includes a function to display an error message with a specific code and message.
 """
 class PlantServer(object):
     
-    #ssid = 'VM7763450'
-    #password = 'udWrTpeejf86gugx' 
-    ssid = 'MIFI_3880'
-    password = None    
+    ssid = 'VM7763450'
+    password = 'udWrTpeejf86gugx' 
+    #ssid = 'MIFI_3880'
+    #password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -40,57 +40,14 @@ class PlantServer(object):
         
         if self.ipAddress == None:
             self.plantCare = PlantCare(None)         
-            print("No WIFI")
-            self.statusLight.setErroredStatus()  
+            print("No WIFI.  Using default settings...")
+            self.statusLight.setErroredStatus()
         else:
             self.statusLight.setOperationalStatus()   
             self.plantCare = PlantCare(self.ipAddress)
             timestamp = self.configure()
             self.plantCare.setDateTime(timestamp)
             
-    """
-    Attempt Connection to WIFI
-    """
-    def wifiConnection(self, ssid, password):
-        
-        print("Connect to Wi-Fi: " + ssid)
-                    
-        try:
-            
-            if (password != None):
-                self.wlan.connect(ssid, password)
-            else:
-                self.wlan.connect(ssid)
-                
-            MAX_TRIES = 3
-            for i in range(MAX_TRIES):
-
-                print('Connect attempt {}...'.format(i))
-                time.sleep(6)
-
-                print('Wlan status:' + self.getWlanStatus())
-                
-                wlanStatus = self.wlan.status()
-                
-                if (wlanStatus == network.STAT_GOT_IP):                        
-                    print('******** WIFI CONNECTED ********')
-
-                    status = self.wlan.ifconfig()
-                    ip = status[0]
-                    print('ip = ' + ip)
-                    self.ipAddress = ip
-                    
-                    print('IP address: '  + self.ipAddress)
-                    
-                    return self.ipAddress
-                
-            else:  
-                return None
-            
-        except Exception as e:
-            err = self.getWlanStatus()
-            print('Connection Error: ' + err)
-            return None
         
     """
     Connect to a Wi-Fi network.
@@ -115,7 +72,7 @@ class PlantServer(object):
             else:
                 self.wlan.connect(ssid)
             
-            MAX_TRIES = 10
+            MAX_TRIES = 3
             for i in range(MAX_TRIES):
 
                 print('waiting for connection attempt {}...'.format(i))
@@ -140,7 +97,6 @@ class PlantServer(object):
         except Exception as e:
             
             err = self.getWlanStatus()
-                
             print('Error: ' + err)         
             
 
@@ -199,7 +155,7 @@ class PlantServer(object):
             timestamp = jsonData["timestamp"]
             print("timestamp: " + timestamp) 
             
-            self.reconfigure(plantCare, jsonData)               
+            self.setData(plantCare, jsonData)               
         
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
@@ -221,7 +177,7 @@ class PlantServer(object):
         jsonData: The new configuration
 
     """
-    def reconfigure(self, plantCare, jsonData):
+    def setData(self, plantCare, jsonData):
             
             # Config stored inside doc          
         doc = jsonData["doc"]
@@ -250,64 +206,6 @@ class PlantServer(object):
         plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)        
             
 
-    # This function is used to log data from the plant care system. 
-    # It attempts to connect to the network and log the data. If any errors occur during this process, 
-    # it will display an error message and reset the machine.
-    def logger(self):  
-        
-        print('Start logger...')
-        
-        try: 
-        
-            self.connect_to_network(self.ssid, self.password)
-                             
-            temperatureData = self.plantCare.getTemperatureData()
-            humidityData = self.plantCare.getHumidityData()
-
-            self.logData(temperatureData, humidityData)
-                
-        except Exception as err:
-            sys.print_exception(err)
-            print(f"Unexpected {err=}, {type(err)=}")
-            self.displayError(123, "SYSTEM ERROR")
-            machine.reset()
-            
-            
-    # Logs data to the Greenhouse Data Service. 
-    def logData(self, airTemperature, humidity):
-        
-        print("Logging data...")
-        
-        header = {
-          'Content-Type': 'application/json',
-          }
-        
-        payload = json.dumps({
-          "airTemperature": airTemperature,
-          "leafTemperature": 0,          
-          "humidity": humidity,
-          "co2": 0,
-          "vpd": 0,
-          "lux": 0          
-        })
-        
-        request_url = GREENHOUSE_DATASERVICE + '/doc?id=polytunnel'
-     
-        gc.collect() 
-        resp = None
-        response = "ERROR"
-        try:
-            resp = post( request_url, headers=header, data=payload, timeout=10)
-            response = resp.text
-            resp.close()
-            
-        except Exception as e: # Here it catches any error.
-            print(e)
-            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
-                resp.close()
-        finally:   
-            gc.collect()          
-            return response
         
     """
     This function is responsible for caring for plants.
@@ -323,9 +221,7 @@ class PlantServer(object):
         
         statusLight = StatusLight()        
         
-        SLEEP_TIME = 10 # seconds
-        
-        count = 0
+        SLEEP_TIME = 1 # seconds
         
         while True:
 
@@ -338,8 +234,6 @@ class PlantServer(object):
             statusLight.setSleepingStatus()                       
             time.sleep(SLEEP_TIME)           
             statusLight.setOperationalStatus()
-
-            count = count + 1
                             
         
 """
@@ -364,5 +258,4 @@ def main():
         #machine.reset()
 
 main()
-
 
