@@ -323,7 +323,7 @@ class Pump(OnOFFAutoController):
     
     #### DEFINE WATERING TIMES HERE ####
     WATERING_TIMES = [6, 12, 18]
-    WATERING_PERIOD = 1 # minutes
+    WATERING_DURATION = 1 # minutes
 
     def __init__(self):
         # GPIO pin number  relay is connected to
@@ -362,10 +362,10 @@ class Pump(OnOFFAutoController):
                 PUMP_ON_HOUR  = h # 24 hour
  
                 PUMP_ON_TIME  = time.mktime((2000, 1, 1, PUMP_ON_HOUR, 0, 0, 0, 0))
-                PUMP_OFF_TIME = time.mktime((2000, 1, 1, PUMP_ON_HOUR, self.WATERING_PERIOD, 0, 0, 0))                     
+                PUMP_OFF_TIME = time.mktime((2000, 1, 1, PUMP_ON_HOUR, self.WATERING_DURATION, 0, 0, 0))                     
                     
                 if (rtc.timeInRange(PUMP_ON_TIME, PUMP_OFF_TIME)):
-                    print("Pump on: " + str(PUMP_ON_HOUR)+ "h for " + str(self.WATERING_PERIOD) + "m")
+                    print("Pump on: " + str(PUMP_ON_HOUR)+ "h for " + str(self.WATERING_DURATION) + "m")
                     self.setState(OnOffState.ON)          
                     self.setState(OnOffState.AUTO)
                     return
@@ -376,11 +376,11 @@ class Pump(OnOFFAutoController):
                                
         
         #if ( (temperature > self.MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
-         #   asyncio.create_task(self.watering(self.WATERING_PERIOD))
+         #   asyncio.create_task(self.watering(self.WATERING_DURATION))
      
     def setTimes(self, wateringTimes, period, minTemp):
         self.WATERING_TIMES = wateringTimes
-        self.WATERING_PERIOD = period      
+        self.WATERING_DURATION = period      
         
 """
 This code controls various devices such as a pump, fan, heater, , and probe. 
@@ -391,7 +391,7 @@ class PlantCare(object):
     
     # define temperature range
     MIN_TEMPERATURE  = 15
-    MAX_TEMPERATURE = 24
+    MAX_TEMPERATURE = 25
         
     def __init__(self, ip):
         
@@ -527,7 +527,7 @@ class PlantCare(object):
             timeStr = self.rtc.getTimeStr()   
             dateStr = self.rtc.getDateTimeStr()[:10]
       
-            self.oled.show(dateStr, timeStr, airTemperature, humidity )            
+            self.oled.show(dateStr, timeStr, airTemperature, humidity, self.MAX_TEMPERATURE, self.MIN_TEMPERATURE, self.pump.WATERING_TIMES, self.pump.WATERING_DURATION)            
 
           
         except HardwareError as e:
@@ -549,3 +549,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+

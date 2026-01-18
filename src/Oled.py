@@ -3,6 +3,9 @@ import ssd1306
 
 class Oled                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         (object):
 
+    #  display mode
+    screen = 0
+    
     def __init__(self): 
         #====== setup the I2C communication
         i2c = I2C(0, sda=Pin(0), scl=Pin(1))
@@ -56,18 +59,36 @@ class Oled                                                                      
         None
     """
 
-    def show(self, dateStr, timeStr, temperature, humidity):
+    def show(self, dateStr, timeStr, temperature, humidity, maxTemp, minTemp, wateringTimes, wateringDuration):
       
+        print("OLED")
+         
         # clear 
         self.oledClearBlack()
-
-        # Display text on the OLED screen
-        self.oled.text('Date: ' + dateStr, 0, 0)   
-        self.oled.text('Time: ' + timeStr, 0, 16)
-        self.oled.text('Temp: ' + str(temperature) + " C", 0, 32)         
-        self.oled.text('Humidity: ' + str(humidity) + "%", 0, 48)
         
+        if (self.screen == 0): 
+            # Display text on the OLED screen
+            self.oled.text('Date: ' + dateStr, 0, 0)   
+            self.oled.text('Time: ' + timeStr, 0, 16)
+            self.oled.text('Temp: ' + str(temperature) + " C", 0, 32)         
+            self.oled.text('Humidity: ' + str(humidity) + "%", 0, 48)       
+            self.screen = 1
+            
+        elif (self.screen == 1):
+            self.oled.text('Max Temp: ' + str(maxTemp), 0, 0)   
+            self.oled.text('Min Temp: ' + str(minTemp), 0, 16)
+            self.screen = 2
+            
+        elif (self.screen == 2):
+            self.oled.text('WATER1: ' + str(wateringTimes[0]), 0, 0)   
+            self.oled.text('WATER2: ' + str(wateringTimes[1]), 0, 16)
+            self.oled.text('WATER3: ' + str(wateringTimes[2]), 0, 32)
+            self.oled.text('Duration: ' + str(wateringDuration), 0, 48)              
+            self.screen = 0            
+
+        # Show data
         self.oled.show()
+
         
     """
     Display date and time on the OLED screen.
@@ -107,6 +128,11 @@ class Oled                                                                      
         
 if __name__ == '__main__':
     
+    WATERING_TIMES = [6, 12, 18]
+    WATERING_PERIOD = 1 # minutes
+    
     oled = Oled()
-    oled.show("2026/01/17", "11:22:16", 20, 60)        
+    
+    oled.screen = 1
+    oled.show("2026/01/17", "11:22:16", 20, 60, 10, 14, WATERING_TIMES, WATERING_PERIOD)        
 
