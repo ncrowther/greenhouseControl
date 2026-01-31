@@ -17,6 +17,8 @@ from machine import Pin
 RED = (255, 0, 0)
 GREEN = (00, 255, 0)
 BLUE = (00, 00, 255)
+MAGENTA = (255, 00, 255)
+ORANGE = (255, 255, 0)
     
 class StatusLight(object):
         
@@ -43,9 +45,6 @@ class StatusLight(object):
         return max(0, min(c * brightness / 100, 255))
 
     def setOperationalStatus(self):
-        self.setColor(GREEN, 25)
-        self.show()    
-        self.wait(100)
         self.setColor(GREEN, 1)    
         self.show()
         
@@ -55,9 +54,17 @@ class StatusLight(object):
         self.wait(10)
         self.setColor(BLUE, 1)    
         self.show()
+        
+    def setSleepingStatus(self):
+        self.setColor(MAGENTA, 1)
+        self.show()
+        
+    def setWarningStatus(self):
+        self.setColor(ORANGE, 1)
+        self.show()                
 
     def setErroredStatus(self):
-        self.setColor(RED, 40)
+        self.setColor(RED, 255)
         self.show()
  
 

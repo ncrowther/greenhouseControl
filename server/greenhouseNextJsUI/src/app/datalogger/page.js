@@ -13,13 +13,20 @@ function ChartPage() {
   const [chartData, setChartData] = useState([]);
   const [airTemperatureData, setAirTemperatureData] = useState([]);
   const [humidityData, setHumidityData] = useState([]);
-  const [co2Data, setCo2Data] = useState([]);
+  const [pressureData, setPressureData] = useState([]);
+  const [vocData, setvocData] = useState([]);
   const [chartOptions, setChartOptions] = useState(options1);
   const [airTemperatureChecked, setAirTemperatureChecked] = useState(true);
   const [humidityChecked, setHumidityChecked] = useState(true);
-  const [co2Checked, setCo2Checked] = useState(false);
+  const [vocChecked, setvocChecked] = useState(false);
+  const [pressureChecked, setPressureChecked] = useState(false);
 
-  const refreshChart = (airChecked, humidityChecked, co2Checked) => {
+  const refreshChart = (
+    airChecked,
+    humidityChecked,
+    vocChecked,
+    pressureChecked
+  ) => {
     //this will reload the page with the new selection
     let data = [];
 
@@ -31,15 +38,20 @@ function ChartPage() {
       data = data.concat(humidityData);
     }
 
-    if (co2Checked) {
-      data = data.concat(co2Data);
+    if (vocChecked) {
+      data = data.concat(vocData);
+    }
+
+    if (pressureChecked) {
+      data = data.concat(pressureData);
     }
 
     setChartData(data);
 
     setAirTemperatureChecked(airChecked);
     setHumidityChecked(humidityChecked);
-    setCo2Checked(co2Checked);
+    setvocChecked(vocChecked);
+    setPressureChecked(pressureChecked);
   };
 
   useEffect(() => {
@@ -56,14 +68,16 @@ function ChartPage() {
             response.json().then((docs) => {
               let temperaturePos = 0;
               let humidityPos = 1;
-              let co2Pos = 2;
+              let vocPos = 2;
+              let pressurePos = 3;
 
               let sensorCodes = docs.data.list[0];
 
               // Map sensor codes to positions in the data array:
               const temperatureSensorCode = 4165;
-              const humidiySensorCode = 4166;
-              const co2SensorCode = 4167;
+              const pressureSensorCode = 4166;
+              const humiditySensorCode = 4167;
+              const airQualityCode = 4168;
 
               for (let i = 0; i < sensorCodes.length; i++) {
                 let sensorCode = sensorCodes[i];
@@ -72,33 +86,36 @@ function ChartPage() {
                   temperaturePos = i;
                 }
 
-                if (sensorCode[1] == humidiySensorCode) {
+                if (sensorCode[1] == humiditySensorCode) {
                   humidityPos = i;
                 }
 
-                if (sensorCode[1] == co2SensorCode) {
-                  co2Pos = i;
+                if (sensorCode[1] == airQualityCode) {
+                  vocPos = i;
+                }
+                if (sensorCode[1] == pressureSensorCode) {
+                  pressurePos = i;
                 }
               }
 
               //we have data
               //now parse it into the format needed for the chart
 
-              const co2Readings = docs.data.list[1][co2Pos].reduce(
-                (co2Readings, obj) => {
-                  console.log('******co2*********' + JSON.stringify(obj));
+              const vocReadings = docs.data.list[1][vocPos].reduce(
+                (vocReadings, obj) => {
+                  console.log('******voc*********' + JSON.stringify(obj));
 
-                  var co2 = {
-                    group: 'Co2',
+                  var voc = {
+                    group: 'Voc',
                     date: obj[1],
-                    value: obj[0],
+                    value: obj[0] / 10, // divide by 10 to correct scale error
                   };
-                  co2Readings.push(co2);
-                  return co2Readings;
+                  vocReadings.push(voc);
+                  return vocReadings;
                 },
                 []
               );
-              setCo2Data(co2Readings);
+              setvocData(vocReadings);
 
               const humidityReadings = docs.data.list[1][humidityPos].reduce(
                 (humidity, obj) => {
@@ -122,7 +139,7 @@ function ChartPage() {
                 console.log('******airC*********' + JSON.stringify(obj));
 
                 var temp = {
-                  group: 'airTemperature',
+                  group: 'AirTemperature',
                   date: obj[1],
                   value: obj[0],
                 };
@@ -130,6 +147,22 @@ function ChartPage() {
                 return airTemperature;
               }, []);
               setAirTemperatureData(airTemperatureReadings);
+
+              const pressureReadings = docs.data.list[1][pressurePos].reduce(
+                (pressure, obj) => {
+                  console.log('********Pressure*******' + JSON.stringify(obj));
+
+                  var hum = {
+                    group: 'Pressure',
+                    date: obj[1],
+                    value: obj[0],
+                  };
+                  pressure.push(hum);
+                  return pressure;
+                },
+                []
+              );
+              setPressureData(pressureReadings);
 
               setChartOptions(options1);
             }, []);
@@ -151,11 +184,17 @@ function ChartPage() {
     if (
       airTemperatureData.length > 0 ||
       humidityData.length > 0 ||
-      co2Data.length > 0
+      vocData.length > 0 ||
+      pressureData.length > 0
     ) {
-      refreshChart(airTemperatureChecked, humidityChecked, co2Checked);
+      refreshChart(
+        airTemperatureChecked,
+        humidityChecked,
+        vocChecked,
+        pressureChecked
+      );
     }
-  }, [airTemperatureData, humidityData, co2Data]);
+  }, [airTemperatureData, humidityData, vocData, pressureData]);
 
   if (loading) {
     return <Loading active className="some-class" description="Loading" />;
@@ -173,7 +212,7 @@ function ChartPage() {
           labelText="Air Temperature"
           checked={airTemperatureChecked}
           onChange={(_, { checked }) =>
-            refreshChart(checked, humidityChecked, co2Checked)
+            refreshChart(checked, humidityChecked, vocChecked, pressureChecked)
           }
         />
 
@@ -182,16 +221,40 @@ function ChartPage() {
           labelText="Humidity"
           checked={humidityChecked}
           onChange={(_, { checked }) =>
-            refreshChart(airTemperatureChecked, checked, co2Checked)
+            refreshChart(
+              airTemperatureChecked,
+              checked,
+              vocChecked,
+              pressureChecked
+            )
           }
         />
 
         <Checkbox
-          id="Co2"
-          labelText="Co2"
-          checked={co2Checked}
+          id="voc"
+          labelText="Voc"
+          checked={vocChecked}
           onChange={(_, { checked }) =>
-            refreshChart(airTemperatureChecked, humidityChecked, checked)
+            refreshChart(
+              airTemperatureChecked,
+              humidityChecked,
+              checked,
+              pressureChecked
+            )
+          }
+        />
+
+        <Checkbox
+          id="pressure"
+          labelText="Pressure"
+          checked={pressureChecked}
+          onChange={(_, { checked }) =>
+            refreshChart(
+              airTemperatureChecked,
+              humidityChecked,
+              vocChecked,
+              checked
+            )
           }
         />
       </CheckboxGroup>

@@ -153,6 +153,8 @@ app.post('/light', async (req, res) => {
         originalDoc.wateringTimes[2]
       ],
       "windowState": originalDoc.windowState,
+      "windowRun": originalDoc.windowRun,
+      "windowPause": originalDoc.windowPause,
       "temperatureRange": [
         originalDoc.temperatureRange[0],
         originalDoc.temperatureRange[1]
@@ -199,6 +201,8 @@ app.post('/heat', async (req, res) => {
         originalDoc.wateringTimes[2]
       ],
       "windowState": originalDoc.windowState,
+      "windowRun": originalDoc.windowRun,
+      "windowPause": originalDoc.windowPause,
       "temperatureRange": [
         inputDoc.minTemp,
         originalDoc.temperatureRange[1]
@@ -214,7 +218,7 @@ app.post('/heat', async (req, res) => {
 })
 
 // ///////////////////// Set Irrigation ////////////////////
-app.post('/irrigation', async (req, res) => {
+app.post('/water', async (req, res) => {
 
   const inputDoc = req.body;
 
@@ -245,6 +249,8 @@ app.post('/irrigation', async (req, res) => {
         inputDoc.timeHH3
       ],
       "windowState": originalDoc.windowState,
+      "windowRun": originalDoc.windowRun,
+      "windowPause": originalDoc.windowPause,
       "temperatureRange": [
         originalDoc.temperatureRange[0],
         originalDoc.temperatureRange[1]
@@ -291,6 +297,8 @@ app.post('/cool', async (req, res) => {
         originalDoc.wateringTimes[2]
       ],
       "windowState": inputDoc.windowState,
+      "windowRun": inputDoc.windowRun,
+      "windowPause": inputDoc.windowPause,
       "temperatureRange": [
         originalDoc.temperatureRange[0],
         inputDoc.maxTemp
@@ -334,6 +342,8 @@ app.post('/config', async (req, res) => {
       inputDoc.wateringTimes[2]
     ],
     "windowState": inputDoc.windowState,
+    "windowRun": inputDoc.windowRun,
+    "windowPause": inputDoc.windowPause,
     "temperatureRange": [
       inputDoc.temperatureRange[0],
       inputDoc.temperatureRange[1]
@@ -447,6 +457,7 @@ app.get('/photo', async (req, res) => {
 app.get('/photos', async (req, res) => {
 
   const camId = req.query.camId
+
   photoDb = getPhotoDb(camId);
   console.log('Get all photos from: ' + photoDb);
 
@@ -558,7 +569,7 @@ function getPhotoDb(camId) {
   }
 
   let photoDb = process.env.CAM1_DB_NAME;
-  
+
   if (camId == 2) {
     photoDb = process.env.CAM2_DB_NAME;
   }

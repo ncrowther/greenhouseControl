@@ -7,42 +7,48 @@ import json
 import gc
 import machine
 
-from plantcare import PlantCare, WindowState, OnOffState
+from plantcare_v2 import PlantCare, WindowState, OnOffState
+from StatusLight import StatusLight
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
-GREENHOUSE_DATASERVICE = 'http://86.4.208.162'         
+GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
+
+
 """
 This code is a Python program that controls a plant care system. 
 It connects to a network, retrieves system time, temperature, humidity, 
-and CO2 data from the plant care system, and logs the data to a Greenhouse Data Service. 
+from the plant care system
 The program also includes a function to display an error message with a specific code and message.
 """
 class PlantServer(object):
     
-    #ssid = 'VM7763450_EXT'
     ssid = 'VM7763450'
-    password = 'udWrTpeejf86gugx'
-    
+    password = 'udWrTpeejf86gugx' 
     #ssid = 'MIFI_3880'
-    
+    #password = None    
     ipAddress = "ERR"
         
     def __init__(self):
         
+        self.statusLight = StatusLight()
+        self.statusLight.setConnectingStatus()      
+        
         self.wlan = network.WLAN(network.STA_IF)
-        self.ipAddress = self.connect_to_network()
+        self.ipAddress = self.connect_to_network(self.ssid, self.password)
         
         print("***IP: " + str(self.ipAddress))
         
         if self.ipAddress == None:
             self.plantCare = PlantCare(None)         
-            self.displayError(99, "No WIFI")
-            sys.exit()
+            print("No WIFI.  Using default settings...")
+            self.statusLight.setErroredStatus()
         else:
+            self.statusLight.setOperationalStatus()   
             self.plantCare = PlantCare(self.ipAddress)
             timestamp = self.configure()
             self.plantCare.setDateTime(timestamp)
             
+        
     """
     Connect to a Wi-Fi network.
 
@@ -52,7 +58,7 @@ class PlantServer(object):
     Returns:
     str: The IP address of the connected network.
     """    
-    def connect_to_network(self):  
+    def connect_to_network(self, ssid, password):  
         
         try:        
             # Check if already connected
@@ -60,11 +66,16 @@ class PlantServer(object):
             
             self.wlan.active(True)
             self.wlan.config(pm = 0xa11140) # Disable power-save mode
-            self.wlan.connect(self.ssid, self.password)
-            
-            while True:
 
-                print('waiting for connection...')
+            if (password):
+                self.wlan.connect(ssid, password)
+            else:
+                self.wlan.connect(ssid)
+            
+            MAX_TRIES = 3
+            for i in range(MAX_TRIES):
+
+                print('waiting for connection attempt {}...'.format(i))
                 time.sleep(6)
 
                 print('Wlan status:' + self.getWlanStatus())
@@ -86,8 +97,8 @@ class PlantServer(object):
         except Exception as e:
             
             err = self.getWlanStatus()
-                
-            print('Error: ' + err) 
+            print('Error: ' + err)         
+            
 
     """
     Get WIreless lan connection status
@@ -144,16 +155,15 @@ class PlantServer(object):
             timestamp = jsonData["timestamp"]
             print("timestamp: " + timestamp) 
             
-            self.reconfigure(plantCare, jsonData)               
+            self.setData(plantCare, jsonData)               
         
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
                 print(resp)
                 resp.close()
-            print("CONNECTION ERROR " + str(e))
+            print("configure(): CONNECTION ERROR " + str(e))
         finally:
             if resp:
-                print(resp)
                 resp.close()
                 gc.collect()
                            
@@ -167,28 +177,14 @@ class PlantServer(object):
         jsonData: The new configuration
 
     """
-    def reconfigure(self, plantCare, jsonData):
+    def setData(self, plantCare, jsonData):
             
             # Config stored inside doc          
         doc = jsonData["doc"]
-
-        lightOnOff = doc["lightOnOff"]
-        onTime = lightOnOff[0]
-        offTime = lightOnOff[1]        
-        plantCare.setLightOnOffTime(onTime, offTime)
-            
-        lightState = doc["lightState"]
-        plantCare.setLight(lightState)  # must be same as PlantCare.OnOffState                
-            
-        pumpState = doc["pumpState"]
-        plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
-            
-        fanState = doc["fanState"]
-        plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState
-            
-        heaterState = doc["heaterState"]
-        plantCare.setHeater(heaterState)  # must be same as PlantCare.OnOffState                
-            
+        
+        temperatureRange = doc["temperatureRange"]            
+        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])        
+                
         windowState = doc["windowState"]
         plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
         
@@ -196,29 +192,20 @@ class PlantServer(object):
         plantCare.setWindowRun(windowRun)  # must be same as PlantCare.WindowState
         
         windowPause = doc["windowPause"]
-        plantCare.setWindowPause(windowPause)  # must be same as PlantCare.WindowState
+        plantCare.setWindowPause(windowPause)  # must be same as PlantCare.WindowState        
         
-        temperatureRange = doc["temperatureRange"]            
-        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
-
+        pumpState = doc["pumpState"]
+        plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
+        
+        fanState = doc["fanState"]
+        plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState        
+        
         wateringPeriod = doc["wateringDuration"]  	# minutes
         wateringTimes = doc["wateringTimes"]  		# list of three start times in 24H format
         wateringMinTemp = 5       					# Not implemented
-        plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)
+        plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)        
+            
 
-           
-    """
-    This function displays an error message with a specific code and message.
-
-    Args:
-        code (int): The error code.
-        message (str): The error message.
-
-    Returns:
-        None
-    """
-    def displayError(self, code, message):
-        self.plantCare.displayError(code, message)
         
     """
     This function is responsible for caring for plants.
@@ -232,92 +219,23 @@ class PlantServer(object):
     def care(self):
         print('Start care...')
         
-        SLEEP_TIME = 10
-        LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
+        statusLight = StatusLight()        
         
-        count = 0
+        SLEEP_TIME = 1 # seconds
         
         while True:
 
             print("Care")
+            
             self.plantCare.careforplants()
             
-            # get config data
-            timestamp = self.configure()
-            print("************* TIME: " + str(timestamp))
-
-            # If timestamp exists then log every LOG_TIME mins
-            if (timestamp and (count % LOG_TIME == 0)):
-                self.logger()
-                self.plantCare.setDateTime(timestamp)
-
-            time.sleep(SLEEP_TIME)
-
-            count = count + 1
+            print('Sleep for {} seconds'.format(SLEEP_TIME))
+            
+            statusLight.setSleepingStatus()                       
+            time.sleep(SLEEP_TIME)           
+            statusLight.setOperationalStatus()
                             
         
-    # This function is used to log data from the plant care system. 
-    # It attempts to connect to the network, retrieve system time,  temperature, humidity, 
-    # and CO2 from the plant care system, and then log the data. If any errors occur during this process, 
-    # it will display an error message and reset the machine.
-    def logger(self):  
-        
-        print('Start logger...')
-        
-        try: 
-        
-            self.connect_to_network()
-                             
-            temperatureData = self.plantCare.getTemperatureData()
-            humidityData = self.plantCare.getHumidityData()
-            co2Data = self.plantCare.getCo2Data()
-            vpd = self.plantCare.getVpdData()
-            lux = self.plantCare.getluxData()
-            self.logData(temperatureData[0], temperatureData[1], humidityData[0], co2Data[0], vpd, lux[0])
-                
-        except Exception as err:
-            sys.print_exception(err)
-            print(f"Unexpected {err=}, {type(err)=}")
-            self.displayError(123, "SYSTEM ERROR")
-            machine.reset()
-            
-            
-    # This code is a function that logs data to the Greenhouse Data Service. 
-    def logData(self, airTemperature, leafTemperature, humidity, co2, vpd, lux):
-        
-        print("Logging data...")
-        
-        header = {
-          'Content-Type': 'application/json',
-          }
-        
-        payload = json.dumps({
-          "airTemperature": airTemperature,
-          "leafTemperature": leafTemperature,          
-          "humidity": humidity,
-          "co2": co2,
-          "vpd": vpd,
-          "lux": lux          
-        })
-        
-        request_url = GREENHOUSE_DATASERVICE + '/doc'
-     
-        gc.collect() 
-        resp = None
-        response = "ERROR"
-        try:
-            resp = post( request_url, headers=header, data=payload, timeout=10)
-            response = resp.text
-            resp.close()
-            
-        except Exception as e: # Here it catches any error.
-            print(e)
-            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
-                resp.close()
-        finally:   
-            gc.collect()          
-            return response
-            
 """
 This function is the main entry point for the program.
 

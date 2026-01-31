@@ -1,5 +1,5 @@
 export default {
-  title: 'Temperature / Humidity / Co2',
+  title: 'Senscap Data Logger',
   axes: {
     left: {
       mapsTo: 'value',
