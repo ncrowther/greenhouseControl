@@ -191,10 +191,10 @@ class TemperatureHumidityProbe(object):
    
 """
 This code defines a class called Heater that inherits from the OnOFFAutoController class. 
-The Mister class has an init method that initializes the relay pin number and sets it to output mode. 
+The Humidifier class has an init method that initializes the relay pin number and sets it to output mode. 
 It also has on and off methods that set the relay pin to the corresponding state. 
 """
-class Mister(OnOFFAutoController):
+class Humidifier(OnOFFAutoController):
     # Relay heater
     
     def __init__(self):
@@ -203,7 +203,7 @@ class Mister(OnOFFAutoController):
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
     def on(self):
-        print("Mister ON")
+        print("Humidifier ON")
         self.relay_pin.value(1)  # Set relay to ON state
             
     def off(self):   
@@ -520,7 +520,7 @@ class Pump(OnOFFAutoController):
                 PUMP_ON_HOUR  = h # 24 hour
  
                 PUMP_ON_TIME  = time.mktime((2000, 1, 1, PUMP_ON_HOUR, 0, 0, 0, 0))
-                PUMP_OFF_TIME = time.mktime((2000, 1, 1, PUMP_ON_HOUR, self.WATERING_PERIOD, 0, 0, 0))                     
+                PUMP_OFF_TIME = time.mktime((2000, 1, 1, PUMP_ON_HOUR, self.WATERING_PERIOD, 0, 0, 0))            
                 print("Pump on: " + str(PUMP_ON_HOUR)+ "h for " + str(self.WATERING_PERIOD) + "m")
                     
                 if (rtc.timeInRange(PUMP_ON_TIME, PUMP_OFF_TIME)):
@@ -786,6 +786,7 @@ class PlantCare(object):
     MIN_TEMPERATURE  = 15
     MAX_TEMPERATURE = 20
     MIN_HUMIDITY = 60
+    MAX_HUMIDITY = 60    
         
     def __init__(self, ip):
         
@@ -807,7 +808,7 @@ class PlantCare(object):
         self.fan = Fan()
         self.windows = LinearActuator()
         self.heater = Heater()
-        self.mister = Mister()
+        self.humidifier = Humidifier()
         self.lcd = Lcd()
                 
         self.heatSensor = MLX90614()
@@ -835,8 +836,8 @@ class PlantCare(object):
         self.heater.setState(OnOffState.OFF)
         self.heater.setState(OnOffState.AUTO)
         
-        self.mister.setState(OnOffState.OFF)
-        self.mister.setState(OnOffState.AUTO)        
+        self.humidifier.setState(OnOffState.OFF)
+        self.humidifier.setState(OnOffState.AUTO)        
         
     def setDateTime(self, datetime):              
         # Set internal clock
@@ -903,21 +904,25 @@ class PlantCare(object):
     def getHeaterSettings(self):
         return self.heater.settings()
     
-    def setMister(self, state):
-        self.mister.setState(state)
+    def setHumidifier(self, state):
+        self.humidifier.setState(state)
         
-    def getMisterStatus(self):
-        return self.mister.status()
+    def setHumidityRange(self, min, max):
+        self.MIN_HUMIDITY = min
+        self.MAX_HUMIDITY = max          
+        
+    def getHumidifierStatus(self):
+        return self.humidifier.status()
     
-    def getMisterSettings(self):
-        return self.mister.settings()      
+    def getHumidifierSettings(self):
+        return self.humidifier.settings()
+    
+    def getHumidityData(self):
+        return [self.thProbe.humidity, self.thProbe.highHumidity, self.thProbe.lowHumidity]        
         
     def getTemperatureData(self):
         # Air temp in [0] and leaf temp in [1]
         return [self.thProbe.temperature, self.heatSensor.getObjectTemperature(), self.thProbe.highTemp, self.thProbe.lowTemp]
-    
-    def getHumidityData(self):
-        return [self.thProbe.humidity, self.thProbe.highHumidity, self.thProbe.lowHumidity]    
   
     def getCo2Data(self):
         
@@ -1027,7 +1032,7 @@ class PlantCare(object):
                         
             self.fan.control(leafTemperature, self.MAX_TEMPERATURE)
             
-            self.mister.control(humidity, self.MIN_HUMIDITY)          
+            self.humidifier.control(humidity, self.MIN_HUMIDITY)          
             
             print("controlWatering...")
             self.pump.control(self.rtc)
