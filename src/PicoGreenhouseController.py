@@ -187,7 +187,10 @@ class PlantServer(object):
         plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState
             
         heaterState = doc["heaterState"]
-        plantCare.setHeater(heaterState)  # must be same as PlantCare.OnOffState                
+        plantCare.setHeater(heaterState)  # must be same as PlantCare.OnOffState
+        
+        humidifierState = doc["humidifierState"]
+        plantCare.setHumidifier(humidifierState)  # must be same as PlantCare.OnOffState          
             
         windowState = doc["windowState"]
         plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
@@ -200,6 +203,9 @@ class PlantServer(object):
         
         temperatureRange = doc["temperatureRange"]            
         plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])
+        
+        humidityRange = doc["humidityRange"]            
+        plantCare.setHumidityRange(humidityRange[0], humidityRange[1])        
 
         wateringPeriod = doc["wateringDuration"]  	# minutes
         wateringTimes = doc["wateringTimes"]  		# list of three start times in 24H format
