@@ -10,6 +10,7 @@ const sensecapAuth =
 const configServiceEndpoint = `${serviceEndpoint}/config?id=default`;
 const lightServiceEndpoint = `${serviceEndpoint}/light?id=default`;
 const heatServiceEndpoint = `${serviceEndpoint}/heat?id=default`;
+const humidityServiceEndpoint = `${serviceEndpoint}/humidity?id=default`;
 const coolServiceEndpoint = `${serviceEndpoint}/cool?id=default`;
 const waterServiceEndpoint = `${serviceEndpoint}/water?id=default`;
 const dataServiceEndpoint = `${serviceEndpoint}/docs`;
@@ -18,6 +19,7 @@ const photoServiceEndpoint = `${serviceEndpoint}/photos`;
 exports.configServiceEndpoint = configServiceEndpoint;
 exports.lightServiceEndpoint = lightServiceEndpoint;
 exports.heatServiceEndpoint = heatServiceEndpoint;
+exports.humidityServiceEndpoint = humidityServiceEndpoint;
 exports.coolServiceEndpoint = coolServiceEndpoint;
 exports.waterServiceEndpoint = waterServiceEndpoint;
 exports.dataServiceEndpoint = dataServiceEndpoint;

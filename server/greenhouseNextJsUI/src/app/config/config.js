@@ -55,6 +55,24 @@ exports.heat = function heat(configData) {
     .catch((error) => console.error(error));
 };
 
+exports.humidity = function humidity(configData) {
+  console.log('SEND: ' + JSON.stringify(configData));
+
+  const myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json');
+  // Send data to the backend via POST
+  fetch(endpoints.humidityServiceEndpoint, {
+    method: 'POST',
+    mode: 'cors',
+    headers: myHeaders,
+    body: configData, // body data type must match "Content-Type" header
+  })
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((error) => console.error(error));
+};
+
 exports.cool = function cool(configData) {
   console.log('SEND: ' + JSON.stringify(configData));
 

@@ -73,6 +73,16 @@ const GreenhouseHeader = () => {
 
               <HeaderMenuItem
                 Light
+                label="Humidity"
+                onClick={() => {
+                  router.push('/humidity');
+                }}
+              >
+                Humidity
+              </HeaderMenuItem>
+
+              <HeaderMenuItem
+                Light
                 label="Water"
                 onClick={() => {
                   router.push('/water');
@@ -152,6 +162,9 @@ const GreenhouseHeader = () => {
                 </Link>
                 <Link href="/heat" passHref legacyBehavior>
                   <HeaderMenuItem>Heat</HeaderMenuItem>
+                </Link>
+                <Link href="/humidity" passHref legacyBehavior>
+                  <HeaderMenuItem>Humidity</HeaderMenuItem>
                 </Link>
                 <Link href="/water" passHref legacyBehavior>
                   <HeaderMenuItem>Water</HeaderMenuItem>
