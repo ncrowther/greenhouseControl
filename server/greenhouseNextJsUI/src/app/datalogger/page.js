@@ -7,6 +7,21 @@ import options1 from './options.js';
 import '@carbon/charts-react/styles.css';
 const endpoints = require('../endpoints.js');
 
+// Assisted by watsonx Code Assistant
+
+function calculateVPD(airTemperature, humidity) {
+  // Calculate leaf temperature assuming it's 1 degrees higher than air temperature
+  const leafTemperature = airTemperature;
+  const esAir =
+    0.61078 * Math.exp((17.27 * airTemperature) / (airTemperature + 237.3));
+  const esLeaf =
+    0.61078 * Math.exp((17.27 * leafTemperature) / (leafTemperature + 237.3));
+  const e = (humidity / 100) * esAir;
+  const vpd = esLeaf - e;
+
+  return vpd;
+}
+
 function ChartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -15,15 +30,18 @@ function ChartPage() {
   const [humidityData, setHumidityData] = useState([]);
   const [pressureData, setPressureData] = useState([]);
   const [vocData, setvocData] = useState([]);
+  const [vpdData, setVpdData] = useState([]);
   const [chartOptions, setChartOptions] = useState(options1);
   const [airTemperatureChecked, setAirTemperatureChecked] = useState(true);
   const [humidityChecked, setHumidityChecked] = useState(true);
+  const [vpdChecked, setVpdChecked] = useState(true);
   const [vocChecked, setvocChecked] = useState(false);
   const [pressureChecked, setPressureChecked] = useState(false);
 
   const refreshChart = (
     airChecked,
     humidityChecked,
+    vpdChecked,
     vocChecked,
     pressureChecked
   ) => {
@@ -38,6 +56,10 @@ function ChartPage() {
       data = data.concat(humidityData);
     }
 
+    if (vpdChecked) {
+      data = data.concat(vpdData);
+    }
+
     if (vocChecked) {
       data = data.concat(vocData);
     }
@@ -50,6 +72,7 @@ function ChartPage() {
 
     setAirTemperatureChecked(airChecked);
     setHumidityChecked(humidityChecked);
+    setVpdChecked(vpdChecked);
     setvocChecked(vocChecked);
     setPressureChecked(pressureChecked);
   };
@@ -148,6 +171,33 @@ function ChartPage() {
               }, []);
               setAirTemperatureData(airTemperatureReadings);
 
+              var i = 0;
+              // VPD is calculated from air temperature and humidity
+              const vpdReadings = docs.data.list[1][temperaturePos].reduce(
+                (vpd, obj) => {
+                  const airTemperature = obj[0];
+                  const humidity = humidityReadings[i].value;
+
+                  console.log('******airC*********' + airTemperature);
+                  console.log('******Hum*********' + humidity);
+
+                  const vpdCalc = calculateVPD(airTemperature, humidity);
+
+                  console.log('******Vpd*********' + vpdCalc);
+
+                  var temp = {
+                    group: 'VPD',
+                    date: obj[1],
+                    value: vpdCalc,
+                  };
+                  vpd.push(temp);
+                  i++;
+                  return vpd;
+                },
+                []
+              );
+              setVpdData(vpdReadings);
+
               const pressureReadings = docs.data.list[1][pressurePos].reduce(
                 (pressure, obj) => {
                   console.log('********Pressure*******' + JSON.stringify(obj));
@@ -184,17 +234,19 @@ function ChartPage() {
     if (
       airTemperatureData.length > 0 ||
       humidityData.length > 0 ||
+      vpdData.length > 0 ||
       vocData.length > 0 ||
       pressureData.length > 0
     ) {
       refreshChart(
         airTemperatureChecked,
         humidityChecked,
+        vpdChecked,
         vocChecked,
         pressureChecked
       );
     }
-  }, [airTemperatureData, humidityData, vocData, pressureData]);
+  }, [airTemperatureData, humidityData, vpdData, vocData, pressureData]);
 
   if (loading) {
     return <Loading active className="some-class" description="Loading" />;
@@ -212,7 +264,13 @@ function ChartPage() {
           labelText="Air Temperature"
           checked={airTemperatureChecked}
           onChange={(_, { checked }) =>
-            refreshChart(checked, humidityChecked, vocChecked, pressureChecked)
+            refreshChart(
+              checked,
+              humidityChecked,
+              vpdChecked,
+              vocChecked,
+              pressureChecked
+            )
           }
         />
 
@@ -223,6 +281,22 @@ function ChartPage() {
           onChange={(_, { checked }) =>
             refreshChart(
               airTemperatureChecked,
+              checked,
+              vpdChecked,
+              vocChecked,
+              pressureChecked
+            )
+          }
+        />
+
+        <Checkbox
+          id="vpd"
+          labelText="VPD"
+          checked={vpdChecked}
+          onChange={(_, { checked }) =>
+            refreshChart(
+              airTemperatureChecked,
+              humidityChecked,
               checked,
               vocChecked,
               pressureChecked
@@ -238,6 +312,7 @@ function ChartPage() {
             refreshChart(
               airTemperatureChecked,
               humidityChecked,
+              vpdChecked,
               checked,
               pressureChecked
             )
@@ -252,6 +327,7 @@ function ChartPage() {
             refreshChart(
               airTemperatureChecked,
               humidityChecked,
+              vpdChecked,
               vocChecked,
               checked
             )

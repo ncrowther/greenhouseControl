@@ -146,6 +146,7 @@ app.post('/light', async (req, res) => {
       "pumpState": originalDoc.pumpState,
       "fanState": originalDoc.fanState,
       "heaterState": originalDoc.heaterState,
+      "humidifierState": originalDoc.humidifierState,            
       "wateringDuration": originalDoc.wateringDuration,
       "wateringTimes": [
         originalDoc.wateringTimes[0],
@@ -159,6 +160,10 @@ app.post('/light', async (req, res) => {
         originalDoc.temperatureRange[0],
         originalDoc.temperatureRange[1]
       ],
+      "humidityRange": [
+        originalDoc.humidityRange[0],
+        originalDoc.humidityRange[1]
+      ],          
       "lastUpdate": timestamp
     }
 
@@ -194,6 +199,7 @@ app.post('/heat', async (req, res) => {
       "pumpState": originalDoc.pumpState,
       "fanState": originalDoc.fanState,
       "heaterState": inputDoc.heaterState,
+      "humidifierState": originalDoc.humidifierState,            
       "wateringDuration": originalDoc.wateringDuration,
       "wateringTimes": [
         originalDoc.wateringTimes[0],
@@ -207,6 +213,10 @@ app.post('/heat', async (req, res) => {
         inputDoc.minTemp,
         originalDoc.temperatureRange[1]
       ],
+      "humidityRange": [
+        originalDoc.humidityRange[0],
+        originalDoc.humidityRange[1]
+      ],        
       "lastUpdate": timestamp
     }
 
@@ -242,6 +252,7 @@ app.post('/water', async (req, res) => {
       "pumpState": inputDoc.pumpState,
       "fanState": originalDoc.fanState,
       "heaterState": originalDoc.heaterState,
+      "humidifierState": originalDoc.humidifierState,            
       "wateringDuration": inputDoc.wateringDuration,
       "wateringTimes": [
         inputDoc.timeHH1,
@@ -255,6 +266,10 @@ app.post('/water', async (req, res) => {
         originalDoc.temperatureRange[0],
         originalDoc.temperatureRange[1]
       ],
+      "humidityRange": [
+        originalDoc.humidityRange[0],
+        originalDoc.humidityRange[1]
+      ],        
       "lastUpdate": timestamp
     }
 
@@ -290,6 +305,7 @@ app.post('/cool', async (req, res) => {
       "pumpState": originalDoc.pumpState,
       "fanState": inputDoc.fanState,
       "heaterState": originalDoc.heaterState,
+      "humidifierState": originalDoc.humidifierState,            
       "wateringDuration": originalDoc.wateringDuration,
       "wateringTimes": [
         originalDoc.wateringTimes[0],
@@ -303,6 +319,63 @@ app.post('/cool', async (req, res) => {
         originalDoc.temperatureRange[0],
         inputDoc.maxTemp
       ],
+      "humidityRange": [
+        originalDoc.humidityRange[0],
+        originalDoc.humidityRange[1]
+      ],        
+      "lastUpdate": timestamp
+    }
+
+    console.log('Set Config: ' + JSON.stringify(newDoc))
+
+    updateDoc(res, configDbName, id, newDoc)
+
+  })
+})
+
+// ///////////////////// Set Humidity ////////////////////
+app.post('/humidity', async (req, res) => {
+
+  const inputDoc = req.body;
+
+  console.log('Set humidity ' + JSON.stringify(inputDoc));
+
+  const id = "default"
+  console.log('Get config for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
+
+    var time = moment();
+    var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+    console.log(timestamp);
+
+    const newDoc = {
+      "lightState": originalDoc.lightState,
+      "lightOnOff": [
+        originalDoc.lightOnOff[0],
+        originalDoc.lightOnOff[1]
+      ],
+      "pumpState": originalDoc.pumpState,
+      "fanState": originalDoc.fanState,
+      "heaterState": originalDoc.heaterState,
+      "humidifierState": inputDoc.humidifierState,      
+      "wateringDuration": originalDoc.wateringDuration,
+      "wateringTimes": [
+        originalDoc.wateringTimes[0],
+        originalDoc.wateringTimes[1],
+        originalDoc.wateringTimes[2]
+      ],
+      "windowState": originalDoc.windowState,
+      "windowRun": originalDoc.windowRun,
+      "windowPause": originalDoc.windowPause,
+      "temperatureRange": [
+        originalDoc.temperatureRange[0],
+        originalDoc.temperatureRange[1]
+      ],
+      "humidityRange": [
+        inputDoc.minHumidity,
+        inputDoc.maxHumidity  
+      ],      
       "lastUpdate": timestamp
     }
 
@@ -335,6 +408,7 @@ app.post('/config', async (req, res) => {
     "pumpState": inputDoc.pumpState,
     "fanState": inputDoc.fanState,
     "heaterState": inputDoc.heaterState,
+    "humidifierState": inputDoc.humidifierState,          
     "wateringDuration": inputDoc.wateringDuration,
     "wateringTimes": [
       inputDoc.wateringTimes[0],
@@ -348,6 +422,10 @@ app.post('/config', async (req, res) => {
       inputDoc.temperatureRange[0],
       inputDoc.temperatureRange[1]
     ],
+    "humidityRange": [
+      inputDoc.humidityRange[0],
+      inputDoc.humidityRange[1]
+    ],    
     "lastUpdate": timestamp
   }
 
