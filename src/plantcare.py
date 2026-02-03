@@ -190,15 +190,14 @@ class TemperatureHumidityProbe(object):
    
    
 """
-This code defines a class called Heater that inherits from the OnOFFAutoController class. 
+This code defines a class called Humidifier that inherits from the OnOFFAutoController class. 
 The Humidifier class has an init method that initializes the relay pin number and sets it to output mode. 
 It also has on and off methods that set the relay pin to the corresponding state. 
 """
 class Humidifier(OnOFFAutoController):
-    # Relay heater
     
     def __init__(self):
-        # GPIO pin number  relay is connected to
+        # GPIO pin number relay is connected to
         RELAY_PIN = 16
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
@@ -1028,9 +1027,11 @@ class PlantCare(object):
 
             self.vpd = self.calculateVPD(airTemperature, leafTemperature, humidity)
                  
-            self.windows.control(leafTemperature, self.MAX_TEMPERATURE)
-                        
+            self.windows.control(leafTemperature, self.MAX_TEMPERATURE)                     
+            
             self.fan.control(leafTemperature, self.MAX_TEMPERATURE)
+                  
+            self.heater.control(airTemperature, self.MIN_TEMPERATURE)            
             
             self.humidifier.control(humidity, self.MIN_HUMIDITY)          
             
