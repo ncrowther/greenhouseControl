@@ -145,11 +145,10 @@ function ChartPage() {
               const luxReadings = docs.Docs.reduce((luxReadings, obj) => {
                 let lux = 0;
                 if (obj.lux > 0) {
-                  lux = Math.sqrt(obj.lux / 4);
-                  // lux = obj.lux;
+                  lux = obj.lux / 1000; // convert to klux
                 }
                 var luxPlot = {
-                  group: 'lux',
+                  group: 'klux',
                   date: obj._id,
                   value: lux,
                 };
