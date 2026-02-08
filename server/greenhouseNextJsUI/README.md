@@ -35,7 +35,7 @@ Configure paths in `jsconfig.json`
 
 ### Deployment to code engine on IBM Cloud
 
-1. Open WSL shell from VSC
+1. Open bash shell from VSC
 
 ```bash
    yarn clean
