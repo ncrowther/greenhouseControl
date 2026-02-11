@@ -12,7 +12,7 @@ from StatusLight import StatusLight
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
-DEVICE_NAME = "Polytunnel"
+DEVICE_NAME = "polytunnel"
 
 
 """
@@ -98,7 +98,8 @@ class PlantServer(object):
         except Exception as e:
             
             err = self.getWlanStatus()
-            print('Error: ' + err)         
+            print('Error: ' + err)
+            raise TypeError("Connetion error") from e
             
 
     """
@@ -206,7 +207,66 @@ class PlantServer(object):
         wateringMinTemp = 5       					# Not implemented
         plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)        
             
-
+ # This function is used to log data from the plant care system. 
+    # It attempts to connect to the network, retrieve system time,  temperature, humidity, 
+    # and CO2 from the plant care system, and then log the data. If any errors occur during this process, 
+    # it will display an error message and reset the machine.
+    def logger(self):  
+        
+        print('Start logger...')
+        
+        try: 
+        
+            self.connect_to_network(self.ssid, self.password)
+                             
+            temperatureData = self.plantCare.getTemperatureData()
+            humidityData = self.plantCare.getHumidityData()
+            co2Data = 0 #self.plantCare.getCo2Data()
+            vpd = 0 #self.plantCare.getVpdData()
+            lux = 0 #self.plantCare.getluxData()
+            self.logData(temperatureData, 0, humidityData, co2Data, vpd, lux)
+                
+        except Exception as err:
+            sys.print_exception(err)
+            errMsg = '{}: {}'.format(type(err).__name__, err)
+            print(errMsg)
+            
+            
+    # This code is a function that logs data to the Greenhouse Data Service. 
+    def logData(self, airTemperature, leafTemperature, humidity, co2, vpd, lux):
+        
+        print("Logging data...")
+        
+        header = {
+          'Content-Type': 'application/json',
+          }
+        
+        payload = json.dumps({
+          "airTemperature": airTemperature,
+          "leafTemperature": 0,          
+          "humidity": humidity,
+          "co2": 0,
+          "vpd": 0,
+          "lux": 0          
+        })
+        
+        request_url = GREENHOUSE_DATASERVICE + '/doc' + '?id=' + DEVICE_NAME
+     
+        gc.collect() 
+        resp = None
+        response = "ERROR"
+        try:
+            resp = post( request_url, headers=header, data=payload, timeout=10)
+            response = resp.text
+            resp.close()
+            
+        except Exception as e: # Here it catches any error.
+            print(e)
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                resp.close()
+        finally:   
+            gc.collect()          
+            return response
         
     """
     This function is responsible for caring for plants.
@@ -223,10 +283,22 @@ class PlantServer(object):
         statusLight = StatusLight()        
         
         SLEEP_TIME = 1 # seconds
+        LOG_TIME = 1 # log period in seconds = SLEEP_TIME * LOG_TIME
+        
+        count = 0
         
         while True:
 
             print("Care")
+            
+            self.plantCare.careforplants()
+            
+            # If timestamp exists then log every LOG_TIME mins
+            if (count % LOG_TIME == 0):
+                # set config 
+                self.configure()    
+                self.logger()
+           
             
             self.plantCare.careforplants()
             
