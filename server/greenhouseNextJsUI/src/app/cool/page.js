@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
-
-const config = require('../config/config.js');
 import { BiWindow } from 'react-icons/bi';
 import { PiFanFill } from 'react-icons/pi';
 import { Button, Grid, Column } from '@carbon/react';
 import '@carbon/charts-react/styles.css';
-const endpoints = require('../endpoints.js');
+const endpoints = require('../config/endpoints.js');
+const config = require('../config/config.js');
 
 function Cool() {
   const [highTemp, setHighTemp] = useState('0');
@@ -38,12 +37,15 @@ function Cool() {
 
   useEffect(() => {
     async function getConfigData() {
-      await fetch(endpoints.configServiceEndpoint, {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      await fetch(
+        endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
         .then((response) => {
           if (response.status == 200) {
             response.json().then((data) => {

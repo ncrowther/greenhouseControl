@@ -11,9 +11,25 @@ import {
   Column,
 } from '@carbon/react';
 
+import { Dropdown } from 'primereact/dropdown';
+import { useState } from 'react';
 import Image from 'next/image';
+const config = require('../config/config.js');
 
 export default function LandingPage() {
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
+
+  const environment = [
+    { name: 'default', code: '1' },
+    { name: 'Greenhouse', code: '2' },
+    { name: 'Polytunnel', code: '3' },
+  ];
+
+  const setEnv = (event) => {
+    console.log('Event: ' + JSON.stringify(event));
+    config.setEnv(event);
+  };
+
   return (
     <Grid className="landing-page" fullWidth>
       <Column lg={16} md={8} sm={4} className="landing-page__banner">
@@ -23,7 +39,7 @@ export default function LandingPage() {
       <Column lg={16} md={8} sm={4} className="landing-page__r2">
         <Tabs defaultSelectedIndex={0}>
           <TabList className="tabs-group" aria-label="Page navigation">
-            <Tab>About</Tab>
+            <Tab>Environment</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -34,7 +50,19 @@ export default function LandingPage() {
                   sm={4}
                   className="landing-page__tab-content"
                 >
-                  Welcome to Greenhouse Control
+                  <div className="landing-page__tab-content">
+                    <Dropdown
+                      variant="filled"
+                      value={selectedEnv}
+                      onChange={(e) => {
+                        setSelectedEnv(e.value);
+                        setEnv(e.value);
+                      }}
+                      options={environment}
+                      optionLabel="name"
+                      placeholder="Select environment"
+                    />
+                  </div>
                 </Column>
                 <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
                   <Image

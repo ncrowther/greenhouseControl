@@ -5,7 +5,7 @@ import { Grid, Loading, Checkbox, CheckboxGroup } from '@carbon/react';
 import { LineChart } from '@carbon/charts-react';
 import options1 from './options.js';
 import '@carbon/charts-react/styles.css';
-const endpoints = require('../endpoints.js');
+const endpoints = require('../config/endpoints.js');
 
 function ChartPage() {
   const [loading, setLoading] = useState(true);

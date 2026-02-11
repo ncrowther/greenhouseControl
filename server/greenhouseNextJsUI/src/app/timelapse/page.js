@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Loading } from '@carbon/react';
 import { Galleria } from 'primereact/galleria';
-const endpoints = require('../endpoints.js');
+const endpoints = require('../config/endpoints.js');
 
 function TimelapsePage(camId) {
   const [loading, setLoading] = useState(true);

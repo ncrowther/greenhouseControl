@@ -14,9 +14,6 @@ import {
   SideNav,
   SideNavItems,
   HeaderSideNavItems,
-  MenuButton,
-  MenuItem,
-  MenuItemDivider,
 } from '@carbon/react';
 import { Switcher, Notification, UserAvatar } from '@carbon/icons-react';
 
@@ -40,7 +37,7 @@ const GreenhouseHeader = () => {
           </Link>
 
           <HeaderNavigation aria-label="IBM [Platform]">
-            <HeaderMenu aria-label="Config" menuLinkName="Config">
+            <HeaderMenu aria-label="Set" menuLinkName="Set">
               <HeaderMenuItem
                 Light
                 label="Light"
@@ -92,7 +89,7 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
             </HeaderMenu>
 
-            <HeaderMenu aria-label="Greenhouse" menuLinkName="Greenhouse">
+            <HeaderMenu aria-label="View" menuLinkName="View">
               <HeaderMenuItem
                 Light
                 label="Chart"

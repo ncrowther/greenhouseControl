@@ -6,7 +6,7 @@ const config = require('../config/config.js');
 import { IoRainyOutline } from 'react-icons/io5';
 import { Button, Grid, Column, Slider } from '@carbon/react';
 import '@carbon/charts-react/styles.css';
-const endpoints = require('../endpoints.js');
+const endpoints = require('../config/endpoints.js');
 
 function Water() {
   const [pump, setPump] = useState('OFF');
@@ -40,12 +40,15 @@ function Water() {
 
   useEffect(() => {
     async function getConfigData() {
-      await fetch(endpoints.configServiceEndpoint, {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      await fetch(
+        endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
         .then((response) => {
           if (response.status == 200) {
             response.json().then((data) => {
