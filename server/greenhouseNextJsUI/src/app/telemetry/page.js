@@ -9,7 +9,8 @@ import {
   Grid,
   ToastNotification,
 } from '@carbon/react';
-const endpoints = require('../endpoints.js');
+const endpoints = require('../config/endpoints.js');
+const config = require('../config/config.js');
 
 import React, { useEffect, useState } from 'react';
 
@@ -59,8 +60,8 @@ const LinkList = ({ url, homepageUrl }) => (
 );
 
 const getNotifications = (rows) => {
-  const MAX_TEMPERATURE = 40.0;
-  const MIN_TEMPERATURE = 0.0;
+  const MAX_TEMPERATURE = 30.0;
+  const MIN_TEMPERATURE = 4.0;
 
   const notifications = [];
   let maxViolation = null;
@@ -140,12 +141,15 @@ function RepoPage() {
 
   useEffect(() => {
     async function getData() {
-      await fetch(`${endpoints.dataServiceEndpoint}`, {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      await fetch(
+        endpoints.dataServiceEndpoint + '?id=' + config.getEnv().name,
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
         .then((response) => {
           if (response.status == 200) {
             response.json().then((data) => {

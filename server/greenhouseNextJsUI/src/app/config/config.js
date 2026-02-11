@@ -1,5 +1,36 @@
 const { ResponseCookies } = require('next/dist/compiled/@edge-runtime/cookies');
-const endpoints = require('../endpoints.js');
+const endpoints = require('./endpoints.js');
+
+var environment = { name: 'default', code: '1' };
+
+exports.getEnv = function setEnv() {
+  return environment;
+};
+
+exports.setEnv = function setEnv(env) {
+  console.log('Environment set to: ' + env);
+  environment = env;
+};
+
+/*
+exports.getConfig = function getConfig() {
+  console.log('Get config for: ' + environment.name);  
+
+  const myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json');
+  // Send data to the backend via POST
+  fetch(endpoints.configServiceEndpoint + '?id=' + environment.name, {
+    method: 'POST',
+    mode: 'cors',
+    headers: myHeaders,
+    body: configData, // body data type must match "Content-Type" header
+  })
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((error) => console.error(error));
+};
+*/
 
 exports.writeConfig = function writeConfig(configData) {
   console.log('SEND: ' + JSON.stringify(configData));
@@ -7,7 +38,7 @@ exports.writeConfig = function writeConfig(configData) {
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.configServiceEndpoint, {
+  fetch(endpoints.configServiceEndpoint + '?id=' + environment.name, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -25,7 +56,7 @@ exports.light = function light(configData) {
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.lightServiceEndpoint, {
+  fetch(endpoints.lightServiceEndpoint + '?id=' + environment.name, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -43,7 +74,7 @@ exports.heat = function heat(configData) {
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.heatServiceEndpoint, {
+  fetch(endpoints.heatServiceEndpoint + '?id=' + environment.name, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -61,7 +92,7 @@ exports.humidity = function humidity(configData) {
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.humidityServiceEndpoint, {
+  fetch(endpoints.humidityServiceEndpoint + '?id=' + environment.name, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -79,7 +110,7 @@ exports.cool = function cool(configData) {
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.coolServiceEndpoint, {
+  fetch(endpoints.coolServiceEndpoint + '?id=' + environment.name, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -97,7 +128,7 @@ exports.water = function water(configData) {
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.waterServiceEndpoint, {
+  fetch(endpoints.waterServiceEndpoint + '?id=' + environment.name, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,

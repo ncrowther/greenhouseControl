@@ -5,7 +5,8 @@ import { Grid, Loading, Checkbox, CheckboxGroup } from '@carbon/react';
 import { LineChart } from '@carbon/charts-react';
 import options1 from './options.js';
 import '@carbon/charts-react/styles.css';
-const endpoints = require('../endpoints.js');
+const endpoints = require('../config/endpoints.js');
+const config = require('../config/config.js');
 
 function ChartPage() {
   const [loading, setLoading] = useState(true);
@@ -72,12 +73,15 @@ function ChartPage() {
 
   useEffect(() => {
     async function getTelemetryData() {
-      await fetch(endpoints.dataServiceEndpoint, {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      await fetch(
+        endpoints.dataServiceEndpoint + '?id=' + config.getEnv().name,
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
         .then((response) => {
           if (response.status == 200) {
             response.json().then((docs) => {

@@ -17,7 +17,6 @@ const express = require('express')
 var https = require('https');
 const querystring = require('querystring');
 const cloudantLib = require('./database/cloudantDb.js')
-const session = require('express-session')
 const { CloudantV1 } = require('@ibm-cloud/cloudant')
 const cors = require('cors');
 var moment = require('moment');
@@ -55,7 +54,8 @@ app.use(express.json())
 // //////////////// Create Doc ////////////////////////
 app.post('/doc', async (req, res) => {
 
-  console.log('Write doc');
+  const logDbName = (req.query.id + 'log').toLowerCase();
+  console.log('Write doc to DB: ' + logDbName)
 
   const newDoc = req.body;
 
@@ -97,7 +97,8 @@ app.post('/doc', async (req, res) => {
 // //////////////// Get Docs ////////////////////////
 app.get('/docs', async (req, res) => {
 
-  console.log('Get docs')
+  const logDbName = (req.query.id + 'log').toLowerCase();
+  console.log('Get docs for ' + logDbName)
 
   const purgeWindow = 48 // Hours
   await purge(res, purgeWindow, logDbName);
@@ -125,10 +126,7 @@ app.post('/light', async (req, res) => {
 
   console.log('Set Light ' + JSON.stringify(inputDoc));
 
-  const settings = req.query.id;
-  console.log('Settings ' + settings);
-
-  const id = "default"
+  const id = req.query.id;
   console.log('Get light for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -146,7 +144,7 @@ app.post('/light', async (req, res) => {
       "pumpState": originalDoc.pumpState,
       "fanState": originalDoc.fanState,
       "heaterState": originalDoc.heaterState,
-      "humidifierState": originalDoc.humidifierState,            
+      "humidifierState": originalDoc.humidifierState,
       "wateringDuration": originalDoc.wateringDuration,
       "wateringTimes": [
         originalDoc.wateringTimes[0],
@@ -163,7 +161,7 @@ app.post('/light', async (req, res) => {
       "humidityRange": [
         originalDoc.humidityRange[0],
         originalDoc.humidityRange[1]
-      ],          
+      ],
       "lastUpdate": timestamp
     }
 
@@ -181,7 +179,7 @@ app.post('/heat', async (req, res) => {
 
   console.log('Set Heat ' + JSON.stringify(inputDoc));
 
-  const id = "default"
+  const id = req.query.id;
   console.log('Get heat for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -199,7 +197,7 @@ app.post('/heat', async (req, res) => {
       "pumpState": originalDoc.pumpState,
       "fanState": originalDoc.fanState,
       "heaterState": inputDoc.heaterState,
-      "humidifierState": originalDoc.humidifierState,            
+      "humidifierState": originalDoc.humidifierState,
       "wateringDuration": originalDoc.wateringDuration,
       "wateringTimes": [
         originalDoc.wateringTimes[0],
@@ -216,7 +214,7 @@ app.post('/heat', async (req, res) => {
       "humidityRange": [
         originalDoc.humidityRange[0],
         originalDoc.humidityRange[1]
-      ],        
+      ],
       "lastUpdate": timestamp
     }
 
@@ -234,7 +232,7 @@ app.post('/water', async (req, res) => {
 
   console.log('Set irrigation ' + JSON.stringify(inputDoc));
 
-  const id = "default"
+  const id = req.query.id;
   console.log('Get irrigation for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -252,7 +250,7 @@ app.post('/water', async (req, res) => {
       "pumpState": inputDoc.pumpState,
       "fanState": originalDoc.fanState,
       "heaterState": originalDoc.heaterState,
-      "humidifierState": originalDoc.humidifierState,            
+      "humidifierState": originalDoc.humidifierState,
       "wateringDuration": inputDoc.wateringDuration,
       "wateringTimes": [
         inputDoc.timeHH1,
@@ -269,7 +267,7 @@ app.post('/water', async (req, res) => {
       "humidityRange": [
         originalDoc.humidityRange[0],
         originalDoc.humidityRange[1]
-      ],        
+      ],
       "lastUpdate": timestamp
     }
 
@@ -287,7 +285,7 @@ app.post('/cool', async (req, res) => {
 
   console.log('Set cooling ' + JSON.stringify(inputDoc));
 
-  const id = "default"
+  const id = req.query.id;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -305,7 +303,7 @@ app.post('/cool', async (req, res) => {
       "pumpState": originalDoc.pumpState,
       "fanState": inputDoc.fanState,
       "heaterState": originalDoc.heaterState,
-      "humidifierState": originalDoc.humidifierState,            
+      "humidifierState": originalDoc.humidifierState,
       "wateringDuration": originalDoc.wateringDuration,
       "wateringTimes": [
         originalDoc.wateringTimes[0],
@@ -322,7 +320,7 @@ app.post('/cool', async (req, res) => {
       "humidityRange": [
         originalDoc.humidityRange[0],
         originalDoc.humidityRange[1]
-      ],        
+      ],
       "lastUpdate": timestamp
     }
 
@@ -340,7 +338,7 @@ app.post('/humidity', async (req, res) => {
 
   console.log('Set humidity ' + JSON.stringify(inputDoc));
 
-  const id = "default"
+  const id = req.query.id;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -358,7 +356,7 @@ app.post('/humidity', async (req, res) => {
       "pumpState": originalDoc.pumpState,
       "fanState": originalDoc.fanState,
       "heaterState": originalDoc.heaterState,
-      "humidifierState": inputDoc.humidifierState,      
+      "humidifierState": inputDoc.humidifierState,
       "wateringDuration": originalDoc.wateringDuration,
       "wateringTimes": [
         originalDoc.wateringTimes[0],
@@ -374,8 +372,8 @@ app.post('/humidity', async (req, res) => {
       ],
       "humidityRange": [
         inputDoc.minHumidity,
-        inputDoc.maxHumidity  
-      ],      
+        inputDoc.maxHumidity
+      ],
       "lastUpdate": timestamp
     }
 
@@ -395,7 +393,7 @@ app.post('/config', async (req, res) => {
   var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
   console.log(timestamp);
 
-  const id = "default" //req.query.id;
+  const id = req.query.id;
   const inputDoc = req.body;
 
   // Hint: This is the doc that is required for input from the OpenAPI spec
@@ -408,7 +406,7 @@ app.post('/config', async (req, res) => {
     "pumpState": inputDoc.pumpState,
     "fanState": inputDoc.fanState,
     "heaterState": inputDoc.heaterState,
-    "humidifierState": inputDoc.humidifierState,          
+    "humidifierState": inputDoc.humidifierState,
     "wateringDuration": inputDoc.wateringDuration,
     "wateringTimes": [
       inputDoc.wateringTimes[0],
@@ -425,7 +423,7 @@ app.post('/config', async (req, res) => {
     "humidityRange": [
       inputDoc.humidityRange[0],
       inputDoc.humidityRange[1]
-    ],    
+    ],
     "lastUpdate": timestamp
   }
 
@@ -439,7 +437,7 @@ app.post('/config', async (req, res) => {
 // //////////////// Get Config ////////////////////////
 app.get('/config', async (req, res) => {
 
-  const id = "default" //req.query.id;
+  const id = req.query.id;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (doc) {
@@ -457,214 +455,253 @@ app.get('/config', async (req, res) => {
     res.send(config);
 
   }, function (err) {
-    console.error('[App] Cloudant DB Failure in get config: ' + err)
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  })
 
+    const newDoc = {
+      "_id": id,
+      "lightState": "OFF",
+      "lightOnOff": [
+        8,
+        22
+      ],
+      "pumpState": "OFF",
+      "fanState": "OFF",
+      "heaterState": "OFF",
+      "humidifierState": "OFF",
+      "wateringDuration": "OFF",
+      "wateringTimes": [
+        7,
+        12,
+        18
+      ],
+      "windowState": "OFF",
+      "windowRun": "OFF",
+      "windowPause": "OFF",
+      "temperatureRange": [
+        0,
+        40
+      ],
+      "humidityRange": [
+        30,
+        70
+      ],
+      "lastUpdate": 0
+    }
+
+    cloudantLib.createDoc(service, configDbName, newDoc) // Create default config doc if not found
+      .then(function (config) {
+        console.error('Created default config doc');
+        res.status(200);
+        res.set('Access-Control-Allow-Origin', '*');
+        res.send(config);
+      }, function (err) {
+        console.error('[App] Cloudant DB Failure in get config: ' + err)
+        res.status(500);
+        res.set('Access-Control-Allow-Origin', '*');
+        res.send(err);
+      })
+
+  })
 })
 
+  // ///////////////////// Write Photo ////////////////////
+  app.post('/photo', async (req, res) => {
 
-// ///////////////////// Write Photo ////////////////////
-app.post('/photo', async (req, res) => {
+    const newDoc = req.body;
+    console.log('Write photo to cam ' + newDoc.cam);
 
-  const newDoc = req.body;
-  console.log('Write photo to cam ' + newDoc.cam);
+    const camId = newDoc.cam
+    photoDb = getPhotoDb(camId);
+    console.log('Write photo to: ' + photoDb);
 
-  const camId = newDoc.cam
-  photoDb = getPhotoDb(camId);
-  console.log('Write photo to: ' + photoDb);
+    var timestamp = new Date().toISOString();
 
-  var timestamp = new Date().toISOString();
+    const doc = {
+      "_id": timestamp,
+      "photo": newDoc.photo,
+      "timestamp": timestamp
+    }
 
-  const doc = {
-    "_id": timestamp,
-    "photo": newDoc.photo,
-    "timestamp": timestamp
+    console.log(JSON.stringify(doc));
+
+    await cloudantLib.createDoc(service, photoDb, doc).then(function (ret) {
+
+      console.error('Created photo');
+
+      res.status(200);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(timestamp);
+
+    }, function (err) {
+      console.error('[App] Cloudant DB Failure in create photo: ' + err)
+      res.status(500);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(err);
+    })
+
+  })
+
+  // //////////////// Get Latest Photo ////////////////////////
+  app.get('/photo', async (req, res) => {
+
+    const camId = req.query.camId
+    photoDb = getPhotoDb(camId);
+    console.log('Get latest photos from: ' + photoDb);
+
+    await cloudantLib.findAllDocs(service, photoDb).then(function (docs) {
+
+      photos = docs.Docs
+      let latest = photos.length
+      let latestPhoto = photos[latest - 1]
+
+      res.status(200);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(latestPhoto);
+
+    }, function (err) {
+      console.error('[App] Cloudant DB Failure in get photo: ' + err)
+      res.status(500);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(err);
+    })
+
+
+
+  })
+
+  // //////////////// Get All Photos ////////////////////////
+  app.get('/photos', async (req, res) => {
+
+    const camId = req.query.camId
+
+    photoDb = getPhotoDb(camId);
+    console.log('Get all photos from: ' + photoDb);
+
+    const purgeWindow = 12  // Hours
+    await purge(res, purgeWindow, photoDb);
+
+    await cloudantLib.findAllDocs(service, photoDb).then(function (docs) {
+
+      res.status(200);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(docs);
+
+    }, function (err) {
+      console.error('[App] Cloudant DB Failure in get photos: ' + err)
+      res.status(500);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(err);
+    })
+
+  })
+
+  // Create cloudant doc
+  async function createDoc(doc, res, dbName) {
+
+    console.log('[App] Create doc:' + JSON.stringify(doc.id));
+
+    await cloudantLib.createDoc(service, dbName, doc).then(function (ret) {
+
+      console.log('[App] Created doc');
+
+      return ret
+
+    }, function (err) {
+      console.error('[App] Cloudant DB Failure in create photo doc: ' + err);
+      res.status(500);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(err);
+    });
   }
 
-  console.log(JSON.stringify(doc));
+  /**
+   * Find and update document in Cloudant database.
+   * @param {Object} res - The response object.
+   * @returns {void}
+   */
+  async function updateDoc(res, dbName, id, newDoc) {
+    console.log('Update doc');
 
-  await cloudantLib.createDoc(service, photoDb, doc).then(function (ret) {
+    await cloudantLib.findById(service, dbName, id).then(function (doc) {
 
-    console.error('Created photo');
+      console.log('Updating doc: ' + id);
 
-    res.status(200);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(timestamp);
+      cloudantLib.updateDoc(service, dbName, doc, newDoc).then(function (doc) {
 
-  }, function (err) {
-    console.error('[App] Cloudant DB Failure in create photo: ' + err)
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  })
+        res.status(200);
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
-})
+        res.send(doc);
 
-// //////////////// Get Latest Photo ////////////////////////
-app.get('/photo', async (req, res) => {
-
-  const camId = req.query.camId
-  photoDb = getPhotoDb(camId);
-  console.log('Get latest photos from: ' + photoDb);
-
-  await cloudantLib.findAllDocs(service, photoDb).then(function (docs) {
-
-    photos = docs.Docs
-    let latest = photos.length
-    let latestPhoto = photos[latest - 1]
-
-    res.status(200);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(latestPhoto);
-
-  }, function (err) {
-    console.error('[App] Cloudant DB Failure in get photo: ' + err)
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  })
+      }, function (err) {
+        console.error('[App] Cloudant DB Failure in update doc: ' + err)
+        res.status(500);
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.send(err);
+      })
 
 
+    }, function (err) {
 
-})
-
-// //////////////// Get All Photos ////////////////////////
-app.get('/photos', async (req, res) => {
-
-  const camId = req.query.camId
-
-  photoDb = getPhotoDb(camId);
-  console.log('Get all photos from: ' + photoDb);
-
-  const purgeWindow = 12  // Hours
-  await purge(res, purgeWindow, photoDb);
-
-  await cloudantLib.findAllDocs(service, photoDb).then(function (docs) {
-
-    res.status(200);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(docs);
-
-  }, function (err) {
-    console.error('[App] Cloudant DB Failure in get photos: ' + err)
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  })
-
-})
-
-// Create cloudant doc
-async function createDoc(doc, res, dbName) {
-
-  console.log('[App] Create doc:' + JSON.stringify(doc.id));
-
-  await cloudantLib.createDoc(service, dbName, doc).then(function (ret) {
-
-    console.log('[App] Created doc');
-
-    return ret
-
-  }, function (err) {
-    console.error('[App] Cloudant DB Failure in create photo doc: ' + err);
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  });
-}
-
-/**
- * Find and update document in Cloudant database.
- * @param {Object} res - The response object.
- * @returns {void}
- */
-async function updateDoc(res, dbName, id, newDoc) {
-  console.log('Update doc');
-
-  await cloudantLib.findById(service, dbName, id).then(function (doc) {
-
-    console.log('Updating doc: ' + id);
-
-    cloudantLib.updateDoc(service, dbName, doc, newDoc).then(function (doc) {
+      // Create doc if not found
+      newDoc._id = "default"
+      createDoc(newDoc, res, dbName);
 
       res.status(200);
       res.set('Access-Control-Allow-Origin', '*');
       res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
-      res.send(doc);
-
-    }, function (err) {
-      console.error('[App] Cloudant DB Failure in update doc: ' + err)
-      res.status(500);
-      res.set('Access-Control-Allow-Origin', '*');
-      res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      res.send(err);
+      res.send(newDoc);
     })
 
+  }
 
-  }, function (err) {
+  /**
+   * Purge expired documents from Cloudant database.
+   * @param {Object} res - The response object.
+   * @returns {void}
+   */
+  async function purge(res, purgeWindow, dbName) {
 
-    // Create doc if not found
-    newDoc._id = "default"
-    createDoc(newDoc, res, dbName);
+    console.log('Purge docs in ' + dbName);
 
-    res.status(200);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    await cloudantLib.getExpiredDocs(service, purgeWindow, dbName).then(function (docs) {
+      cloudantLib.deleteDocs(service, dbName, docs);
 
-    res.send(newDoc);
+    }, function (err) {
+      console.error('[App] Cloudant DB Failure in purge docs: ' + err);
+      res.status(500);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send(err);
+    });
+  }
+
+  // ////// Helper function to get photoDb from cameraId passed in query param ///
+  function getPhotoDb(camId) {
+    if (camId == null) {
+      camId = 1;
+    }
+
+    let photoDb = process.env.CAM1_DB_NAME;
+
+    if (camId == 2) {
+      photoDb = process.env.CAM2_DB_NAME;
+    }
+
+    if (camId == 3) {
+      photoDb = process.env.CAM3_DB_NAME;
+    }
+
+    if (camId == 4) {
+      photoDb = process.env.CAM4_DB_NAME;
+    }
+
+    console.log("Selected db " + photoDb)
+    return photoDb;
+  }
+
+  app.listen(port, () => {
+    console.info('[App] Listening on http://localhost:' + port)
   })
-
-}
-
-/**
- * Purge expired documents from Cloudant database.
- * @param {Object} res - The response object.
- * @returns {void}
- */
-async function purge(res, purgeWindow, dbName) {
-
-  console.log('Purge docs in ' + dbName);
-
-  await cloudantLib.getExpiredDocs(service, purgeWindow, dbName).then(function (docs) {
-    cloudantLib.deleteDocs(service, dbName, docs);
-
-  }, function (err) {
-    console.error('[App] Cloudant DB Failure in purge docs: ' + err);
-    res.status(500);
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
-  });
-}
-
-// ////// Helper function to get photoDb from cameraId passed in query param ///
-function getPhotoDb(camId) {
-  if (camId == null) {
-    camId = 1;
-  }
-
-  let photoDb = process.env.CAM1_DB_NAME;
-
-  if (camId == 2) {
-    photoDb = process.env.CAM2_DB_NAME;
-  }
-
-  if (camId == 3) {
-    photoDb = process.env.CAM3_DB_NAME;
-  }
-
-  if (camId == 4) {
-    photoDb = process.env.CAM4_DB_NAME;
-  }
-
-  console.log("Selected db " + photoDb)
-  return photoDb;
-}
-
-app.listen(port, () => {
-  console.info('[App] Listening on http://localhost:' + port)
-})
 
