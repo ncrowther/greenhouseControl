@@ -12,7 +12,7 @@ from StatusLight import StatusLight
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
-DEVICE_NAME = "polytunnel"
+DEVICE_ID = "polytunnel"
 
 
 """
@@ -139,7 +139,7 @@ class PlantServer(object):
                
         plantCare = self.plantCare
         
-        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + DEVICE_NAME
+        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + DEVICE_ID
         resp = None
         timestamp = None
         
@@ -250,7 +250,7 @@ class PlantServer(object):
           "lux": 0          
         })
         
-        request_url = GREENHOUSE_DATASERVICE + '/doc' + '?id=' + DEVICE_NAME
+        request_url = GREENHOUSE_DATASERVICE + '/doc?id=' + DEVICE_ID
      
         gc.collect() 
         resp = None
