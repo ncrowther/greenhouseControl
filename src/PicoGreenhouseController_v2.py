@@ -12,6 +12,7 @@ from StatusLight import StatusLight
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
+DEVICE_NAME = "Polytunnel"
 
 
 """
@@ -22,10 +23,10 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    ssid = 'VM7763450'
-    password = 'udWrTpeejf86gugx' 
-    #ssid = 'MIFI_3880'
-    #password = None    
+    #ssid = 'VM7763450'
+    #password = 'udWrTpeejf86gugx' 
+    ssid = 'MIFI_3880'
+    password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -137,7 +138,7 @@ class PlantServer(object):
                
         plantCare = self.plantCare
         
-        request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
+        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + DEVICE_NAME
         resp = None
         timestamp = None
         
@@ -183,7 +184,7 @@ class PlantServer(object):
         doc = jsonData["doc"]
         
         temperatureRange = doc["temperatureRange"]            
-        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1])        
+        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )     
                 
         windowState = doc["windowState"]
         plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
