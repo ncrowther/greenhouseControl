@@ -162,10 +162,10 @@ class PlantServer(object):
       
             jsonData = json.loads(response)
             timestamp = jsonData["timestamp"]
-            print("timestamp: " + timestamp) 
+            print("timestamp: " + timestamp)           
             
             self.setData(plantCare, jsonData)               
-        
+                
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
                 print(resp)
@@ -188,11 +188,13 @@ class PlantServer(object):
     """
     def setData(self, plantCare, jsonData):
             
-            # Config stored inside doc          
+        # Config stored inside doc          
         doc = jsonData["doc"]
         
-        temperatureRange = doc["temperatureRange"]            
-        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )     
+        temperatureRange = doc["temperatureRange"]
+        print("****Configure TEMPERATURE RANGE to: " + str(temperatureRange)     )   
+        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )
+        
                 
         windowState = doc["windowState"]
         plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
@@ -340,4 +342,3 @@ def main():
         #machine.reset()
 
 main()
-
