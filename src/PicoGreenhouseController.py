@@ -10,7 +10,9 @@ import machine
 from plantcare import PlantCare, WindowState, OnOffState
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
-GREENHOUSE_DATASERVICE = 'http://86.4.208.162'         
+GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
+DEVICE_ID = "Growtent"
+
 """
 This code is a Python program that controls a plant care system. 
 It connects to a network, retrieves system time, temperature, humidity, 
@@ -126,7 +128,7 @@ class PlantServer(object):
                
         plantCare = self.plantCare
         
-        request_url = GREENHOUSE_DATASERVICE + '/config?id=default'
+        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + DEVICE_ID
         resp = None
         timestamp = None
         
@@ -258,7 +260,6 @@ class PlantServer(object):
                 self.plantCare.setDateTime(timestamp)
 
             time.sleep(SLEEP_TIME)
-
             count = count + 1
                             
         
@@ -280,6 +281,8 @@ class PlantServer(object):
             vpd = self.plantCare.getVpdData()
             lux = self.plantCare.getluxData()
             self.logData(temperatureData[0], temperatureData[1], humidityData[0], co2Data[0], vpd, lux[0])
+            
+            self.spicyIot(temperatureData[0], humidityData[0])
                 
         except Exception as err:
             sys.print_exception(err)
@@ -306,7 +309,7 @@ class PlantServer(object):
           "lux": lux          
         })
         
-        request_url = GREENHOUSE_DATASERVICE + '/doc'
+        request_url = GREENHOUSE_DATASERVICE + '/doc?id=' + DEVICE_ID
      
         gc.collect() 
         resp = None
@@ -323,6 +326,48 @@ class PlantServer(object):
         finally:   
             gc.collect()          
             return response
+        
+    def spicyIot(self, temperature, humidity):
+
+        # Your API credentials
+        API_KEY = "UVYnUC2iZlhPLIVBtDGf4ynQ9YPF9Bmd"
+        SENSOR_ID = 21109  # temperature
+
+        # API endpoint
+        url = "http://spicyiot.com/sendIOT.php"
+
+        header = {
+          'Content-Type': 'application/json',
+          }
+        
+        # Prepare sensor reading
+        payload = {
+            "apikey": API_KEY,
+            "sensorReadings": [{
+                "id": SENSOR_ID,
+                "val": temperature,  # Your sensor value here
+                "timestamp": 1770368157
+            }]
+        }
+
+        # Send the data
+        #response = requests.post(url, json=data)
+
+        response = "ERROR"
+        try:
+            resp = post( url, headers=header, data=payload, timeout=10)
+            response = resp.text
+            print("******SPICY RESPONSE:" + response)
+            resp.close()
+            
+        except Exception as e: # Here it catches any error.
+            print(e)
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                resp.close()
+        finally:   
+            gc.collect()          
+            return response
+              
             
 """
 This function is the main entry point for the program.
