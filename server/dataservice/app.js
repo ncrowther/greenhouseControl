@@ -310,9 +310,9 @@ app.post('/fan', async (req, res) => {
         originalDoc.wateringTimes[1],
         originalDoc.wateringTimes[2]
       ],
-      "windowState": inputDoc.windowState,
-      "windowRun": inputDoc.windowRun,
-      "windowPause": inputDoc.windowPause,
+      "windowState": originalDoc.windowState,
+      "windowRun": originalDoc.windowRun,
+      "windowPause": originalDoc.windowPause,
       "temperatureRange": [
         originalDoc.temperatureRange[0],
         inputDoc.maxTemp
@@ -440,13 +440,13 @@ app.post('/humidity', async (req, res) => {
 // ///////////////////// Set Config ////////////////////
 app.post('/config', async (req, res) => {
 
-  console.log('Write config');
+  const id = (req.query.id).toLowerCase(); 
+  console.log('Write config for ' + id);
 
   var time = moment();
   var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
   console.log(timestamp);
 
-  const id = (req.query.id).toLowerCase(); 
   const inputDoc = req.body;
 
   // Hint: This is the doc that is required for input from the OpenAPI spec

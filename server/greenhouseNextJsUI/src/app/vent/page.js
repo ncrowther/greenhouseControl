@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
-import { BiWindow } from 'react-icons/bi';
+import { BiVent } from 'react-icons/bi';
 import { PiFanFill } from 'react-icons/pi';
 import { Button, Grid, Column } from '@carbon/react';
 import '@carbon/charts-react/styles.css';
@@ -12,9 +12,9 @@ const config = require('../config/config.js');
 function Vent() {
   const [highTemp, setHighTemp] = useState('0');
   const [fan, setFan] = useState('OFF');
-  const [window, setWindow] = useState('DOWN');
-  const [windowRun, setWindowRun] = useState('0');
-  const [windowPause, setWindowPause] = useState('0');
+  const [vent, setVent] = useState('DOWN');
+  const [ventRun, setVentRun] = useState('0');
+  const [ventPause, setVentPause] = useState(10);
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -24,10 +24,10 @@ function Vent() {
     event.preventDefault();
 
     let configData = JSON.stringify({
-      windowState: window,
+      windowState: vent,
       fanState: fan,
-      windowRun: windowRun,
-      windowPause: windowPause,
+      windowRun: ventRun,
+      windowPause: ventPause - 10, // Adjust for UI offset
       maxTemp: highTemp,
     });
 
@@ -56,9 +56,9 @@ function Vent() {
 
               if (configData) {
                 setHighTemp(configData.temperatureRange[1]);
-                setWindow(configData.windowState);
-                setWindowRun(configData.windowRun);
-                setWindowPause(configData.windowPause);
+                setVent(configData.windowState);
+                setVentRun(configData.windowRun);
+                setVentPause(configData.windowPause + 10); // Adjust for UI offset
               }
             }, []);
           }
@@ -82,78 +82,78 @@ function Vent() {
     return `Error! ${error}`;
   }
 
-  // Set window buttons and highlight the one that is enabled
+  // Set vent buttons and highlight the one that is enabled
   let ventButton = {};
-  if (window === 'OPEN') {
+  if (vent === 'OPEN') {
     ventButton = (
       <div>
         <Button
           kind="primary"
-          renderIcon={BiWindow}
-          inputid="windowOpen"
-          name="windowOpen"
+          renderIcon={BiVent}
+          inputid="ventOpen"
+          name="ventOpen"
           value="OPEN"
-          onClick={(e) => setWindow('OPEN')}
+          onClick={(e) => setVent('OPEN')}
         >
           {' '}
           UP*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={BiWindow}
-          inputid="windowClosed"
-          name="windowClosed"
+          renderIcon={BiVent}
+          inputid="ventClosed"
+          name="ventClosed"
           value="CLOSED"
-          onClick={(e) => setWindow('CLOSED')}
+          onClick={(e) => setVent('CLOSED')}
         >
           {' '}
           DWN
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={BiWindow}
-          inputid="windowAuto"
-          name="windowAuto"
+          renderIcon={BiVent}
+          inputid="ventAuto"
+          name="ventAuto"
           value="AUTO"
-          onClick={(e) => setWindow('AUTO')}
+          onClick={(e) => setVent('AUTO')}
         >
           {' '}
           AUTO
         </Button>
       </div>
     );
-  } else if (window === 'CLOSED') {
+  } else if (vent === 'CLOSED') {
     ventButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={BiWindow}
-          inputid="windowOpen"
-          name="windowOpen"
+          renderIcon={BiVent}
+          inputid="ventOpen"
+          name="ventOpen"
           value="OPEN"
-          onClick={(e) => setWindow('OPEN')}
+          onClick={(e) => setVent('OPEN')}
         >
           {' '}
           UP
         </Button>
         <Button
           kind="primary"
-          renderIcon={BiWindow}
-          inputid="windowClosed"
-          name="windowClosed"
+          renderIcon={BiVent}
+          inputid="ventClosed"
+          name="ventClosed"
           value="CLOSED"
-          onClick={(e) => setWindow('CLOSED')}
+          onClick={(e) => setVent('CLOSED')}
         >
           {' '}
           DWN*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={BiWindow}
-          inputid="windowAuto"
-          name="windowAuto"
+          renderIcon={BiVent}
+          inputid="ventAuto"
+          name="ventAuto"
           value="AUTO"
-          onClick={(e) => setWindow('AUTO')}
+          onClick={(e) => setVent('AUTO')}
         >
           {' '}
           AUTO
@@ -165,33 +165,33 @@ function Vent() {
       <div>
         <Button
           kind="tertiary"
-          renderIcon={BiWindow}
-          inputid="windowOpen"
-          name="windowOpen"
+          renderIcon={BiVent}
+          inputid="ventOpen"
+          name="ventOpen"
           value="OPEN"
-          onClick={(e) => setWindow('OPEN')}
+          onClick={(e) => setVent('OPEN')}
         >
           {' '}
           UP
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={BiWindow}
-          inputid="windowClosed"
-          name="windowClosed"
+          renderIcon={BiVent}
+          inputid="ventClosed"
+          name="ventClosed"
           value="CLOSED"
-          onClick={(e) => setWindow('CLOSED')}
+          onClick={(e) => setVent('CLOSED')}
         >
           {' '}
           DWN
         </Button>
         <Button
           kind="primary"
-          renderIcon={BiWindow}
-          inputid="windowAuto"
-          name="windowAuto"
+          renderIcon={BiVent}
+          inputid="ventAuto"
+          name="ventAuto"
           value="AUTO"
-          onClick={(e) => setWindow('AUTO')}
+          onClick={(e) => setVent('AUTO')}
         >
           {' '}
           AUTO*
@@ -230,23 +230,23 @@ function Vent() {
             rangeColor="lightgray"
           />
 
-          <h4>Vent Run (0 - 60 Sec):</h4>
+          <h4>Vent Run (1 - 30 Sec):</h4>
           <Knob
-            value={windowRun}
-            onChange={(e) => setWindowRun(e.value)}
-            min={0}
-            max={60}
+            value={ventRun}
+            onChange={(e) => setVentRun(e.value)}
+            min={1}
+            max={30}
             valueTemplate={'{value}'}
             valueColor="blue"
             rangeColor="lightgray"
           />
 
-          <h4>Vent Pause (0 - 120 Sec):</h4>
+          <h4>Vent Pause (10 - 30 Sec):</h4>
           <Knob
-            value={windowPause}
-            onChange={(e) => setWindowPause(e.value)}
-            min={0}
-            max={120}
+            value={ventPause}
+            onChange={(e) => setVentPause(e.value)}
+            min={10}
+            max={30}
             valueTemplate={'{value}'}
             valueColor="purple"
             rangeColor="lightgray"
