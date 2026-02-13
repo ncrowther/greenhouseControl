@@ -12,7 +12,7 @@ from StatusLight import StatusLight
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
-DEVICE_ID = "polytunnel"
+DEVICE_NAME = "polytunnel"
 
 
 """
@@ -24,9 +24,11 @@ The program also includes a function to display an error message with a specific
 class PlantServer(object):
     
     #ssid = 'VM7763450'
-    #password = 'udWrTpeejf86gugx' 
-    ssid = 'MIFI_3880'
-    password = None    
+    #password = 'udWrTpeejf86gugx'
+    ssid = "Nigel’s iPhone"
+    password = 'Porker01!'     
+    #ssid = 'MIFI_3880'
+    #password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -62,8 +64,13 @@ class PlantServer(object):
     def connect_to_network(self, ssid, password):  
         
         try:        
-            # Check if already connected
             print("Connect to Wi-Fi....")
+            
+            # Check if already connected            
+            wlanStatus = self.wlan.status()
+            if (wlanStatus == network.STAT_GOT_IP):                        
+                print('******** WIFI ALREADY CONNECTED ********')
+                return self.ipAddress
             
             self.wlan.active(True)
             self.wlan.config(pm = 0xa11140) # Disable power-save mode
@@ -139,7 +146,7 @@ class PlantServer(object):
                
         plantCare = self.plantCare
         
-        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + DEVICE_ID
+        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + DEVICE_NAME
         resp = None
         timestamp = None
         
@@ -250,13 +257,13 @@ class PlantServer(object):
           "lux": 0          
         })
         
-        request_url = GREENHOUSE_DATASERVICE + '/doc?id=' + DEVICE_ID
+        request_url = GREENHOUSE_DATASERVICE + '/doc' + '?id=' + DEVICE_NAME
      
         gc.collect() 
         resp = None
         response = "ERROR"
         try:
-            resp = post( request_url, headers=header, data=payload, timeout=10)
+            resp = post( request_url, headers=header, data=payload, timeout=100)
             response = resp.text
             resp.close()
             
@@ -282,8 +289,8 @@ class PlantServer(object):
         
         statusLight = StatusLight()        
         
-        SLEEP_TIME = 1 # seconds
-        LOG_TIME = 1 # log period in seconds = SLEEP_TIME * LOG_TIME
+        SLEEP_TIME = 10 # seconds
+        LOG_TIME = 60 # log period in seconds = SLEEP_TIME * LOG_TIME
         
         count = 0
         
@@ -307,6 +314,8 @@ class PlantServer(object):
             statusLight.setSleepingStatus()                       
             time.sleep(SLEEP_TIME)           
             statusLight.setOperationalStatus()
+            
+            count = count + 1
                             
         
 """

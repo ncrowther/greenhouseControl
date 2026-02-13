@@ -11,7 +11,7 @@ from plantcare import PlantCare, WindowState, OnOffState
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
-DEVICE_ID = "default"
+DEVICE_ID = "Growtent"
 
 """
 This code is a Python program that controls a plant care system. 
