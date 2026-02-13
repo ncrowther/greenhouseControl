@@ -33,8 +33,8 @@ function ChartPage() {
   const [vpdData, setVpdData] = useState([]);
   const [chartOptions, setChartOptions] = useState(options1);
   const [airTemperatureChecked, setAirTemperatureChecked] = useState(true);
-  const [humidityChecked, setHumidityChecked] = useState(true);
-  const [vpdChecked, setVpdChecked] = useState(true);
+  const [humidityChecked, setHumidityChecked] = useState(false);
+  const [vpdChecked, setVpdChecked] = useState(false);
   const [vocChecked, setvocChecked] = useState(false);
   const [pressureChecked, setPressureChecked] = useState(false);
 

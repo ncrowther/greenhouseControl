@@ -1,7 +1,7 @@
 const { ResponseCookies } = require('next/dist/compiled/@edge-runtime/cookies');
 const endpoints = require('./endpoints.js');
 
-var environment = { name: 'default', code: '1' };
+var environment = { name: 'Growtent', code: '1' };
 
 exports.getEnv = function setEnv() {
   return environment;
@@ -104,13 +104,31 @@ exports.humidity = function humidity(configData) {
     .catch((error) => console.error(error));
 };
 
-exports.cool = function cool(configData) {
+exports.fan = function fan(configData) {
   console.log('SEND: ' + JSON.stringify(configData));
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.coolServiceEndpoint + '?id=' + environment.name, {
+  fetch(endpoints.fanServiceEndpoint + '?id=' + environment.name, {
+    method: 'POST',
+    mode: 'cors',
+    headers: myHeaders,
+    body: configData, // body data type must match "Content-Type" header
+  })
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((error) => console.error(error));
+};
+
+exports.vent = function vent(configData) {
+  console.log('SEND: ' + JSON.stringify(configData));
+
+  const myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json');
+  // Send data to the backend via POST
+  fetch(endpoints.ventServiceEndpoint + '?id=' + environment.name, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,

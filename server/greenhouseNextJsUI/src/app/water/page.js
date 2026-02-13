@@ -14,6 +14,7 @@ function Water() {
   const [pumpOnTime1, setPumpOnTime1] = useState(0);
   const [pumpOnTime2, setPumpOnTime2] = useState(0);
   const [pumpOnTime3, setPumpOnTime3] = useState(0);
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
@@ -202,16 +203,20 @@ function Water() {
     );
   }
 
+  const env = `${selectedEnv.name}`;
+
   return (
     <Grid>
       <Column lg={1} md={1} sm={1}>
         {/* Empty first column */}
       </Column>
-
-      <Column lg={5} md={5} sm={5}>
+      <Column lg={10} md={10} sm={10}>
+        <br></br>
         <form onSubmit={(e) => handleOnSubmit(e)}>
+          <h3>{env}</h3>
           <br></br>
-          <h4>Pump:</h4>
+          <br></br>
+          <h4>Water:</h4>
           {pumpButton}
 
           <br></br>

@@ -1,5 +1,5 @@
 export default {
-  title: 'Temperature / Humidity',
+  title: 'Climate',
   axes: {
     left: {
       mapsTo: 'value',

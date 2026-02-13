@@ -126,7 +126,7 @@ app.post('/light', async (req, res) => {
 
   console.log('Set Light ' + JSON.stringify(inputDoc));
 
-  const id = req.query.id;
+  const id = (req.query.id).toLowerCase();
   console.log('Get light for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -179,7 +179,7 @@ app.post('/heat', async (req, res) => {
 
   console.log('Set Heat ' + JSON.stringify(inputDoc));
 
-  const id = req.query.id;
+  const id = (req.query.id).toLowerCase();
   console.log('Get heat for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -232,7 +232,7 @@ app.post('/water', async (req, res) => {
 
   console.log('Set irrigation ' + JSON.stringify(inputDoc));
 
-  const id = req.query.id;
+  const id = (req.query.id).toLowerCase();
   console.log('Get irrigation for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -278,14 +278,14 @@ app.post('/water', async (req, res) => {
   })
 })
 
-// ///////////////////// Set Cooling ////////////////////
-app.post('/cool', async (req, res) => {
+// ///////////////////// Set Fan ////////////////////
+app.post('/fan', async (req, res) => {
 
   const inputDoc = req.body;
 
-  console.log('Set cooling ' + JSON.stringify(inputDoc));
+  console.log('Set fan ' + JSON.stringify(inputDoc));
 
-  const id = req.query.id;
+  const id = (req.query.id).toLowerCase();
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -331,6 +331,59 @@ app.post('/cool', async (req, res) => {
   })
 })
 
+// ///////////////////// Set Vent ////////////////////
+app.post('/vent', async (req, res) => {
+
+  const inputDoc = req.body;
+
+  console.log('Set vent ' + JSON.stringify(inputDoc));
+
+  const id = (req.query.id).toLowerCase();
+  console.log('Get config for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
+
+    var time = moment();
+    var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+    console.log(timestamp);
+
+    const newDoc = {
+      "lightState": originalDoc.lightState,
+      "lightOnOff": [
+        originalDoc.lightOnOff[0],
+        originalDoc.lightOnOff[1]
+      ],
+      "pumpState": originalDoc.pumpState,
+      "fanState": originalDoc.fanState,
+      "heaterState": originalDoc.heaterState,
+      "humidifierState": originalDoc.humidifierState,
+      "wateringDuration": originalDoc.wateringDuration,
+      "wateringTimes": [
+        originalDoc.wateringTimes[0],
+        originalDoc.wateringTimes[1],
+        originalDoc.wateringTimes[2]
+      ],
+      "windowState": inputDoc.windowState,
+      "windowRun": inputDoc.windowRun,
+      "windowPause": inputDoc.windowPause,
+      "temperatureRange": [
+        originalDoc.temperatureRange[0],
+        inputDoc.maxTemp
+      ],
+      "humidityRange": [
+        originalDoc.humidityRange[0],
+        originalDoc.humidityRange[1]
+      ],
+      "lastUpdate": timestamp
+    }
+
+    console.log('Set Config: ' + JSON.stringify(newDoc))
+
+    updateDoc(res, configDbName, id, newDoc)
+
+  })
+})
+
 // ///////////////////// Set Humidity ////////////////////
 app.post('/humidity', async (req, res) => {
 
@@ -338,7 +391,7 @@ app.post('/humidity', async (req, res) => {
 
   console.log('Set humidity ' + JSON.stringify(inputDoc));
 
-  const id = req.query.id;
+  const id = (req.query.id).toLowerCase()
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -393,7 +446,7 @@ app.post('/config', async (req, res) => {
   var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
   console.log(timestamp);
 
-  const id = req.query.id;
+  const id = (req.query.id).toLowerCase(); 
   const inputDoc = req.body;
 
   // Hint: This is the doc that is required for input from the OpenAPI spec
@@ -437,7 +490,7 @@ app.post('/config', async (req, res) => {
 // //////////////// Get Config ////////////////////////
 app.get('/config', async (req, res) => {
 
-  const id = req.query.id;
+  const id = (req.query.id).toLowerCase()
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (doc) {
@@ -467,15 +520,15 @@ app.get('/config', async (req, res) => {
       "fanState": "OFF",
       "heaterState": "OFF",
       "humidifierState": "OFF",
-      "wateringDuration": "OFF",
+      "wateringDuration": 0,
       "wateringTimes": [
         7,
         12,
         18
       ],
       "windowState": "OFF",
-      "windowRun": "OFF",
-      "windowPause": "OFF",
+      "windowRun": 0,
+      "windowPause": 0,
       "temperatureRange": [
         0,
         40

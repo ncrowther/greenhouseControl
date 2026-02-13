@@ -2,28 +2,32 @@
 
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
-import { FaFireFlameSimple } from 'react-icons/fa6';
+import { BiWindow } from 'react-icons/bi';
+import { PiFanFill } from 'react-icons/pi';
 import { Button, Grid, Column } from '@carbon/react';
 import '@carbon/charts-react/styles.css';
-
 const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
 
-function Heat() {
-  const [lowTemp, setLowTemp] = useState('0');
-  const [heater, setHeater] = useState('OFF');
+function Fan() {
+  const [highTemp, setHighTemp] = useState('0');
+  const [fan, setFan] = useState('OFF');
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
   const handleOnSubmit = (event) => {
+    // Prevent default refresh
+    event.preventDefault();
+
     let configData = JSON.stringify({
-      heaterState: heater,
-      minTemp: lowTemp,
+      fanState: fan,
+      maxTemp: highTemp,
     });
 
     console.log('Got: ' + JSON.stringify(configData));
 
-    config.heat(configData);
+    config.fan(configData);
   };
 
   useEffect(() => {
@@ -45,8 +49,8 @@ function Heat() {
               console.log('*******' + JSON.stringify(configData));
 
               if (configData) {
-                setLowTemp(configData.temperatureRange[0]);
-                setHeater(configData.heaterState);
+                setHighTemp(configData.temperatureRange[1]);
+                setFan(configData.fanState);
               }
             }, []);
           }
@@ -70,78 +74,78 @@ function Heat() {
     return `Error! ${error}`;
   }
 
-  // Set heater buttons and highlight the one that is enabled
-  let heaterButton = {};
-  if (heater === 'ON') {
-    heaterButton = (
-      <div>
+  // Set fan buttons and highlight the one that is enabled
+  let fanButton = {};
+  if (fan === 'ON') {
+    fanButton = (
+      <div className="p-inputgroup flex-1">
         <Button
           kind="primary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater1"
-          name="heaterOn"
+          renderIcon={PiFanFill}
+          inputid="fan1"
+          name="fanOn"
           value="ON"
-          onClick={(e) => setHeater('ON')}
+          onClick={(e) => setFan('ON')}
         >
           {' '}
           ON*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater2"
-          name="heaterOff"
+          renderIcon={PiFanFill}
+          inputid="fan2"
+          name="fanOff"
           value="OFF"
-          onClick={(e) => setHeater('OFF')}
+          onClick={(e) => setFan('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater3"
-          name="heaterAuto"
+          renderIcon={PiFanFill}
+          inputid="fan3"
+          name="fanAuto"
           value="AUTO"
-          onClick={(e) => setHeater('AUTO')}
+          onClick={(e) => setFan('AUTO')}
         >
           {' '}
           AUTO
         </Button>
       </div>
     );
-  } else if (heater === 'OFF') {
-    heaterButton = (
-      <div>
+  } else if (fan === 'OFF') {
+    fanButton = (
+      <div className="p-inputgroup flex-1">
         <Button
           kind="tertiary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater1"
-          name="heaterOn"
+          renderIcon={PiFanFill}
+          inputid="fan1"
+          name="fanOn"
           value="ON"
-          onClick={(e) => setHeater('ON')}
+          onClick={(e) => setFan('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="primary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater2"
-          name="heaterOff"
+          renderIcon={PiFanFill}
+          inputid="fan2"
+          name="fanOff"
           value="OFF"
-          onClick={(e) => setHeater('OFF')}
+          onClick={(e) => setFan('OFF')}
         >
           {' '}
           OFF*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater3"
-          name="heaterAuto"
+          renderIcon={PiFanFill}
+          inputid="fan3"
+          name="fanAuto"
           value="AUTO"
-          onClick={(e) => setHeater('AUTO')}
+          onClick={(e) => setFan('AUTO')}
         >
           {' '}
           AUTO
@@ -149,37 +153,37 @@ function Heat() {
       </div>
     );
   } else {
-    heaterButton = (
+    fanButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater1"
-          name="heaterOn"
+          renderIcon={PiFanFill}
+          inputid="fan1"
+          name="fanOn"
           value="ON"
-          onClick={(e) => setHeater('ON')}
+          onClick={(e) => setFan('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater2"
-          name="heaterOff"
+          renderIcon={PiFanFill}
+          inputid="fan2"
+          name="fanOff"
           value="OFF"
-          onClick={(e) => setHeater('OFF')}
+          onClick={(e) => setFan('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="primary"
-          renderIcon={FaFireFlameSimple}
-          inputid="heater3"
-          name="heaterAuto"
+          renderIcon={PiFanFill}
+          inputid="fan3"
+          name="fanAuto"
           value="AUTO"
-          onClick={(e) => setHeater('AUTO')}
+          onClick={(e) => setFan('AUTO')}
         >
           {' '}
           AUTO*
@@ -188,29 +192,34 @@ function Heat() {
     );
   }
 
+  const env = `${selectedEnv.name}`;
+
   return (
     <Grid>
       <Column lg={1} md={1} sm={1}>
         {/* Empty first column */}
       </Column>
-
-      <Column lg={5} md={5} sm={5}>
+      <Column lg={10} md={10} sm={10}>
+        <br></br>
         <form onSubmit={(e) => handleOnSubmit(e)}>
+          <h3>{env}</h3>
           <br></br>
-          <h4>Heat:</h4>
-          {heaterButton}
+          <br></br>
+
+          <h4>Fan:</h4>
+          {fanButton}
 
           <br></br>
           <br></br>
 
-          <h4>Min:</h4>
+          <h4>Temperature:</h4>
           <Knob
-            value={lowTemp}
-            onChange={(e) => setLowTemp(e.value)}
+            value={highTemp}
+            onChange={(e) => setHighTemp(e.value)}
             min={5}
-            max={50}
+            max={40}
             valueTemplate={'{value}C'}
-            valueColor="blue"
+            valueColor="red"
             rangeColor="lightgray"
           />
 
@@ -226,5 +235,4 @@ function Heat() {
     </Grid>
   );
 }
-
-export default Heat;
+export default Fan;

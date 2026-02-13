@@ -2,28 +2,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
-import { WiHumidity } from 'react-icons/wi';
+import { FaFireFlameSimple } from 'react-icons/fa6';
 import { Button, Grid, Column } from '@carbon/react';
 import '@carbon/charts-react/styles.css';
+
 const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
 
-function Humidity() {
-  const [lowHumidity, setLowHumidity] = useState('0');
-  const [humidifier, sethumidifier] = useState('OFF');
+function Heater() {
+  const [lowTemp, setLowTemp] = useState('0');
+  const [heater, setHeater] = useState('OFF');
   const [loading, setLoading] = useState(true);
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [error, setError] = useState();
 
   const handleOnSubmit = (event) => {
     let configData = JSON.stringify({
-      humidifierState: humidifier,
-      minHumidity: lowHumidity,
-      maxHumidity: 100,
+      heaterState: heater,
+      minTemp: lowTemp,
     });
 
     console.log('Got: ' + JSON.stringify(configData));
 
-    config.humidity(configData);
+    config.heat(configData);
   };
 
   useEffect(() => {
@@ -45,8 +46,8 @@ function Humidity() {
               console.log('*******' + JSON.stringify(configData));
 
               if (configData) {
-                setLowHumidity(configData.humidityRange[0]);
-                sethumidifier(configData.humidifierState);
+                setLowTemp(configData.temperatureRange[0]);
+                setHeater(configData.heaterState);
               }
             }, []);
           }
@@ -70,78 +71,78 @@ function Humidity() {
     return `Error! ${error}`;
   }
 
-  // Set humidifier buttons and highlight the one that is enabled
-  let humidifierButton = {};
-  if (humidifier === 'ON') {
-    humidifierButton = (
+  // Set heater buttons and highlight the one that is enabled
+  let heaterButton = {};
+  if (heater === 'ON') {
+    heaterButton = (
       <div>
         <Button
           kind="primary"
-          renderIcon={WiHumidity}
-          inputid="humidifier1"
-          name="humidifierOn"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater1"
+          name="heaterOn"
           value="ON"
-          onClick={(e) => sethumidifier('ON')}
+          onClick={(e) => setHeater('ON')}
         >
           {' '}
           ON*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={WiHumidity}
-          inputid="humidifier2"
-          name="humidifierOff"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater2"
+          name="heaterOff"
           value="OFF"
-          onClick={(e) => sethumidifier('OFF')}
+          onClick={(e) => setHeater('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={WiHumidity}
-          inputid="humidifier3"
-          name="humidifierAuto"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater3"
+          name="heaterAuto"
           value="AUTO"
-          onClick={(e) => sethumidifier('AUTO')}
+          onClick={(e) => setHeater('AUTO')}
         >
           {' '}
           AUTO
         </Button>
       </div>
     );
-  } else if (humidifier === 'OFF') {
-    humidifierButton = (
+  } else if (heater === 'OFF') {
+    heaterButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={WiHumidity}
-          inputid="humidifier1"
-          name="humidifierOn"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater1"
+          name="heaterOn"
           value="ON"
-          onClick={(e) => sethumidifier('ON')}
+          onClick={(e) => setHeater('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="primary"
-          renderIcon={WiHumidity}
-          inputid="humidifier2"
-          name="humidifierOff"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater2"
+          name="heaterOff"
           value="OFF"
-          onClick={(e) => sethumidifier('OFF')}
+          onClick={(e) => setHeater('OFF')}
         >
           {' '}
           OFF*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={WiHumidity}
-          inputid="humidifier3"
-          name="humidifierAuto"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater3"
+          name="heaterAuto"
           value="AUTO"
-          onClick={(e) => sethumidifier('AUTO')}
+          onClick={(e) => setHeater('AUTO')}
         >
           {' '}
           AUTO
@@ -149,37 +150,37 @@ function Humidity() {
       </div>
     );
   } else {
-    humidifierButton = (
+    heaterButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={WiHumidity}
-          inputid="humidifier1"
-          name="humidifierOn"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater1"
+          name="heaterOn"
           value="ON"
-          onClick={(e) => sethumidifier('ON')}
+          onClick={(e) => setHeater('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={WiHumidity}
-          inputid="humidifier2"
-          name="humidifierOff"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater2"
+          name="heaterOff"
           value="OFF"
-          onClick={(e) => sethumidifier('OFF')}
+          onClick={(e) => setHeater('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="primary"
-          renderIcon={WiHumidity}
-          inputid="humidifier3"
-          name="humidifierAuto"
+          renderIcon={FaFireFlameSimple}
+          inputid="heater3"
+          name="heaterAuto"
           value="AUTO"
-          onClick={(e) => sethumidifier('AUTO')}
+          onClick={(e) => setHeater('AUTO')}
         >
           {' '}
           AUTO*
@@ -188,28 +189,32 @@ function Humidity() {
     );
   }
 
+  const env = `${selectedEnv.name}`;
+
   return (
     <Grid>
       <Column lg={1} md={1} sm={1}>
         {/* Empty first column */}
       </Column>
-
-      <Column lg={5} md={5} sm={5}>
+      <Column lg={10} md={10} sm={10}>
+        <br></br>
         <form onSubmit={(e) => handleOnSubmit(e)}>
+          <h3>{env}</h3>
           <br></br>
-          <h4>Humidifier:</h4>
-          {humidifierButton}
+          <br></br>
+          <h4>Heater:</h4>
+          {heaterButton}
 
           <br></br>
           <br></br>
 
           <h4>Min:</h4>
           <Knob
-            value={lowHumidity}
-            onChange={(e) => setLowHumidity(e.value)}
+            value={lowTemp}
+            onChange={(e) => setLowTemp(e.value)}
             min={5}
-            max={100}
-            valueTemplate={'{value}%'}
+            max={50}
+            valueTemplate={'{value}C'}
             valueColor="blue"
             rangeColor="lightgray"
           />
@@ -227,4 +232,4 @@ function Humidity() {
   );
 }
 
-export default Humidity;
+export default Heater;

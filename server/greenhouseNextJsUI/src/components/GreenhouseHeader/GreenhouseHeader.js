@@ -16,9 +16,9 @@ import {
   HeaderSideNavItems,
 } from '@carbon/react';
 import { Switcher, Notification, UserAvatar } from '@carbon/icons-react';
-
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const GreenhouseHeader = () => {
   const router = useRouter();
@@ -50,32 +50,42 @@ const GreenhouseHeader = () => {
 
               <HeaderMenuItem
                 Light
-                label="Cool"
+                label="Fan"
                 onClick={() => {
-                  router.push('/cool');
+                  router.push('/fan');
                 }}
               >
-                Cool
+                Fan
               </HeaderMenuItem>
 
               <HeaderMenuItem
                 Light
-                label="Heat"
+                label="Vent"
                 onClick={() => {
-                  router.push('/heat');
+                  router.push('/vent');
                 }}
               >
-                Heat
+                Vent
               </HeaderMenuItem>
 
               <HeaderMenuItem
                 Light
-                label="Humidity"
+                label="Heater"
                 onClick={() => {
-                  router.push('/humidity');
+                  router.push('/heater');
                 }}
               >
-                Humidity
+                Heater
+              </HeaderMenuItem>
+
+              <HeaderMenuItem
+                Light
+                label="Humidifier"
+                onClick={() => {
+                  router.push('/humidifier');
+                }}
+              >
+                Humidifier
               </HeaderMenuItem>
 
               <HeaderMenuItem
@@ -111,7 +121,7 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
             </HeaderMenu>
 
-            <HeaderMenu aria-label="Polytunnel" menuLinkName="Polytunnel">
+            <HeaderMenu aria-label="Lora" menuLinkName="Lora">
               <HeaderMenuItem
                 Light
                 label="Air chart"
@@ -154,14 +164,17 @@ const GreenhouseHeader = () => {
                 <Link href="/light" passHref legacyBehavior>
                   <HeaderMenuItem>Light</HeaderMenuItem>
                 </Link>
-                <Link href="/cool" passHref legacyBehavior>
-                  <HeaderMenuItem>Cool</HeaderMenuItem>
+                <Link href="/fan" passHref legacyBehavior>
+                  <HeaderMenuItem>Fan</HeaderMenuItem>
                 </Link>
-                <Link href="/heat" passHref legacyBehavior>
-                  <HeaderMenuItem>Heat</HeaderMenuItem>
+                <Link href="/vent" passHref legacyBehavior>
+                  <HeaderMenuItem>Vent</HeaderMenuItem>
                 </Link>
-                <Link href="/humidity" passHref legacyBehavior>
-                  <HeaderMenuItem>Humidity</HeaderMenuItem>
+                <Link href="/heater" passHref legacyBehavior>
+                  <HeaderMenuItem>Heater</HeaderMenuItem>
+                </Link>
+                <Link href="/humidifier" passHref legacyBehavior>
+                  <HeaderMenuItem>Humidifier</HeaderMenuItem>
                 </Link>
                 <Link href="/water" passHref legacyBehavior>
                   <HeaderMenuItem>Water</HeaderMenuItem>

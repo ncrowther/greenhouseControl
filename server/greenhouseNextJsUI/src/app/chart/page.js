@@ -25,6 +25,7 @@ function ChartPage() {
   const [vpdChecked, setVpdChecked] = useState(false);
   const [co2Checked, setCo2Checked] = useState(false);
   const [luxChecked, setLuxChecked] = useState(false);
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
 
   const refreshChart = (
     airChecked,
@@ -213,12 +214,14 @@ function ChartPage() {
     return <Grid>{error};</Grid>;
   }
 
+  options1.title = `Climate - ${selectedEnv.name}`;
+
   return (
     <Grid>
       <CheckboxGroup invalidText="Invalid" warnText="Warning">
         <Checkbox
           id="airTemperature"
-          labelText="Air Temperature"
+          labelText="Air Temp"
           checked={airTemperatureChecked}
           onChange={(_, { checked }) =>
             refreshChart(
@@ -233,7 +236,7 @@ function ChartPage() {
         />
         <Checkbox
           id="leafTemperature"
-          labelText="Leaf Temperature"
+          labelText="Leaf Temp"
           checked={leafTemperatureChecked}
           onChange={(_, { checked }) =>
             refreshChart(

@@ -14,8 +14,13 @@ import {
   TableCell,
   TableExpandedRow,
 } from '@carbon/react';
+import { useState } from 'react';
+
+const config = require('../config/config.js');
 
 const TelemetryTable = ({ rows, headers }) => {
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
+
   const getRowDescription = (rowId) => {
     const row = rows.find(({ id }) => id === rowId);
     return row ? row.description : '';
@@ -32,9 +37,7 @@ const TelemetryTable = ({ rows, headers }) => {
         getRowProps,
         getTableProps,
       }) => (
-        <TableContainer
-          title="Telemetry"
-        >
+        <TableContainer title={`Telemetry - ${selectedEnv.name}`}>
           <Table {...getTableProps()}>
             <TableHead>
               <TableRow>
@@ -54,7 +57,6 @@ const TelemetryTable = ({ rows, headers }) => {
                       <TableCell key={cell.id}>{cell.value}</TableCell>
                     ))}
                   </TableExpandRow>
-
                 </React.Fragment>
               ))}
             </TableBody>

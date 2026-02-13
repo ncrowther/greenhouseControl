@@ -9,12 +9,13 @@ import '@carbon/charts-react/styles.css';
 const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
 
-function Cool() {
+function Vent() {
   const [highTemp, setHighTemp] = useState('0');
   const [fan, setFan] = useState('OFF');
   const [window, setWindow] = useState('DOWN');
   const [windowRun, setWindowRun] = useState('0');
   const [windowPause, setWindowPause] = useState('0');
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
@@ -32,7 +33,7 @@ function Cool() {
 
     console.log('Got: ' + JSON.stringify(configData));
 
-    config.cool(configData);
+    config.vent(configData);
   };
 
   useEffect(() => {
@@ -55,7 +56,6 @@ function Cool() {
 
               if (configData) {
                 setHighTemp(configData.temperatureRange[1]);
-                setFan(configData.fanState);
                 setWindow(configData.windowState);
                 setWindowRun(configData.windowRun);
                 setWindowPause(configData.windowPause);
@@ -83,9 +83,9 @@ function Cool() {
   }
 
   // Set window buttons and highlight the one that is enabled
-  let windowButton = {};
+  let ventButton = {};
   if (window === 'OPEN') {
-    windowButton = (
+    ventButton = (
       <div>
         <Button
           kind="primary"
@@ -123,7 +123,7 @@ function Cool() {
       </div>
     );
   } else if (window === 'CLOSED') {
-    windowButton = (
+    ventButton = (
       <div>
         <Button
           kind="tertiary"
@@ -161,7 +161,7 @@ function Cool() {
       </div>
     );
   } else {
-    windowButton = (
+    ventButton = (
       <div>
         <Button
           kind="tertiary"
@@ -200,141 +200,22 @@ function Cool() {
     );
   }
 
-  // Set fan buttons and highlight the one that is enabled
-  let fanButton = {};
-  if (fan === 'ON') {
-    fanButton = (
-      <div className="p-inputgroup flex-1">
-        <Button
-          kind="primary"
-          renderIcon={PiFanFill}
-          inputid="fan1"
-          name="fanOn"
-          value="ON"
-          onClick={(e) => setFan('ON')}
-        >
-          {' '}
-          ON*
-        </Button>
-        <Button
-          kind="tertiary"
-          renderIcon={PiFanFill}
-          inputid="fan2"
-          name="fanOff"
-          value="OFF"
-          onClick={(e) => setFan('OFF')}
-        >
-          {' '}
-          OFF
-        </Button>
-        <Button
-          kind="tertiary"
-          renderIcon={PiFanFill}
-          inputid="fan3"
-          name="fanAuto"
-          value="AUTO"
-          onClick={(e) => setFan('AUTO')}
-        >
-          {' '}
-          AUTO
-        </Button>
-      </div>
-    );
-  } else if (fan === 'OFF') {
-    fanButton = (
-      <div className="p-inputgroup flex-1">
-        <Button
-          kind="tertiary"
-          renderIcon={PiFanFill}
-          inputid="fan1"
-          name="fanOn"
-          value="ON"
-          onClick={(e) => setFan('ON')}
-        >
-          {' '}
-          ON
-        </Button>
-        <Button
-          kind="primary"
-          renderIcon={PiFanFill}
-          inputid="fan2"
-          name="fanOff"
-          value="OFF"
-          onClick={(e) => setFan('OFF')}
-        >
-          {' '}
-          OFF*
-        </Button>
-        <Button
-          kind="tertiary"
-          renderIcon={PiFanFill}
-          inputid="fan3"
-          name="fanAuto"
-          value="AUTO"
-          onClick={(e) => setFan('AUTO')}
-        >
-          {' '}
-          AUTO
-        </Button>
-      </div>
-    );
-  } else {
-    fanButton = (
-      <div>
-        <Button
-          kind="tertiary"
-          renderIcon={PiFanFill}
-          inputid="fan1"
-          name="fanOn"
-          value="ON"
-          onClick={(e) => setFan('ON')}
-        >
-          {' '}
-          ON
-        </Button>
-        <Button
-          kind="tertiary"
-          renderIcon={PiFanFill}
-          inputid="fan2"
-          name="fanOff"
-          value="OFF"
-          onClick={(e) => setFan('OFF')}
-        >
-          {' '}
-          OFF
-        </Button>
-        <Button
-          kind="primary"
-          renderIcon={PiFanFill}
-          inputid="fan3"
-          name="fanAuto"
-          value="AUTO"
-          onClick={(e) => setFan('AUTO')}
-        >
-          {' '}
-          AUTO*
-        </Button>
-      </div>
-    );
-  }
+  const env = `${selectedEnv.name}`;
 
   return (
     <Grid>
       <Column lg={1} md={1} sm={1}>
         {/* Empty first column */}
       </Column>
-
-      <Column lg={5} md={5} sm={5}>
+      <Column lg={10} md={10} sm={10}>
+        <br></br>
         <form onSubmit={(e) => handleOnSubmit(e)}>
+          <h3>{env}</h3>
           <br></br>
+          <br></br>
+
           <h4>Vent:</h4>
-          {windowButton}
-
-          <br></br>
-
-          <h4>Fan:</h4>
-          {fanButton}
-
+          {ventButton}
           <br></br>
           <br></br>
 
@@ -383,4 +264,4 @@ function Cool() {
     </Grid>
   );
 }
-export default Cool;
+export default Vent;

@@ -45,20 +45,6 @@ const headers = [
   },
 ];
 
-const LinkList = ({ url, homepageUrl }) => (
-  <ul style={{ display: 'flex' }}>
-    <li>
-      <Link href={url}>Greenhouse</Link>
-    </li>
-    {homepageUrl && (
-      <li>
-        <span>&nbsp;|&nbsp;</span>
-        <Link href={homepageUrl}>Homepage</Link>
-      </li>
-    )}
-  </ul>
-);
-
 const getNotifications = (rows) => {
   const MAX_TEMPERATURE = 30.0;
   const MIN_TEMPERATURE = 4.0;

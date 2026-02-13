@@ -2,37 +2,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
-import { CiLight } from 'react-icons/ci';
+import { WiHumidity } from 'react-icons/wi';
 import { Button, Grid, Column } from '@carbon/react';
 import '@carbon/charts-react/styles.css';
 const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
 
-function LightPage() {
-  const [light, setLight] = useState('OFF');
-  const [lightOnTime, setLightOnTime] = useState('00:00');
-  const [lightOffTime, setLightOffTime] = useState('00:00');
-  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
+function Humidity() {
+  const [lowHumidity, setLowHumidity] = useState('0');
+  const [humidifier, sethumidifier] = useState('OFF');
   const [loading, setLoading] = useState(true);
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [error, setError] = useState();
 
   const handleOnSubmit = (event) => {
-    // Prevent default refresh
-    event.preventDefault();
-
-    writeConfig(event);
-  };
-
-  const writeConfig = (event) => {
     let configData = JSON.stringify({
-      lightState: light,
-      lightOnHH: lightOnTime,
-      lightOffHH: lightOffTime,
+      humidifierState: humidifier,
+      minHumidity: lowHumidity,
+      maxHumidity: 100,
     });
 
-    console.log('Send: ' + JSON.stringify(configData));
+    console.log('Got: ' + JSON.stringify(configData));
 
-    config.light(configData);
+    config.humidity(configData);
   };
 
   useEffect(() => {
@@ -54,9 +46,8 @@ function LightPage() {
               console.log('*******' + JSON.stringify(configData));
 
               if (configData) {
-                setLight(configData.lightState);
-                setLightOnTime(configData.lightOnOff[0]);
-                setLightOffTime(configData.lightOnOff[1]);
+                setLowHumidity(configData.humidityRange[0]);
+                sethumidifier(configData.humidifierState);
               }
             }, []);
           }
@@ -80,78 +71,78 @@ function LightPage() {
     return `Error! ${error}`;
   }
 
-  // Set light buttons and highlight the one that is enabled
-  let lightButton = {};
-  if (light === 'ON') {
-    lightButton = (
+  // Set humidifier buttons and highlight the one that is enabled
+  let humidifierButton = {};
+  if (humidifier === 'ON') {
+    humidifierButton = (
       <div>
         <Button
           kind="primary"
-          renderIcon={CiLight}
-          inputid="light1"
-          name="lightOn"
+          renderIcon={WiHumidity}
+          inputid="humidifier1"
+          name="humidifierOn"
           value="ON"
-          onClick={(e) => setLight('ON')}
+          onClick={(e) => sethumidifier('ON')}
         >
           {' '}
           ON*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light2"
-          name="lightOff"
+          renderIcon={WiHumidity}
+          inputid="humidifier2"
+          name="humidifierOff"
           value="OFF"
-          onClick={(e) => setLight('OFF')}
+          onClick={(e) => sethumidifier('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light3"
-          name="lightAuto"
+          renderIcon={WiHumidity}
+          inputid="humidifier3"
+          name="humidifierAuto"
           value="AUTO"
-          onClick={(e) => setLight('AUTO')}
+          onClick={(e) => sethumidifier('AUTO')}
         >
           {' '}
           AUTO
         </Button>
       </div>
     );
-  } else if (light === 'OFF') {
-    lightButton = (
+  } else if (humidifier === 'OFF') {
+    humidifierButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light1"
-          name="lightOn"
+          renderIcon={WiHumidity}
+          inputid="humidifier1"
+          name="humidifierOn"
           value="ON"
-          onClick={(e) => setLight('ON')}
+          onClick={(e) => sethumidifier('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="primary"
-          renderIcon={CiLight}
-          inputid="light2"
-          name="lightOff"
+          renderIcon={WiHumidity}
+          inputid="humidifier2"
+          name="humidifierOff"
           value="OFF"
-          onClick={(e) => setLight('OFF')}
+          onClick={(e) => sethumidifier('OFF')}
         >
           {' '}
           OFF*
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light3"
-          name="lightAuto"
+          renderIcon={WiHumidity}
+          inputid="humidifier3"
+          name="humidifierAuto"
           value="AUTO"
-          onClick={(e) => setLight('AUTO')}
+          onClick={(e) => sethumidifier('AUTO')}
         >
           {' '}
           AUTO
@@ -159,37 +150,37 @@ function LightPage() {
       </div>
     );
   } else {
-    lightButton = (
+    humidifierButton = (
       <div>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light1"
-          name="lightOn"
+          renderIcon={WiHumidity}
+          inputid="humidifier1"
+          name="humidifierOn"
           value="ON"
-          onClick={(e) => setLight('ON')}
+          onClick={(e) => sethumidifier('ON')}
         >
           {' '}
           ON
         </Button>
         <Button
           kind="tertiary"
-          renderIcon={CiLight}
-          inputid="light2"
-          name="lightOff"
+          renderIcon={WiHumidity}
+          inputid="humidifier2"
+          name="humidifierOff"
           value="OFF"
-          onClick={(e) => setLight('OFF')}
+          onClick={(e) => sethumidifier('OFF')}
         >
           {' '}
           OFF
         </Button>
         <Button
           kind="primary"
-          renderIcon={CiLight}
-          inputid="light3"
-          name="lightAuto"
+          renderIcon={WiHumidity}
+          inputid="humidifier3"
+          name="humidifierAuto"
           value="AUTO"
-          onClick={(e) => setLight('AUTO')}
+          onClick={(e) => sethumidifier('AUTO')}
         >
           {' '}
           AUTO*
@@ -211,33 +202,20 @@ function LightPage() {
           <h3>{env}</h3>
           <br></br>
           <br></br>
-
-          <h4>Light:</h4>
-
-          {lightButton}
+          <h4>Humidifier:</h4>
+          {humidifierButton}
 
           <br></br>
           <br></br>
 
-          <h4>On:</h4>
+          <h4>Min:</h4>
           <Knob
-            value={lightOnTime}
-            onChange={(e) => setLightOnTime(e.value)}
-            min={0}
-            max={24}
-            valueTemplate={'{value}H'}
-            valueColor="orange"
-            rangeColor="lightgray"
-          />
-
-          <h4>Off:</h4>
-          <Knob
-            value={lightOffTime}
-            onChange={(e) => setLightOffTime(e.value)}
-            min={0}
-            max={24}
-            valueTemplate={'{value}H'}
-            valueColor="gray"
+            value={lowHumidity}
+            onChange={(e) => setLowHumidity(e.value)}
+            min={5}
+            max={100}
+            valueTemplate={'{value}%'}
+            valueColor="blue"
             rangeColor="lightgray"
           />
 
@@ -254,4 +232,4 @@ function LightPage() {
   );
 }
 
-export default LightPage;
+export default Humidity;

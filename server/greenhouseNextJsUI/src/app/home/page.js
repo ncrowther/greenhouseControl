@@ -20,7 +20,7 @@ export default function LandingPage() {
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
 
   const environment = [
-    { name: 'default', code: '1' },
+    { name: 'Growtent', code: '1' },
     { name: 'Greenhouse', code: '2' },
     { name: 'Polytunnel', code: '3' },
   ];
@@ -34,7 +34,7 @@ export default function LandingPage() {
     <Grid className="landing-page" fullWidth>
       <Column lg={16} md={8} sm={4} className="landing-page__banner">
         <Breadcrumb noTrailingSlash aria-label="Page navigation"></Breadcrumb>
-        <h1 className="landing-page__heading">Greenhouse</h1>
+        <h1 className="landing-page__heading">{selectedEnv.name}</h1>
       </Column>
       <Column lg={16} md={8} sm={4} className="landing-page__r2">
         <Tabs defaultSelectedIndex={0}>
