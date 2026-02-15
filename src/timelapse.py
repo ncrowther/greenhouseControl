@@ -14,11 +14,12 @@ from PIL import Image
 from PIL import ImageDraw
 import socket
 
-CAMERA_NUMBER = 3
+CAMERA_NUMBER = 4
 GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
-WAIT_TIME =  60 * 15  # Photo every fifteen mins
+WAIT_TIME =  60 * 15 # Photo every 15 mins
 NO_IMAGE = 8000 # Image size below which it is discarded
+IMAGE_SIZE = (640, 480)
 
 # Check internet connection
 def checkInternet():
@@ -38,8 +39,8 @@ def generateTimestamp():
     date_time = datetime.fromtimestamp(ts)
     timestamp = date_time.strftime("%Y-%m-%d %H:%M:%S")
     timestamp = str(timestamp)[0:19]
-    return timestamp        
-        
+    return timestamp
+
 def postPhoto(image, frame, timestamp):
     image_64 = base64.b64encode(open(image, "rb").read())
 
@@ -67,11 +68,11 @@ def postPhoto(image, frame, timestamp):
 def takePhoto(timestamp):
 
     # Start camera and wait
-    picam2.start()      
-    sleep(5)  
+    picam2.start()
+    sleep(5)
 
     # Create image file path
-    image = BASE_DIR + str(timestamp) + '.jpg'    
+    image = BASE_DIR + str(timestamp) + '.jpg'
 
     picam2.capture_file(image)
 
@@ -96,17 +97,18 @@ def takePhoto(timestamp):
 
     return image
 
+##################### Main program #####################
 
 hostname = socket.gethostname()
 picam2 = Picamera2()
-camera_config = picam2.create_preview_configuration(main={"size":(320,240), "format": "RGB888"})
+camera_config = picam2.create_preview_configuration(main={"size":IMAGE_SIZE, "format": "RGB888"})
 picam2.configure(camera_config)
 picam2.start_preview(Preview.NULL)
 
 frame = 1
 
 while True:
-                
+
     print("Frame " + str(frame))
 
     # Generate timestamp
@@ -118,7 +120,6 @@ while True:
     picam2.stop()
 
     postPhoto(image, frame, timestamp)
-
     sleep(WAIT_TIME)
 
     frame = frame + 1
