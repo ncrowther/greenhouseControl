@@ -13,13 +13,15 @@ from datetime import datetime
 from PIL import Image
 from PIL import ImageDraw
 import socket
+import os
 
-CAMERA_NUMBER = 4
+CAMERA_NUMBER = 2
+#GREENHOUSE_SERVER_URL =  'http://192.168.0.192:3000'
 GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
 WAIT_TIME =  60 * 15 # Photo every 15 mins
-NO_IMAGE = 8000 # Image size below which it is discarded
-IMAGE_SIZE = (640, 480)
+NO_IMAGE = 500000 # Image size below which it is discarded
+IMAGE_SIZE = (2592, 1944)
 
 # Check internet connection
 def checkInternet():
@@ -59,11 +61,17 @@ def postPhoto(image, frame, timestamp):
     url = GREENHOUSE_SERVER_URL + '/photo'
     myobj = {'_id': frame, 'cam': CAMERA_NUMBER, 'photo': image_64, 'timestamp': timestamp}
     try:
-        res = requests.post(url, data=myobj)
+        res = requests.post(url, data=myobj, timeout=30)
         print("POST:" + str(res))
     except Exception as e:
         print(f'Failed to send photo. {type(e)}: e')
         print("Message: {}".format(e))
+
+
+def deletePhoto(file):
+    # Remove old image if exists
+    if os.path.exists(file):
+       os.remove(file)
 
 def takePhoto(timestamp):
 
@@ -120,8 +128,9 @@ while True:
     picam2.stop()
 
     postPhoto(image, frame, timestamp)
+
+    deletePhoto(image)
+
     sleep(WAIT_TIME)
 
     frame = frame + 1
-
-

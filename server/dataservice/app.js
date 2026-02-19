@@ -33,11 +33,9 @@ const app = express()
 // Enable CORS for all routes
 app.use(cors());
 
-// Parse URL-encoded bodies (as sent by HTML forms)
-app.use(express.urlencoded({ extended: true }))
-
 // Parse JSON bodies (as sent by API clients) - 10mb limit for /photo base64 uploads
-app.use(express.json({ limit: '10mb' }))
+app.use(express.json({ limit: '100mb' }))
+app.use(express.urlencoded({ extended: true, limit: '100mb' }))
 
 const port = process.env.PORT || 3000 //8080
 
