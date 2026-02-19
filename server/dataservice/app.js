@@ -33,10 +33,11 @@ const app = express()
 // Enable CORS for all routes
 app.use(cors());
 
-const bodyParser = require('body-parser')
+// Parse URL-encoded bodies (as sent by HTML forms)
+app.use(express.urlencoded({ extended: true }))
 
-app.use(bodyParser.json())
-
+// Parse JSON bodies (as sent by API clients) - 10mb limit for /photo base64 uploads
+app.use(express.json({ limit: '10mb' }))
 
 const port = process.env.PORT || 3000 //8080
 
@@ -45,16 +46,13 @@ const port = process.env.PORT || 3000 //8080
 console.log('Log DB: ' + logDbName);
 console.log('Config DB: ' + configDbName);
 
-// Parse URL-encoded bodies (as sent by HTML forms)
-app.use(express.urlencoded({ extended: true }))
-
-// Parse JSON bodies (as sent by API clients)
-app.use(express.json())
-
 // //////////////// Create Doc ////////////////////////
 app.post('/doc', async (req, res) => {
 
-  const logDbName = (req.query.id + 'log').toLowerCase();
+  const id = checkId(req, res)
+  if (id == null) return;
+
+  const logDbName = (id + 'log').toLowerCase();
   console.log('Write doc to DB: ' + logDbName)
 
   const newDoc = req.body;
@@ -97,7 +95,10 @@ app.post('/doc', async (req, res) => {
 // //////////////// Get Docs ////////////////////////
 app.get('/docs', async (req, res) => {
 
-  const logDbName = (req.query.id + 'log').toLowerCase();
+  const id = checkId(req, res)
+  if (id == null) return;
+
+  const logDbName = (id + 'log').toLowerCase();
   console.log('Get docs for ' + logDbName)
 
   const purgeWindow = 48 // Hours
@@ -121,13 +122,12 @@ app.get('/docs', async (req, res) => {
 // ///////////////////// Set Light ////////////////////
 app.post('/light', async (req, res) => {
 
+  const id = checkId(req, res)
+  if (id == null) return;
+  console.log('Set light for ' + id)
 
   const inputDoc = req.body;
-
   console.log('Set Light ' + JSON.stringify(inputDoc));
-
-  const id = (req.query.id).toLowerCase();
-  console.log('Get light for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
 
@@ -179,7 +179,8 @@ app.post('/heat', async (req, res) => {
 
   console.log('Set Heat ' + JSON.stringify(inputDoc));
 
-  const id = (req.query.id).toLowerCase();
+  const id = checkId(req, res)
+  if (id == null) return;
   console.log('Get heat for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -232,7 +233,8 @@ app.post('/water', async (req, res) => {
 
   console.log('Set irrigation ' + JSON.stringify(inputDoc));
 
-  const id = (req.query.id).toLowerCase();
+  const id = requireIdParam(req, res);
+  if (id == null) return;
   console.log('Get irrigation for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -281,11 +283,13 @@ app.post('/water', async (req, res) => {
 // ///////////////////// Set Fan ////////////////////
 app.post('/fan', async (req, res) => {
 
+  const id = checkId(req, res);
+  if (id == null) return;
+    
   const inputDoc = req.body;
 
   console.log('Set fan ' + JSON.stringify(inputDoc));
 
-  const id = (req.query.id).toLowerCase();
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -338,7 +342,8 @@ app.post('/vent', async (req, res) => {
 
   console.log('Set vent ' + JSON.stringify(inputDoc));
 
-  const id = (req.query.id).toLowerCase();
+  const id = checkId(req, res)
+  if (id == null) return;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -391,7 +396,8 @@ app.post('/humidity', async (req, res) => {
 
   console.log('Set humidity ' + JSON.stringify(inputDoc));
 
-  const id = (req.query.id).toLowerCase()
+  const id = checkId(req, res)
+  if (id == null) return;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -440,7 +446,8 @@ app.post('/humidity', async (req, res) => {
 // ///////////////////// Set Config ////////////////////
 app.post('/config', async (req, res) => {
 
-  const id = (req.query.id).toLowerCase(); 
+  const id = checkId(req, res);
+  if (id == null) return;
   console.log('Write config for ' + id);
 
   var time = moment();
@@ -490,8 +497,8 @@ app.post('/config', async (req, res) => {
 // //////////////// Get Config ////////////////////////
 app.get('/config', async (req, res) => {
 
-  const id = (req.query.id).toLowerCase()
-  console.log('Get config for ' + id)
+  const id = checkId(req, res);
+  if (id == null) return;
 
   await cloudantLib.findById(service, configDbName, id).then(function (doc) {
 
@@ -697,15 +704,11 @@ app.get('/config', async (req, res) => {
 
     }, function (err) {
 
-      // Create doc if not found
-      newDoc._id = "default"
-      createDoc(newDoc, res, dbName);
-
-      res.status(200);
-      res.set('Access-Control-Allow-Origin', '*');
-      res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
-      res.send(newDoc);
+        console.error('[App] Cloudant DB cannot find: ' + id)
+        res.status(500);
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.send(err);
     })
 
   }
@@ -758,3 +761,12 @@ app.get('/config', async (req, res) => {
     console.info('[App] Listening on http://localhost:' + port)
   })
 
+function checkId(req, res) {
+    if (req.query.id == null) {
+      res.status(400);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send('Missing id query parameter');
+      return null;
+    }  
+    return (req.query.id).toLowerCase();
+}
