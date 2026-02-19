@@ -11,13 +11,13 @@ import base64
 import requests
 from datetime import datetime
 from PIL import Image
-from PIL import ImageDraw
+from PIL import ImageDraw, Image, ImageFont
 import socket
 import os
 
-CAMERA_NUMBER = 2
-#GREENHOUSE_SERVER_URL =  'http://192.168.0.192:3000'
-GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
+CAMERA_NUMBER = 4
+GREENHOUSE_SERVER_URL =  'http://192.168.0.192:3000'
+#GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
 WAIT_TIME =  60 * 15 # Photo every 15 mins
 NO_IMAGE = 500000 # Image size below which it is discarded
@@ -51,7 +51,7 @@ def postPhoto(image, frame, timestamp):
 
     # Discard if the image is less than a defined size
     if (imageLen < NO_IMAGE):
-        print("Discarding")
+        print("Image too dark. Discarding")
         return
 
     # Wait until WIFI connected
@@ -84,6 +84,9 @@ def takePhoto(timestamp):
 
     picam2.capture_file(image)
 
+    # specified font size
+    font = ImageFont.truetype("/usr/share/fonts/truetype/liberation2/LiberationMono-Regular.ttf", 32)
+
     # Open Image
     img = Image.open(image)
 
@@ -91,14 +94,14 @@ def takePhoto(timestamp):
     I1 = ImageDraw.Draw(img)
 
     #Define the coordinates for the rectangle
-    xy = [(0, 0), (120, 30)]
+    xy = [(0, 0), (400, 80)]
 
     #Draw a filled black rectangle
-    I1.rectangle(xy, outline="white", fill="black", width = 1)
+    I1.rectangle(xy, outline="white", fill="black", width = 4)
 
     # Add timestamp and hostname to the image
-    I1.text((4, 4), timestamp, fill="white")
-    I1.text((4, 14), hostname, fill="white")
+    I1.text((8, 8), timestamp, font=font, fill="white")
+    I1.text((8, 34), hostname, font=font, fill="white")
 
     # Save the edited image
     img.save(image)
@@ -134,3 +137,4 @@ while True:
     sleep(WAIT_TIME)
 
     frame = frame + 1
+
