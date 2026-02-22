@@ -291,8 +291,8 @@ class PlantServer(object):
         
         statusLight = StatusLight()        
         
-        SLEEP_TIME = 10 # seconds
-        LOG_TIME = 60 # log period in seconds = SLEEP_TIME * LOG_TIME
+        SLEEP_TIME = 10
+        LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
         count = 0
         
@@ -318,7 +318,6 @@ class PlantServer(object):
             statusLight.setOperationalStatus()
             
             count = count + 1
-                            
         
 """
 This function is the main entry point for the program.
@@ -342,3 +341,5 @@ def main():
         #machine.reset()
 
 main()
+
+
