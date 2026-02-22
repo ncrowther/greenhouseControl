@@ -231,7 +231,7 @@ app.post('/water', async (req, res) => {
 
   console.log('Set irrigation ' + JSON.stringify(inputDoc));
 
-  const id = requireIdParam(req, res);
+  const id = checkId(req, res);
   if (id == null) return;
   console.log('Get irrigation for ' + id)
 

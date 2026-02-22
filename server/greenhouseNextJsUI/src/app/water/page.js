@@ -9,7 +9,7 @@ import '@carbon/charts-react/styles.css';
 const endpoints = require('../config/endpoints.js');
 
 function Water() {
-  const [pump, setPump] = useState('OFF');
+  const [pumpState, setPumpState] = useState('OFF');
   const [pumpOnDuration, setPumpOnDuration] = useState(0);
   const [pumpOnTime1, setPumpOnTime1] = useState(0);
   const [pumpOnTime2, setPumpOnTime2] = useState(0);
@@ -27,7 +27,7 @@ function Water() {
 
   const writeConfig = (event) => {
     let configData = JSON.stringify({
-      pumpState: pump,
+      pumpState: pumpState,
       wateringDuration: pumpOnDuration,
       timeHH1: pumpOnTime1,
       timeHH2: pumpOnTime2,
@@ -58,6 +58,7 @@ function Water() {
               console.log('*******' + JSON.stringify(configData));
 
               if (configData) {
+                setPumpState(configData.pumpState);
                 setPumpOnDuration(configData.wateringDuration);
                 setPumpOnTime1(configData.wateringTimes[0]);
                 setPumpOnTime2(configData.wateringTimes[1]);
@@ -87,7 +88,7 @@ function Water() {
 
   // Set pump buttons and highlight the one that is enabled
   let pumpButton = {};
-  if (pump === 'ON') {
+  if (pumpState === 'ON') {
     pumpButton = (
       <div>
         <Button
@@ -96,7 +97,7 @@ function Water() {
           inputid="pump1"
           name="pumpOn"
           value="ON"
-          onClick={(e) => setPump('ON')}
+          onClick={(e) => setPumpState('ON')}
         >
           {' '}
           ON*
@@ -107,7 +108,7 @@ function Water() {
           inputid="pump2"
           name="pumpOff"
           value="OFF"
-          onClick={(e) => setPump('OFF')}
+          onClick={(e) => setPumpState('OFF')}
         >
           {' '}
           OFF
@@ -118,14 +119,14 @@ function Water() {
           inputid="pump3"
           name="pumpAuto"
           value="AUTO"
-          onClick={(e) => setPump('AUTO')}
+          onClick={(e) => setPumpState('AUTO')}
         >
           {' '}
           AUTO
         </Button>
       </div>
     );
-  } else if (pump === 'OFF') {
+  } else if (pumpState === 'OFF') {
     pumpButton = (
       <div>
         <Button
@@ -134,7 +135,7 @@ function Water() {
           inputid="pump1"
           name="pumpOn"
           value="ON"
-          onClick={(e) => setPump('ON')}
+          onClick={(e) => setPumpState('ON')}
         >
           {' '}
           ON
@@ -145,7 +146,7 @@ function Water() {
           inputid="pump2"
           name="pumpOff"
           value="OFF"
-          onClick={(e) => setPump('OFF')}
+          onClick={(e) => setPumpState('OFF')}
         >
           {' '}
           OFF*
@@ -156,7 +157,7 @@ function Water() {
           inputid="pump3"
           name="pumpAuto"
           value="AUTO"
-          onClick={(e) => setPump('AUTO')}
+          onClick={(e) => setPumpState('AUTO')}
         >
           {' '}
           AUTO
@@ -172,7 +173,7 @@ function Water() {
           inputid="pump1"
           name="pumpOn"
           value="ON"
-          onClick={(e) => setPump('ON')}
+          onClick={(e) => setPumpState('ON')}
         >
           {' '}
           ON
@@ -183,7 +184,7 @@ function Water() {
           inputid="pump2"
           name="pumpOff"
           value="OFF"
-          onClick={(e) => setPump('OFF')}
+          onClick={(e) => setPumpState('OFF')}
         >
           {' '}
           OFF
@@ -194,7 +195,7 @@ function Water() {
           inputid="pump3"
           name="pumpAuto"
           value="AUTO"
-          onClick={(e) => setPump('AUTO')}
+          onClick={(e) => setPumpState('AUTO')}
         >
           {' '}
           AUTO*

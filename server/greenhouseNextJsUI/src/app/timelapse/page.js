@@ -1,23 +1,38 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Grid, Loading } from '@carbon/react';
+import { Grid, Loading, Column } from '@carbon/react';
 import { Galleria } from 'primereact/galleria';
+import { Dropdown } from 'primereact/dropdown';
+const config = require('../config/config.js');
 const endpoints = require('../config/endpoints.js');
 
 function TimelapsePage(camId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [images1, setimages1] = useState(null);
-  const [images2, setimages2] = useState(null);
-  const [images3, setimages3] = useState(null);
-  const [images4, setimages4] = useState(null);
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
+
+  const environment = [
+    { name: 'Allotment', camId: '1' },
+    { name: 'Growtent', camId: '2' },
+    { name: 'Progogator', camId: '3' },
+    { name: 'Drive', camId: '4' },
+  ];
+
+  const setEnv = async (event) => {
+    console.log('Event: ' + JSON.stringify(event));
+    config.setEnv(event);
+    setLoading(true);
+    await getPhotos(event.camId, setimages1);
+    setLoading(false);
+  };
 
   const itemTemplate = (item) => {
     return (
       <img
-        src={'data:image/jpeg;base64,' + item.photo}
-        alt={item.timestamp}
+        src={'data:image/jpeg;base64,' + (item ? item.photo : null)}
+        alt={item ? item.timestamp : null}
         style={{ width: '100%', display: 'block' }}
       />
     );
@@ -46,15 +61,7 @@ function TimelapsePage(camId) {
   };
 
   useEffect(() => {
-    async function getPhotoData() {
-      await getPhotos(1, setimages1);
-      await getPhotos(2, setimages2);
-      await getPhotos(3, setimages3);
-      await getPhotos(4, setimages4);
-      setLoading(false);
-    }
-
-    getPhotoData();
+    setLoading(false);
   }, []);
 
   if (loading) {
@@ -66,34 +73,34 @@ function TimelapsePage(camId) {
   }
 
   return (
-    <Grid className="timelapse-page">
-      <Galleria
-        value={images1}
-        item={itemTemplate}
-        autoPlay
-        transitionInterval={250}
-      />
-
-      <Galleria
-        value={images2}
-        item={itemTemplate}
-        autoPlay
-        transitionInterval={250}
-      />
-
-      <Galleria
-        value={images3}
-        item={itemTemplate}
-        autoPlay
-        transitionInterval={250}
-      />
-
-      <Galleria
-        value={images4}
-        item={itemTemplate}
-        autoPlay
-        transitionInterval={250}
-      />
+    <Grid className="landing-page" fullWidth>
+      <Column lg={16} md={8} sm={4} className="landing-page__banner">
+        <h1>
+          <Dropdown
+            variant="filled"
+            value={selectedEnv}
+            onChange={(e) => {
+              setSelectedEnv(e.value);
+              setEnv(e.value);
+            }}
+            options={environment}
+            optionLabel="name"
+            checkmark={true}
+            highlightOnSelect={false}
+            placeholder="Select environment"
+            className="w-full md:w-14rem"
+          />
+        </h1>
+      </Column>
+      <Column lg={16} md={8} sm={4} className="landing-page__content">
+        <Galleria
+          style={{ maxWidth: '1024px' }}
+          value={images1}
+          item={itemTemplate}
+          autoPlay
+          transitionInterval={150}
+        />
+      </Column>
     </Grid>
   );
 }

@@ -16,12 +16,12 @@ import socket
 import os
 
 CAMERA_NUMBER = 4
-GREENHOUSE_SERVER_URL =  'http://192.168.0.192:3000'
-#GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
+GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
 WAIT_TIME =  60 * 15 # Photo every 15 mins
-NO_IMAGE = 500000 # Image size below which it is discarded
 IMAGE_SIZE = (2592, 1944)
+NO_IMAGE = IMAGE_SIZE[0] * IMAGE_SIZE[1] * 0.1  # Image size below which it is discarded
+
 
 # Check internet connection
 def checkInternet():
@@ -73,7 +73,7 @@ def deletePhoto(file):
     if os.path.exists(file):
        os.remove(file)
 
-def takePhoto(timestamp):
+def takePhoto(timestamp, hostname, ip ):
 
     # Start camera and wait
     picam2.start()
@@ -94,27 +94,40 @@ def takePhoto(timestamp):
     I1 = ImageDraw.Draw(img)
 
     #Define the coordinates for the rectangle
-    xy = [(0, 0), (400, 80)]
+    xy = [(0, 0), (390, 112)]
 
     #Draw a filled black rectangle
     I1.rectangle(xy, outline="white", fill="black", width = 4)
 
     # Add timestamp and hostname to the image
-    I1.text((8, 8), timestamp, font=font, fill="white")
-    I1.text((8, 34), hostname, font=font, fill="white")
+    I1.text((10, 10), timestamp, font=font, fill="white")
+    I1.text((10, 36), hostname, font=font, fill="white")
+    I1.text((10, 66), ip, font=font, fill="white")
 
     # Save the edited image
     img.save(image)
 
     return image
 
+
+def initialise():
+    hostname = socket.gethostname()
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+
+    print("Hostname: {}, IP: {}".format(hostname, ip))
+
+    picam2 = Picamera2()
+    camera_config = picam2.create_preview_configuration(main={"size": IMAGE_SIZE, "format": "RGB888"})
+    picam2.configure(camera_config)
+    picam2.start_preview(Preview.NULL)
+
+    return hostname, ip, picam2
+
 ##################### Main program #####################
 
-hostname = socket.gethostname()
-picam2 = Picamera2()
-camera_config = picam2.create_preview_configuration(main={"size":IMAGE_SIZE, "format": "RGB888"})
-picam2.configure(camera_config)
-picam2.start_preview(Preview.NULL)
+hostname, ip, picam2 = initialise()
 
 frame = 1
 
@@ -126,7 +139,7 @@ while True:
     timestamp = generateTimestamp()
     print(timestamp)
 
-    image = takePhoto(timestamp)
+    image = takePhoto(timestamp, hostname, ip)
 
     picam2.stop()
 
@@ -137,4 +150,5 @@ while True:
     sleep(WAIT_TIME)
 
     frame = frame + 1
+
 
