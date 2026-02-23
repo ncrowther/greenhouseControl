@@ -20,7 +20,7 @@ GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
 WAIT_TIME =  60 * 15 # Photo every 15 mins
 IMAGE_SIZE = (2592, 1944)
-NO_IMAGE = IMAGE_SIZE[0] * IMAGE_SIZE[1] * 0.1  # Image size below which it is discarded
+NO_IMAGE = IMAGE_SIZE[0] * IMAGE_SIZE[1] * 0.05  # Image size below which it is discarded
 
 
 # Check internet connection
@@ -52,7 +52,7 @@ def postPhoto(image, frame, timestamp):
     # Discard if the image is less than a defined size
     if (imageLen < NO_IMAGE):
         print("Image too dark. Discarding")
-        return
+        return False
 
     # Wait until WIFI connected
     waitForInternet()
@@ -63,9 +63,11 @@ def postPhoto(image, frame, timestamp):
     try:
         res = requests.post(url, data=myobj, timeout=30)
         print("POST:" + str(res))
+        return True
     except Exception as e:
         print(f'Failed to send photo. {type(e)}: e')
         print("Message: {}".format(e))
+        return False
 
 
 def deletePhoto(file):
@@ -143,9 +145,10 @@ while True:
 
     picam2.stop()
 
-    postPhoto(image, frame, timestamp)
+    status = postPhoto(image, frame, timestamp)
 
-    deletePhoto(image)
+    if (status == True):
+        deletePhoto(image)
 
     sleep(WAIT_TIME)
 
