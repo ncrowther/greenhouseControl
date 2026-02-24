@@ -3,7 +3,6 @@
 # Instructions: 
 # ssh ncrowther@ipaddress   [pwd=C*01!]
 # Create folder /home/ncrowther/projects/timelapse
-# Create folder /home/ncrowther/projects/timelapse/log
 # Move this file to /home/ncrowther/projects/timelapse
 # chmod +rwx timelapse.sh
 # sudo crontab -e

@@ -167,8 +167,6 @@ class LinearActuator(object):
 
     # Define window pulse count and length
     MAX_ACTUATOR_ANGLE = 180
-    MIN_ACTUATOR_ANGLE = 0
-    PULSE_DEGREE_CHANGE = 10
     RUN_SECS = 5
     PAUSE_SECS = 10
     
@@ -220,8 +218,7 @@ class LinearActuator(object):
 
         # Close
         minTemperature = (maxTemperature - DEAD_ZONE)
-        if (WindowState.AUTO == self.status()) and (temperature < minTemperature) and (self.windowAngle > self.MIN_ACTUATOR_ANGLE):
-            ventStatus = "Dwn: %5.2f < %5.2f %d°" % (temperature, minTemperature, self.windowAngle)
+        if (WindowState.AUTO == self.status()) and (temperature < minTemperature) and (self.windowAngle > 0):
             oled.showVentStatus("DOWN", "<", temperature, minTemperature, self.windowAngle, self.RUN_SECS, self.PAUSE_SECS)
             self.down(self.RUN_SECS, self.PAUSE_SECS)
 
@@ -275,7 +272,11 @@ class LinearActuator(object):
         time.sleep_ms(intervalSeconds * 1000)  
 
         # Decrement degrees decline
-        self.windowAngle = abs(self.windowAngle - runTimeSeconds)
+        self.windowAngle = self.windowAngle - runTimeSeconds
+        
+        if (self.windowAngle < 0):
+            self.windowAngle = 0
+            
         print("Window Angle: " + str(self.windowAngle))      
        
                     
