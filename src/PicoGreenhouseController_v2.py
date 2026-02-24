@@ -25,10 +25,10 @@ class PlantServer(object):
     
     #ssid = 'VM7763450'
     #password = 'udWrTpeejf86gugx'
-    ssid = "Nigel’s iPhone"
-    password = 'Porker01!'     
-    #ssid = 'MIFI_3880'
-    #password = None    
+    #ssid = "Nigel’s iPhone"
+    #password = 'Porker01!'     
+    ssid = 'MIFI_3880'
+    password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -265,7 +265,7 @@ class PlantServer(object):
         resp = None
         response = "ERROR"
         try:
-            resp = post( request_url, headers=header, data=payload, timeout=100)
+            resp = post( request_url, headers=header, data=payload, timeout=500)
             response = resp.text
             resp.close()
             
