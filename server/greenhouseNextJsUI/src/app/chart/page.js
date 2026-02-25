@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Grid, Loading, Checkbox, CheckboxGroup } from '@carbon/react';
+import { Grid, Loading, Checkbox, CheckboxGroup, Column } from '@carbon/react';
 import { LineChart } from '@carbon/charts-react';
+import { Dropdown } from 'primereact/dropdown';
 import options1 from './options.js';
 import '@carbon/charts-react/styles.css';
 const endpoints = require('../config/endpoints.js');
@@ -26,6 +27,113 @@ function ChartPage() {
   const [co2Checked, setCo2Checked] = useState(false);
   const [luxChecked, setLuxChecked] = useState(false);
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
+
+  const setEnv = async (event) => {
+    console.log('Event: ' + JSON.stringify(event));
+    config.setEnv(event);
+    setLoading(true);
+    await getTelemetryData();
+    setLoading(false);
+  };
+
+  async function getTelemetryData() {
+    await fetch(endpoints.dataServiceEndpoint + '?id=' + config.getEnv().name, {
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        if (response.status == 200) {
+          response.json().then((docs) => {
+            const airTemperatureReadings = docs.Docs.reduce(
+              (airTemperature, obj) => {
+                var temp = {
+                  group: 'airTemperature',
+                  date: obj._id,
+                  value: obj.airTemperature,
+                };
+                airTemperature.push(temp);
+                return airTemperature;
+              },
+              []
+            );
+            setAirTemperatureData(airTemperatureReadings);
+
+            const leafTemperatureReadings = docs.Docs.reduce(
+              (leafTemperature, obj) => {
+                var temp = {
+                  group: 'leafTemperature',
+                  date: obj._id,
+                  value: obj.leafTemperature,
+                };
+                leafTemperature.push(temp);
+                return leafTemperature;
+              },
+              []
+            );
+            setLeafTemperatureData(leafTemperatureReadings);
+
+            const humidityReadings = docs.Docs.reduce((humidity, obj) => {
+              var hum = {
+                group: 'Humidity',
+                date: obj._id,
+                value: obj.humidity,
+              };
+              humidity.push(hum);
+              return humidity;
+            }, []);
+            setHumidityData(humidityReadings);
+
+            const vpdReadings = docs.Docs.reduce((vpdReadings, obj) => {
+              var vpd = {
+                group: 'Vpd',
+                date: obj._id,
+                value: obj.vpd,
+              };
+              vpdReadings.push(vpd);
+              return vpdReadings;
+            }, []);
+            setVpdData(vpdReadings);
+
+            const co2Readings = docs.Docs.reduce((co2Readings, obj) => {
+              var co2 = {
+                group: 'Co2',
+                date: obj._id,
+                value: obj.co2,
+              };
+              co2Readings.push(co2);
+              return co2Readings;
+            }, []);
+            setCo2Data(co2Readings);
+
+            const luxReadings = docs.Docs.reduce((luxReadings, obj) => {
+              let lux = 0;
+              if (obj.lux > 0) {
+                lux = obj.lux / 1000; // convert to klux
+              }
+              var luxPlot = {
+                group: 'klux',
+                date: obj._id,
+                value: lux,
+              };
+              luxReadings.push(luxPlot);
+              return luxReadings;
+            }, []);
+            setLuxData(luxReadings);
+
+            setChartOptions(options1);
+            setLoading(false);
+          }, []);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setError(err);
+        setLoading(false);
+        return <Grid>{err}</Grid>;
+      });
+  }
 
   const refreshChart = (
     airChecked,
@@ -73,108 +181,6 @@ function ChartPage() {
   };
 
   useEffect(() => {
-    async function getTelemetryData() {
-      await fetch(
-        endpoints.dataServiceEndpoint + '?id=' + config.getEnv().name,
-        {
-          method: 'get',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-        .then((response) => {
-          if (response.status == 200) {
-            response.json().then((docs) => {
-              const airTemperatureReadings = docs.Docs.reduce(
-                (airTemperature, obj) => {
-                  var temp = {
-                    group: 'airTemperature',
-                    date: obj._id,
-                    value: obj.airTemperature,
-                  };
-                  airTemperature.push(temp);
-                  return airTemperature;
-                },
-                []
-              );
-              setAirTemperatureData(airTemperatureReadings);
-
-              const leafTemperatureReadings = docs.Docs.reduce(
-                (leafTemperature, obj) => {
-                  var temp = {
-                    group: 'leafTemperature',
-                    date: obj._id,
-                    value: obj.leafTemperature,
-                  };
-                  leafTemperature.push(temp);
-                  return leafTemperature;
-                },
-                []
-              );
-              setLeafTemperatureData(leafTemperatureReadings);
-
-              const humidityReadings = docs.Docs.reduce((humidity, obj) => {
-                var hum = {
-                  group: 'Humidity',
-                  date: obj._id,
-                  value: obj.humidity,
-                };
-                humidity.push(hum);
-                return humidity;
-              }, []);
-              setHumidityData(humidityReadings);
-
-              const vpdReadings = docs.Docs.reduce((vpdReadings, obj) => {
-                var vpd = {
-                  group: 'Vpd',
-                  date: obj._id,
-                  value: obj.vpd,
-                };
-                vpdReadings.push(vpd);
-                return vpdReadings;
-              }, []);
-              setVpdData(vpdReadings);
-
-              const co2Readings = docs.Docs.reduce((co2Readings, obj) => {
-                var co2 = {
-                  group: 'Co2',
-                  date: obj._id,
-                  value: obj.co2,
-                };
-                co2Readings.push(co2);
-                return co2Readings;
-              }, []);
-              setCo2Data(co2Readings);
-
-              const luxReadings = docs.Docs.reduce((luxReadings, obj) => {
-                let lux = 0;
-                if (obj.lux > 0) {
-                  lux = obj.lux / 1000; // convert to klux
-                }
-                var luxPlot = {
-                  group: 'klux',
-                  date: obj._id,
-                  value: lux,
-                };
-                luxReadings.push(luxPlot);
-                return luxReadings;
-              }, []);
-              setLuxData(luxReadings);
-
-              setChartOptions(options1);
-              setLoading(false);
-            }, []);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          setError(err);
-          setLoading(false);
-          return <Grid>{err}</Grid>;
-        });
-    }
-
     getTelemetryData();
   }, []);
 
@@ -214,10 +220,28 @@ function ChartPage() {
     return <Grid>{error};</Grid>;
   }
 
-  options1.title = `Climate - ${selectedEnv.name}`;
+  options1.title = ``;
 
   return (
     <Grid>
+      <Column lg={16} md={8} sm={4} className="landing-page__banner">
+        <h1>
+          <Dropdown
+            variant="filled"
+            value={selectedEnv}
+            onChange={(e) => {
+              setSelectedEnv(e.value);
+              setEnv(e.value);
+            }}
+            options={config.getEnvs()}
+            optionLabel="name"
+            checkmark={true}
+            highlightOnSelect={false}
+            placeholder="Select environment"
+            className="w-full md:w-14rem"
+          />
+        </h1>
+      </Column>
       <CheckboxGroup invalidText="Invalid" warnText="Warning">
         <Checkbox
           id="airTemperature"

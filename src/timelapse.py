@@ -15,8 +15,9 @@ from PIL import ImageDraw, Image, ImageFont
 import socket
 import os
 
-CAMERA_NUMBER = 4
-GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
+CAMERA_NUMBER = 2
+#GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
+GREENHOUSE_SERVER_URL =  'http://86.4.208.162'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
 WAIT_TIME =  60 * 15 # Photo every 15 mins
 IMAGE_SIZE = (2592, 1944)

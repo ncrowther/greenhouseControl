@@ -5,6 +5,7 @@ import { Knob } from 'primereact/knob';
 const config = require('../config/config.js');
 import { IoRainyOutline } from 'react-icons/io5';
 import { Button, Grid, Column, Slider } from '@carbon/react';
+import { Dropdown } from 'primereact/dropdown';
 import '@carbon/charts-react/styles.css';
 const endpoints = require('../config/endpoints.js');
 
@@ -17,6 +18,14 @@ function Water() {
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
+
+  const setEnv = async (event) => {
+    console.log('Event: ' + JSON.stringify(event));
+    config.setEnv(event);
+    setLoading(true);
+    await getConfigData();
+    setLoading(false);
+  };
 
   const handleOnSubmit = (event) => {
     // Prevent default refresh
@@ -36,45 +45,45 @@ function Water() {
 
     console.log('Send: ' + JSON.stringify(configData));
 
-    config.water(configData);
+    config.water(configData, selectedEnv);
   };
 
-  useEffect(() => {
-    async function getConfigData() {
-      await fetch(
-        endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
-        {
-          method: 'get',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+  async function getConfigData() {
+    await fetch(
+      endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
+      {
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status == 200) {
+          response.json().then((data) => {
+            const configData = data.doc;
+
+            console.log('*******' + JSON.stringify(configData));
+
+            if (configData) {
+              setPumpState(configData.pumpState);
+              setPumpOnDuration(configData.wateringDuration);
+              setPumpOnTime1(configData.wateringTimes[0]);
+              setPumpOnTime2(configData.wateringTimes[1]);
+              setPumpOnTime3(configData.wateringTimes[2]);
+            }
+          }, []);
         }
-      )
-        .then((response) => {
-          if (response.status == 200) {
-            response.json().then((data) => {
-              const configData = data.doc;
+      })
+      .catch((err) => {
+        console.log(err);
+        return <Grid className="config-page">Loading</Grid>;
+      });
 
-              console.log('*******' + JSON.stringify(configData));
+    setLoading(false);
+  }
 
-              if (configData) {
-                setPumpState(configData.pumpState);
-                setPumpOnDuration(configData.wateringDuration);
-                setPumpOnTime1(configData.wateringTimes[0]);
-                setPumpOnTime2(configData.wateringTimes[1]);
-                setPumpOnTime3(configData.wateringTimes[2]);
-              }
-            }, []);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          return <Grid className="config-page">Loading</Grid>;
-        });
-
-      setLoading(false);
-    }
-
+  useEffect(() => {
     getConfigData();
   }, []);
 
@@ -204,24 +213,36 @@ function Water() {
     );
   }
 
-  const env = `${selectedEnv.name}`;
-
   return (
     <Grid>
-      <Column lg={1} md={1} sm={1}>
-        {/* Empty first column */}
+      <Column lg={16} md={8} sm={4} className="landing-page__banner">
+        <h1>
+          <Dropdown
+            variant="filled"
+            value={selectedEnv}
+            onChange={(e) => {
+              setSelectedEnv(e.value);
+              setEnv(e.value);
+            }}
+            options={config.getEnvs()}
+            optionLabel="name"
+            checkmark={true}
+            highlightOnSelect={false}
+            placeholder="Select environment"
+            className="w-full md:w-14rem"
+          />
+        </h1>
       </Column>
       <Column lg={10} md={10} sm={10}>
         <br></br>
         <form onSubmit={(e) => handleOnSubmit(e)}>
-          <h3>{env}</h3>
           <br></br>
-          <br></br>
-          <h4>Water:</h4>
+          <h4>Pump:</h4>
           {pumpButton}
 
           <br></br>
           <br></br>
+
           <div>
             <h4>T1:</h4>
             <Knob
@@ -283,6 +304,8 @@ function Water() {
             Set
           </Button>
         </form>
+        <br></br>
+        <br></br>
       </Column>
     </Grid>
   );

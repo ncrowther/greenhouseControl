@@ -33,7 +33,7 @@ const GreenhouseHeader = () => {
             isActive={isSideNavExpanded}
           />
           <Link href="/" passHref legacyBehavior>
-            <HeaderName prefix="IBM">Greenhouse</HeaderName>
+            <HeaderName prefix="Open">Greenhouse</HeaderName>
           </Link>
 
           <HeaderNavigation aria-label="IBM [Platform]">

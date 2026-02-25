@@ -99,21 +99,33 @@ app.get('/docs', async (req, res) => {
   const logDbName = (id + 'log').toLowerCase();
   console.log('Get docs for ' + logDbName)
 
-  const purgeWindow = 48 // Hours
-  await purge(res, purgeWindow, logDbName);
-
   await cloudantLib.findAllDocs(service, logDbName).then(function (docs) {
 
+    const purgeWindow = 48 // Hours
+    purge(res, purgeWindow, logDbName);  
     res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
     res.send(docs);
 
   }, function (err) {
     console.error('[App] Cloudant DB Failure in get docs: ' + err)
-    res.status(500);
+    //res.status(500);
+    //res.set('Access-Control-Allow-Origin', '*');
+    //res.send(err);
+
+    res.status(200);
     res.set('Access-Control-Allow-Origin', '*');
-    res.send(err);
+    res.send({"Docs": [        {
+            "_id": "2000-01-91T00:00:00",
+            "airTemperature": 0,
+            "leafTemperature": 0,
+            "humidity": 0,
+            "co2": 0,
+            "vpd": 0,
+            "lux": 0
+        }]});
   })
+
 
 })
 

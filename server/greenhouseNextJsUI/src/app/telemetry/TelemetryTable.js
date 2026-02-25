@@ -37,7 +37,7 @@ const TelemetryTable = ({ rows, headers }) => {
         getRowProps,
         getTableProps,
       }) => (
-        <TableContainer title={`Telemetry - ${selectedEnv.name}`}>
+        <TableContainer title={''}>
           <Table {...getTableProps()}>
             <TableHead>
               <TableRow>

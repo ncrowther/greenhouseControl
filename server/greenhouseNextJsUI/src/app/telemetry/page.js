@@ -1,6 +1,9 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import TelemetryTable from './TelemetryTable';
+import { Dropdown } from 'primereact/dropdown';
+
 import {
   Link,
   DataTableSkeleton,
@@ -11,8 +14,6 @@ import {
 } from '@carbon/react';
 const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
-
-import React, { useEffect, useState } from 'react';
 
 const headers = [
   {
@@ -117,41 +118,47 @@ const getRowItems = (rows) =>
       ...row,
     }));
 
-function RepoPage() {
+function TelemetryPage() {
   const [firstRowIndex, setFirstRowIndex] = useState(0);
   const [currentPageSize, setCurrentPageSize] = useState(15);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [rows, setRows] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
+
+  const setEnv = async (event) => {
+    console.log('Event: ' + JSON.stringify(event));
+    config.setEnv(event);
+    setLoading(true);
+    await getData();
+    setLoading(false);
+  };
+
+  async function getData() {
+    await fetch(endpoints.dataServiceEndpoint + '?id=' + config.getEnv().name, {
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        if (response.status == 200) {
+          response.json().then((data) => {
+            setRows(getRowItems(data.Docs));
+            setNotifications(getNotifications(data.Docs));
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setError('Error obtaining repository data');
+      });
+
+    setLoading(false);
+  }
 
   useEffect(() => {
-    async function getData() {
-      await fetch(
-        endpoints.dataServiceEndpoint + '?id=' + config.getEnv().name,
-        {
-          method: 'get',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-        .then((response) => {
-          if (response.status == 200) {
-            response.json().then((data) => {
-              setRows(getRowItems(data.Docs));
-              setNotifications(getNotifications(data.Docs));
-            });
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          setError('Error obtaining repository data');
-        });
-
-      setLoading(false);
-    }
-
     getData();
   }, []);
 
@@ -177,6 +184,25 @@ function RepoPage() {
     <Grid className="repo-page">
       {notifications}
 
+      <Column lg={16} md={8} sm={4} className="landing-page__banner">
+        <h1>
+          <Dropdown
+            variant="filled"
+            value={selectedEnv}
+            onChange={(e) => {
+              setSelectedEnv(e.value);
+              setEnv(e.value);
+            }}
+            options={config.getEnvs()}
+            optionLabel="name"
+            checkmark={true}
+            highlightOnSelect={false}
+            placeholder="Select environment"
+            className="w-full md:w-14rem"
+          />
+        </h1>
+      </Column>
+
       <Column lg={16} md={8} sm={4} className="repo-page__r1">
         <TelemetryTable headers={headers} rows={rows} />
         <Pagination
@@ -198,4 +224,4 @@ function RepoPage() {
   );
 }
 
-export default RepoPage;
+export default TelemetryPage;

@@ -13,13 +13,6 @@ function TimelapsePage(camId) {
   const [images1, setimages1] = useState(null);
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
 
-  const environment = [
-    { name: 'Allotment', camId: '1' },
-    { name: 'Growtent', camId: '2' },
-    { name: 'Progogator', camId: '3' },
-    { name: 'Drive', camId: '4' },
-  ];
-
   const setEnv = async (event) => {
     console.log('Event: ' + JSON.stringify(event));
     config.setEnv(event);
@@ -83,7 +76,7 @@ function TimelapsePage(camId) {
               setSelectedEnv(e.value);
               setEnv(e.value);
             }}
-            options={environment}
+            options={config.getEnvs()}
             optionLabel="name"
             checkmark={true}
             highlightOnSelect={false}

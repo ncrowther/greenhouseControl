@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
 import { FaFireFlameSimple } from 'react-icons/fa6';
 import { Button, Grid, Column } from '@carbon/react';
+import { Dropdown } from 'primereact/dropdown';
 import '@carbon/charts-react/styles.css';
 
 const endpoints = require('../config/endpoints.js');
@@ -16,7 +17,22 @@ function Heater() {
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [error, setError] = useState();
 
+  const setEnv = async (event) => {
+    console.log('Event: ' + JSON.stringify(event));
+    config.setEnv(event);
+    setLoading(true);
+    await getConfigData();
+    setLoading(false);
+  };
+
   const handleOnSubmit = (event) => {
+    // Prevent default refresh
+    event.preventDefault();
+
+    writeConfig(event);
+  };
+
+  const writeConfig = (event) => {
     let configData = JSON.stringify({
       heaterState: heater,
       minTemp: lowTemp,
@@ -24,42 +40,42 @@ function Heater() {
 
     console.log('Got: ' + JSON.stringify(configData));
 
-    config.heat(configData);
+    config.heat(configData, selectedEnv);
   };
 
-  useEffect(() => {
-    async function getConfigData() {
-      await fetch(
-        endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
-        {
-          method: 'get',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+  async function getConfigData() {
+    await fetch(
+      endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
+      {
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then((response) => {
+        if (response.status == 200) {
+          response.json().then((data) => {
+            const configData = data.doc;
+
+            console.log('*******' + JSON.stringify(configData));
+
+            if (configData) {
+              setLowTemp(configData.temperatureRange[0]);
+              setHeater(configData.heaterState);
+            }
+          }, []);
         }
-      )
-        .then((response) => {
-          if (response.status == 200) {
-            response.json().then((data) => {
-              const configData = data.doc;
+      })
+      .catch((err) => {
+        console.log(err);
+        return <Grid className="config-page">Loading</Grid>;
+      });
 
-              console.log('*******' + JSON.stringify(configData));
+    setLoading(false);
+  }
 
-              if (configData) {
-                setLowTemp(configData.temperatureRange[0]);
-                setHeater(configData.heaterState);
-              }
-            }, []);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          return <Grid className="config-page">Loading</Grid>;
-        });
-
-      setLoading(false);
-    }
-
+  useEffect(() => {
     getConfigData();
   }, []);
 
@@ -193,14 +209,27 @@ function Heater() {
 
   return (
     <Grid>
-      <Column lg={1} md={1} sm={1}>
-        {/* Empty first column */}
+      <Column lg={16} md={8} sm={4} className="landing-page__banner">
+        <h1>
+          <Dropdown
+            variant="filled"
+            value={selectedEnv}
+            onChange={(e) => {
+              setSelectedEnv(e.value);
+              setEnv(e.value);
+            }}
+            options={config.getEnvs()}
+            optionLabel="name"
+            checkmark={true}
+            highlightOnSelect={false}
+            placeholder="Select environment"
+            className="w-full md:w-14rem"
+          />
+        </h1>
       </Column>
       <Column lg={10} md={10} sm={10}>
         <br></br>
         <form onSubmit={(e) => handleOnSubmit(e)}>
-          <h3>{env}</h3>
-          <br></br>
           <br></br>
           <h4>Heater:</h4>
           {heaterButton}
@@ -218,6 +247,7 @@ function Heater() {
             valueColor="blue"
             rangeColor="lightgray"
           />
+          <br></br>
 
           <Button
             kind="primary"
@@ -227,6 +257,8 @@ function Heater() {
             Set
           </Button>
         </form>
+        <br></br>
+        <br></br>
       </Column>
     </Grid>
   );
