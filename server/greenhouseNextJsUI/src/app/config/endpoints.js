@@ -1,5 +1,6 @@
 ///const serviceEndpoint = 'https://foxhound-hip-initially.ngrok-free.app';
-const serviceEndpoint = 'http://localhost:3000';
+//const serviceEndpoint = 'http://localhost:3000';
+const serviceEndpoint = 'http://86.4.208.162';
 const sensecapDatalogEndpoint =
   'https://sensecap.seeed.cc/openapi/list_telemetry_data?device_eui=2CF7F1C06490068B';
 const sensecapSoilEndpoint =

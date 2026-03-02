@@ -10,14 +10,15 @@ const endpoints = require('../config/endpoints.js');
 function TimelapsePage(camId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
-  const [images1, setimages1] = useState(null);
+  const [photos, setphotos] = useState(null);
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
 
   const setEnv = async (event) => {
     console.log('Event: ' + JSON.stringify(event));
     config.setEnv(event);
     setLoading(true);
-    await getPhotos(event.camId, setimages1);
+    setphotos(null);
+    await getPhotos(event.camId, setphotos);
     setLoading(false);
   };
 
@@ -56,7 +57,7 @@ function TimelapsePage(camId) {
   };
 
   useEffect(() => {
-    getPhotos(selectedEnv.camId, setimages1);
+    getPhotos(selectedEnv.camId, setphotos);
   }, []);
 
   if (loading) {
@@ -90,7 +91,7 @@ function TimelapsePage(camId) {
       <Column lg={16} md={8} sm={4} className="landing-page__content">
         <Galleria
           style={{ maxWidth: '800px' }}
-          value={images1}
+          value={photos}
           item={itemTemplate}
           autoPlay
           transitionInterval={150}
