@@ -54,17 +54,23 @@ const getNotifications = (rows) => {
   let maxViolation = null;
   let minViolation = null;
 
+  const now = new Date();
+  const dateString = now.toISOString().split('T')[0];
+
   for (const row of rows) {
-    const airTemperature = row.airTemperature;
-    if (airTemperature) {
-      if (airTemperature > MAX_TEMPERATURE) {
-        if (!maxViolation || airTemperature > maxViolation.temperature) {
-          maxViolation = { temperature: airTemperature, row };
+    var rowDate = row._id.split('T')[0];
+    if (rowDate === dateString) {
+      const airTemperature = row.airTemperature;
+      if (airTemperature) {
+        if (airTemperature > MAX_TEMPERATURE) {
+          if (!maxViolation || airTemperature > maxViolation.temperature) {
+            maxViolation = { temperature: airTemperature, row };
+          }
         }
-      }
-      if (airTemperature < MIN_TEMPERATURE) {
-        if (!minViolation || airTemperature < minViolation.temperature) {
-          minViolation = { temperature: airTemperature, row };
+        if (airTemperature < MIN_TEMPERATURE) {
+          if (!minViolation || airTemperature < minViolation.temperature) {
+            minViolation = { temperature: airTemperature, row };
+          }
         }
       }
     }

@@ -242,7 +242,11 @@ function ChartPage() {
           />
         </h1>
       </Column>
-      <CheckboxGroup invalidText="Invalid" warnText="Warning">
+      <CheckboxGroup
+        invalidText="Invalid"
+        warnText="Warning"
+        className="checkbox-group"
+      >
         <Checkbox
           id="airTemperature"
           labelText="Air Temp"

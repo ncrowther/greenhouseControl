@@ -51,10 +51,12 @@ function TimelapsePage(camId) {
         console.log(err);
         return <Grid className="timelapse-page">Loading</Grid>;
       });
+
+    setLoading(false);
   };
 
   useEffect(() => {
-    setLoading(false);
+    getPhotos(selectedEnv.camId, setimages1);
   }, []);
 
   if (loading) {
@@ -87,7 +89,7 @@ function TimelapsePage(camId) {
       </Column>
       <Column lg={16} md={8} sm={4} className="landing-page__content">
         <Galleria
-          style={{ maxWidth: '1024px' }}
+          style={{ maxWidth: '800px' }}
           value={images1}
           item={itemTemplate}
           autoPlay
