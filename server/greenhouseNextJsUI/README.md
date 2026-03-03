@@ -73,7 +73,7 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
    ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
 ```
 
-5. Start Docker Desktop
+5. Start Docker (Rancher) Desktop and wait for status to be STARTED
 
 ```bash
    docker login -u ncrowthe -p C\*\*\*\*!
@@ -81,16 +81,16 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
 
 6. Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
 
-7. Using the bash shell, deploy the sample application to your docker repo:
+7. Using the bash shell [SHELL AS ADMIN], deploy the sample application to your docker repo:
 
 ```bash
-   ./CEbuild
+   ./CEbuild.sh
 ```
 
 9. Deploy the application to Code Engine on IBM Cloud. From the app's folder do:
 
 ```bash
-   ./CErun
+   ./CErun.sh
 ```
 
 10. Open the URL using the IBM Cloud Code Engine route for the application
