@@ -245,7 +245,7 @@ app.post('/water', async (req, res) => {
 
   const id = checkId(req, res);
   if (id == null) return;
-  console.log('Get irrigation for ' + id)
+  console.log('Set irrigation for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
 
@@ -268,6 +268,60 @@ app.post('/water', async (req, res) => {
         inputDoc.timeHH1,
         inputDoc.timeHH2,
         inputDoc.timeHH3
+      ],
+      "windowState": originalDoc.windowState,
+      "windowRun": originalDoc.windowRun,
+      "windowPause": originalDoc.windowPause,
+      "temperatureRange": [
+        originalDoc.temperatureRange[0],
+        originalDoc.temperatureRange[1]
+      ],
+      "humidityRange": [
+        originalDoc.humidityRange[0],
+        originalDoc.humidityRange[1]
+      ],
+      "lastUpdate": timestamp
+    }
+
+    console.log('Set Config: ' + JSON.stringify(newDoc))
+
+    updateDoc(res, configDbName, id, newDoc)
+
+  })
+})
+
+// ///////////////////// Set Pump ////////////////////
+app.post('/pump', async (req, res) => {
+
+  const inputDoc = req.body;
+
+  console.log('Set pump ' + JSON.stringify(inputDoc));
+
+  const id = checkId(req, res);
+  if (id == null) return;
+  console.log('Set pump for ' + id)
+
+  await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
+
+    var time = moment();
+    var timestamp = time.format('YYYY-MM-DDTHH:mm:ss');
+    console.log(timestamp);
+
+    const newDoc = {
+      "lightState": originalDoc.lightState,
+      "lightOnOff": [
+        originalDoc.lightOnOff[0],
+        originalDoc.lightOnOff[1]
+      ],
+      "pumpState": inputDoc.pumpState,
+      "fanState": originalDoc.fanState,
+      "heaterState": originalDoc.heaterState,
+      "humidifierState": originalDoc.humidifierState,
+      "wateringDuration": originalDoc.wateringDuration,
+      "wateringTimes": [
+        originalDoc.wateringTimes[0],
+        originalDoc.wateringTimes[1],
+        originalDoc.wateringTimes[2]
       ],
       "windowState": originalDoc.windowState,
       "windowRun": originalDoc.windowRun,
@@ -770,7 +824,13 @@ app.get('/config', async (req, res) => {
   })
 
 function checkId(req, res) {
-    if (req.query.id == null) {
+    if (req.query == undefined) {
+      res.status(400);
+      res.set('Access-Control-Allow-Origin', '*');
+      res.send('Missing query parameter');
+      return null;
+    }  
+    if (req.query.id == undefined) {
       res.status(400);
       res.set('Access-Control-Allow-Origin', '*');
       res.send('Missing id query parameter');

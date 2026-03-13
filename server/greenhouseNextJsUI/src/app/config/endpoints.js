@@ -32,6 +32,7 @@ const humidityServiceEndpoint = `${serviceEndpoint}/humidity`;
 const fanServiceEndpoint = `${serviceEndpoint}/fan`;
 const ventServiceEndpoint = `${serviceEndpoint}/vent`;
 const waterServiceEndpoint = `${serviceEndpoint}/water`;
+const pumpServiceEndpoint = `${serviceEndpoint}/pump`;
 const dataServiceEndpoint = `${serviceEndpoint}/docs`;
 const photoServiceEndpoint = `${serviceEndpoint}/photos`;
 
@@ -44,6 +45,7 @@ exports.humidityServiceEndpoint = humidityServiceEndpoint;
 exports.fanServiceEndpoint = fanServiceEndpoint;
 exports.ventServiceEndpoint = ventServiceEndpoint;
 exports.waterServiceEndpoint = waterServiceEndpoint;
+exports.pumpServiceEndpoint = pumpServiceEndpoint;
 exports.dataServiceEndpoint = dataServiceEndpoint;
 exports.photoServiceEndpoint = photoServiceEndpoint;
 exports.sensecapDatalogEndpoint = sensecapDatalogEndpoint;

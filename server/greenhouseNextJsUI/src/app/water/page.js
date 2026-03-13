@@ -34,7 +34,7 @@ function Water() {
     writeConfig(event);
   };
 
-  const writeConfig = (event) => {
+  function writeConfig() {
     let configData = JSON.stringify({
       pumpState: pumpState,
       wateringDuration: pumpOnDuration,
@@ -46,7 +46,7 @@ function Water() {
     console.log('Send: ' + JSON.stringify(configData));
 
     config.water(configData, selectedEnv);
-  };
+  }
 
   async function getConfigData() {
     await fetch(

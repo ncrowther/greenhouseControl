@@ -39,7 +39,6 @@ const GreenhouseHeader = () => {
           <HeaderNavigation aria-label="IBM [Platform]">
             <HeaderMenu aria-label="Set" menuLinkName="Set">
               <HeaderMenuItem
-                Light
                 label="Light"
                 onClick={() => {
                   router.push('/light');
@@ -49,7 +48,6 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
 
               <HeaderMenuItem
-                Light
                 label="Fan"
                 onClick={() => {
                   router.push('/fan');
@@ -59,7 +57,6 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
 
               <HeaderMenuItem
-                Light
                 label="Vent"
                 onClick={() => {
                   router.push('/vent');
@@ -69,7 +66,6 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
 
               <HeaderMenuItem
-                Light
                 label="Heater"
                 onClick={() => {
                   router.push('/heater');
@@ -79,7 +75,6 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
 
               <HeaderMenuItem
-                Light
                 label="Humidifier"
                 onClick={() => {
                   router.push('/humidifier');
@@ -89,7 +84,6 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
 
               <HeaderMenuItem
-                Light
                 label="Water"
                 onClick={() => {
                   router.push('/water');
@@ -101,7 +95,6 @@ const GreenhouseHeader = () => {
 
             <HeaderMenu aria-label="View" menuLinkName="View">
               <HeaderMenuItem
-                Light
                 label="Chart"
                 onClick={() => {
                   router.push('/chart');
@@ -111,7 +104,6 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
 
               <HeaderMenuItem
-                Light
                 label="Telemetry"
                 onClick={() => {
                   router.push('/telemetry');
@@ -123,7 +115,6 @@ const GreenhouseHeader = () => {
 
             <HeaderMenu aria-label="Lora" menuLinkName="Lora">
               <HeaderMenuItem
-                Light
                 label="Air chart"
                 onClick={() => {
                   router.push('/datalogger');
@@ -133,7 +124,6 @@ const GreenhouseHeader = () => {
               </HeaderMenuItem>
 
               <HeaderMenuItem
-                Light
                 label="Soil chart"
                 onClick={() => {
                   router.push('/soil');
@@ -144,7 +134,6 @@ const GreenhouseHeader = () => {
             </HeaderMenu>
 
             <HeaderMenuItem
-              Light
               label="Cam"
               onClick={() => {
                 router.push('/timelapse');
