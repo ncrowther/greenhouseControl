@@ -102,12 +102,12 @@ exports.getExpiredDocs = function getExpiredDocs(service, purgeWindow, dbName) {
 
       response.result.rows.forEach(function (doc) {
 
-        var doc = doc.doc
-        
-        if (!doc._id.startsWith("_design") && (doc._id < purgeDate)) {
-          doc._deleted = true
-          docs[i] = doc;
-          console.log('***DELETE ' + doc._id)
+        doc = doc.doc
+
+        if (doc._id && !doc._id.startsWith("_design") && (doc._id < purgeDate)) {
+          var deletedDoc = {_deleted: true, _id: doc._id, _rev: doc._rev}
+          docs[i] = deletedDoc;
+          console.log('***DELETE ' + deletedDoc._id)
           i++;
         }   
       })

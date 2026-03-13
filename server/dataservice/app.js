@@ -591,8 +591,6 @@ app.get('/config', async (req, res) => {
       "timestamp": timestamp
     }
 
-    console.log(JSON.stringify(doc));
-
     await cloudantLib.createDoc(service, photoDb, doc).then(function (ret) {
 
       console.error('Created photo');
