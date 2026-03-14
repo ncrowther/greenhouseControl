@@ -124,6 +124,11 @@ function ChartPage() {
               //we have data
               //now parse it into the format needed for the chart
 
+              if (docs.data.list[1][0] == undefined) {
+                setError('No data available');
+                setLoading(false);
+                return;
+              }
               const vocReadings = docs.data.list[1][vocPos].reduce(
                 (vocReadings, obj) => {
                   console.log('******voc*********' + JSON.stringify(obj));

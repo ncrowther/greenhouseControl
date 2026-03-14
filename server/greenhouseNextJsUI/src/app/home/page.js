@@ -200,7 +200,7 @@ export default function LandingPage() {
     pumpButtonZ1 = (
       <div>
         <Button
-          kind="primary"
+          kind="secondary"
           renderIcon={IoRainyOutline}
           inputid="pump2"
           name="pumpOff"
@@ -215,7 +215,7 @@ export default function LandingPage() {
     pumpButtonZ1 = (
       <div>
         <Button
-          kind="secondary"
+          kind="tertiary"
           renderIcon={IoRainyOutline}
           inputid="pump3"
           name="pumpAuto"
@@ -250,7 +250,7 @@ export default function LandingPage() {
     pumpButtonZ2 = (
       <div>
         <Button
-          kind="primary"
+          kind="secondary"
           renderIcon={IoRainyOutline}
           inputid="pump2"
           name="pumpOff"
@@ -265,7 +265,7 @@ export default function LandingPage() {
     pumpButtonZ2 = (
       <div>
         <Button
-          kind="secondary"
+          kind="tertiary"
           renderIcon={IoRainyOutline}
           inputid="pump3"
           name="pumpAuto"
@@ -300,7 +300,7 @@ export default function LandingPage() {
     pumpButtonZ3 = (
       <div>
         <Button
-          kind="primary"
+          kind="secondary"
           renderIcon={IoRainyOutline}
           inputid="pump2"
           name="pumpOff"
@@ -315,7 +315,7 @@ export default function LandingPage() {
     pumpButtonZ3 = (
       <div>
         <Button
-          kind="secondary"
+          kind="tertiary"
           renderIcon={IoRainyOutline}
           inputid="pump3"
           name="pumpAuto"
@@ -350,7 +350,7 @@ export default function LandingPage() {
     pumpButtonZ4 = (
       <div>
         <Button
-          kind="primary"
+          kind="secondary"
           renderIcon={IoRainyOutline}
           inputid="pump2"
           name="pumpOff"
@@ -365,7 +365,7 @@ export default function LandingPage() {
     pumpButtonZ4 = (
       <div>
         <Button
-          kind="secondary"
+          kind="tertiary"
           renderIcon={IoRainyOutline}
           inputid="pump3"
           name="pumpAuto"
@@ -387,8 +387,9 @@ export default function LandingPage() {
       <Column lg={16} md={8} sm={4} className="landing-page__r2">
         <Tabs defaultSelectedIndex={0}>
           <TabList className="tabs-group" aria-label="Page navigation">
-            <Tab>Status</Tab>
-            <Tab>API</Tab>
+            <Tab>Irrigation</Tab>
+            <Tab>Temperature</Tab>
+            <Tab>Humidity</Tab>
             <Tab>About</Tab>
           </TabList>
           <TabPanels>
@@ -467,6 +468,8 @@ export default function LandingPage() {
                 <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}></Column>
               </Grid>
             </TabPanel>
+            <TabPanel>TBD</TabPanel>
+            <TabPanel>TBD</TabPanel>
             <TabPanel>
               <Grid className="tabs-group-content">
                 <Column
@@ -475,39 +478,25 @@ export default function LandingPage() {
                   sm={4}
                   className="landing-page__tab-content"
                 >
-                  <strong>Server:</strong> {endpoints.serviceEndpoint}
+                  <h4>
+                    Control your environment with Open Greenhouse, an
+                    open-source project for monitoring and controlling your
+                    greenhouse.
+                  </h4>
+                  <br /> <br />
+                  <strong>Server:</strong> <br />
+                  {endpoints.serviceEndpoint}
+                  <br /> <br />
+                  <strong>Senscap Soil Sensor:</strong>
                   <br />
-                  <strong>Senscap Soil Sensor:</strong>{' '}
                   {endpoints.sensecapSoilEndpoint}
-                  <br />
-                  <strong>Senscap Air Sensor:</strong>{' '}
+                  <br /> <br />
+                  <strong>Senscap Air Sensor:</strong> <br />
                   {endpoints.sensecapDatalogEndpoint}
-                  <br />
-                  <strong>Senscap API Key:</strong> {endpoints.sensecapAuth}
-                  <br />
-                </Column>
-                <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
-                  <Image
-                    className="landing-page__illo"
-                    src="/tab-illo.png"
-                    alt="Carbon illustration"
-                    width={240}
-                    height={480}
-                  />
-                </Column>
-              </Grid>
-            </TabPanel>
-            <TabPanel>
-              <Grid className="tabs-group-content">
-                <Column
-                  md={4}
-                  lg={7}
-                  sm={4}
-                  className="landing-page__tab-content"
-                >
-                  Control your grow environment with Open Greenhouse, an
-                  open-source project for monitoring and controlling your
-                  greenhouse.
+                  <br /> <br />
+                  <strong>Senscap API Key:</strong> <br />
+                  {endpoints.sensecapAuth}
+                  <br /> <br />
                 </Column>
                 <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
                   <Image
