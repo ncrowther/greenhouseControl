@@ -387,7 +387,7 @@ export default function LandingPage() {
       <Column lg={16} md={8} sm={4} className="landing-page__r2">
         <Tabs defaultSelectedIndex={0}>
           <TabList className="tabs-group" aria-label="Page navigation">
-            <Tab>Irrigation</Tab>
+            <Tab>Soil Moisture</Tab>
             <Tab>Temperature</Tab>
             <Tab>Humidity</Tab>
             <Tab>About</Tab>
