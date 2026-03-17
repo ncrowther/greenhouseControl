@@ -1,7 +1,7 @@
 const serviceEndpoint =
   process.env.REACT_APP_DATA_SERVICE_END_POINT !== undefined
     ? process.env.REACT_APP_DATA_SERVICE_END_POINT
-    : 'http://localhost:3000';
+    : 'http://86.4.208.162';
 const sensecapDatalogEndpoint =
   process.env.REACT_APP_SENSECAP_DATALOG_END_POINT !== undefined
     ? process.env.REACT_APP_SENSECAP_DATALOG_END_POINT

@@ -62,7 +62,7 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
 ```bash
    ibmcloud resource groups
 
-   ibmcloud target -g [resource_group]
+   ibmcloud target -g [resource_group] (-r [region])
 ```
 
 4. Select the code engine project:
