@@ -175,7 +175,7 @@ exports.pump = async function pump(configData, selectedEnv) {
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
   // Send data to the backend via POST
-  fetch(endpoints.pumpServiceEndpoint + '?id=' + selectedEnv.name, {
+  fetch(endpoints.pumpServiceEndpoint + '?id=' + selectedEnv, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,

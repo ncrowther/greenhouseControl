@@ -18,7 +18,6 @@ import {
 import { Switcher, Notification, UserAvatar } from '@carbon/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 const GreenhouseHeader = () => {
   const router = useRouter();
@@ -37,6 +36,44 @@ const GreenhouseHeader = () => {
           </Link>
 
           <HeaderNavigation aria-label="IBM [Platform]">
+            <HeaderMenu aria-label="Set" menuLinkName="View">
+              <HeaderMenuItem
+                label="Zone1"
+                onClick={() => {
+                  router.push('/zone?id=Zone1');
+                }}
+              >
+                Zone1
+              </HeaderMenuItem>
+
+              <HeaderMenuItem
+                label="Zone2"
+                onClick={() => {
+                  router.push('/zone?id=Zone2');
+                }}
+              >
+                Zone2
+              </HeaderMenuItem>
+
+              <HeaderMenuItem
+                label="Zone3"
+                onClick={() => {
+                  router.push('/zone?id=Zone3');
+                }}
+              >
+                Zone3
+              </HeaderMenuItem>
+
+              <HeaderMenuItem
+                label="Zone4"
+                onClick={() => {
+                  router.push('/zone?id=Zone4');
+                }}
+              >
+                Zone4
+              </HeaderMenuItem>
+            </HeaderMenu>
+
             <HeaderMenu aria-label="Set" menuLinkName="Set">
               <HeaderMenuItem
                 label="Light"

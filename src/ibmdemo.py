@@ -7,12 +7,12 @@ import json
 import gc
 import machine
 
-from plantcare_v2 import PlantCare, WindowState, OnOffState
-from StatusLight import StatusLight
+from plantcare_v2 import PlantCare, OnOffState
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
-DEVICE_NAME = "zone1"
+#GREENHOUSE_DATASERVICE = 'https://foxhound-hip-initially.ngrok-free.app'
+DEVICE_NAME = "zone3"
 
 
 """
@@ -23,18 +23,16 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    ssid = 'VM7763450'
-    password = 'udWrTpeejf86gugx'
-    #ssid = "Nigel’s iPhone"
-    #password = 'Porker01!'     
-    #ssid = 'MIFI_3880'
+    #ssid = 'VM7763450'
+    #password = 'udWrTpeejf86gugx'
+    ssid = "Nigel’s iPhone"
+    password = 'Porker01!'     
+    #ssid = 'IBMGuest'
+    #password = 'Unit-7-Greet-8-Dial'    
     #password = None    
     ipAddress = "ERR"
         
-    def __init__(self):
-        
-        self.statusLight = StatusLight()
-        self.statusLight.setConnectingStatus()      
+    def __init__(self):      
         
         self.wlan = network.WLAN(network.STA_IF)
         self.ipAddress = self.connect_to_network(self.ssid, self.password)
@@ -44,12 +42,9 @@ class PlantServer(object):
         if self.ipAddress == None:
             self.plantCare = PlantCare(None)         
             print("No WIFI.  Using default settings...")
-            self.statusLight.setErroredStatus()
-        else:
-            self.statusLight.setOperationalStatus()   
+        else: 
             self.plantCare = PlantCare(self.ipAddress)
             timestamp = self.configure()
-            self.plantCare.setDateTime(timestamp)
             
         
     """
@@ -188,33 +183,18 @@ class PlantServer(object):
     """
     def setData(self, plantCare, jsonData):
             
+        print("SetData")
+        
         # Config stored inside doc          
         doc = jsonData["doc"]
         
-        temperatureRange = doc["temperatureRange"]
-        print("****Configure TEMPERATURE RANGE to: " + str(temperatureRange)     )   
-        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )
-        
-                
-        windowState = doc["windowState"]
-        plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
-        
-        windowRun = doc["windowRun"]
-        plantCare.setWindowRun(windowRun)  # must be same as PlantCare.WindowState
-        
-        windowPause = doc["windowPause"]
-        plantCare.setWindowPause(windowPause)  # must be same as PlantCare.WindowState        
+        #temperatureRange = doc["temperatureRange"]
+        #print("****Configure TEMPERATURE RANGE to: " + str(temperatureRange)     )   
+        #plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )        
         
         pumpState = doc["pumpState"]
         plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
-        
-        fanState = doc["fanState"]
-        plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState        
-        
-        wateringPeriod = doc["wateringDuration"]  	# minutes
-        wateringTimes = doc["wateringTimes"]  		# list of three start times in 24H format
-        wateringMinTemp = 5       					# Not implemented
-        plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)        
+      
             
  # This function is used to log data from the plant care system. 
     # It attempts to connect to the network, retrieve system time,  temperature, humidity, 
@@ -288,34 +268,27 @@ class PlantServer(object):
     """
     def care(self):
         print('Start care...')
-        
-        statusLight = StatusLight()        
-        
-        SLEEP_TIME = 10
+          
+        SLEEP_TIME = 5
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
         count = 0
         
         while True:
 
-            print("Care")
-            
-            self.plantCare.careforplants()
-            
-            # If timestamp exists then log every LOG_TIME mins
+            print("Care...")
+                   
+            # Log every LOG_TIME mins
             if (count % LOG_TIME == 0):
-                # set config 
-                self.configure()    
                 self.logger()
-           
-            
+                
+            self.configure()    
+
             self.plantCare.careforplants()
             
             print('Sleep for {} seconds'.format(SLEEP_TIME))
-            
-            statusLight.setSleepingStatus()                       
+                                   
             time.sleep(SLEEP_TIME)           
-            statusLight.setOperationalStatus()
             
             count = count + 1
         
@@ -341,5 +314,6 @@ def main():
         #machine.reset()
 
 main()
+
 
 

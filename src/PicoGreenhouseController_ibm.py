@@ -7,13 +7,17 @@ import json
 import gc
 import machine
 
-from plantcare_v2 import PlantCare, WindowState, OnOffState
+from plantcare_ibm import PlantCare, WindowState, OnOffState
 from StatusLight import StatusLight
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
-DEVICE_NAME = "zone1"
-
+ZONE_NAMES = [
+    {"name": "zone1", "pinNumber": 21}, 
+    {"name": "zone2", "pinNumber": 20}, 
+    {"name": "zone3", "pinNumber": 19}, 
+    {"name": "zone4", "pinNumber": 18}
+]
 
 """
 This code is a Python program that controls a plant care system. 
@@ -23,6 +27,7 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
+    zoneName = None
     ssid = 'VM7763450'
     password = 'udWrTpeejf86gugx'
     #ssid = "Nigel’s iPhone"
@@ -31,8 +36,10 @@ class PlantServer(object):
     #password = None    
     ipAddress = "ERR"
         
-    def __init__(self):
+    def __init__(self, zone):
         
+        self.zoneName = zone["name"]
+        self.pinNumber = zone["pinNumber"]
         self.statusLight = StatusLight()
         self.statusLight.setConnectingStatus()      
         
@@ -42,12 +49,12 @@ class PlantServer(object):
         print("***IP: " + str(self.ipAddress))
         
         if self.ipAddress == None:
-            self.plantCare = PlantCare(None)         
+            self.plantCare = PlantCare(None, self.zone.name, zone.pinNumber)         
             print("No WIFI.  Using default settings...")
             self.statusLight.setErroredStatus()
         else:
             self.statusLight.setOperationalStatus()   
-            self.plantCare = PlantCare(self.ipAddress)
+            self.plantCare = PlantCare(self.ipAddress, self.zoneName, self.pinNumber)
             timestamp = self.configure()
             self.plantCare.setDateTime(timestamp)
             
@@ -143,10 +150,8 @@ class PlantServer(object):
         str: The timestamp of the last successful configuration.
     """
     def configure(self):
-               
-        plantCare = self.plantCare
         
-        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + DEVICE_NAME
+        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + self.zoneName
         resp = None
         timestamp = None
         
@@ -164,7 +169,7 @@ class PlantServer(object):
             timestamp = jsonData["timestamp"]
             print("timestamp: " + timestamp)           
             
-            self.setData(plantCare, jsonData)               
+            self.setData(self.plantCare, jsonData)               
                 
         except Exception as e:
             if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
@@ -222,7 +227,7 @@ class PlantServer(object):
     # it will display an error message and reset the machine.
     def logger(self):  
         
-        print('Start logger...')
+        print('Start logger for zone: ' + self.zoneName)
         
         try: 
         
@@ -233,7 +238,7 @@ class PlantServer(object):
             co2Data = 0 #self.plantCare.getCo2Data()
             vpd = 0 #self.plantCare.getVpdData()
             lux = 0 #self.plantCare.getluxData()
-            self.logData(temperatureData, 0, humidityData, co2Data, vpd, lux)
+            self.logData( temperatureData, 0, humidityData, co2Data, vpd, lux)
                 
         except Exception as err:
             sys.print_exception(err)
@@ -259,7 +264,7 @@ class PlantServer(object):
           "lux": 0          
         })
         
-        request_url = GREENHOUSE_DATASERVICE + '/doc' + '?id=' + DEVICE_NAME
+        request_url = GREENHOUSE_DATASERVICE + '/doc' + '?id=' + self.zoneName
      
         gc.collect() 
         resp = None
@@ -286,44 +291,34 @@ class PlantServer(object):
     Returns:
     None
     """
-    def care(self):
+    def care(self, count):
         print('Start care...')
         
         statusLight = StatusLight()        
         
-        SLEEP_TIME = 10
+        SLEEP_TIME = 1
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
-        
-        count = 0
-        
-        while True:
 
-            print("Care")
+        print("Care for zone: " + self.zoneName)
+
+        self.configure()   
+        self.plantCare.careforplants()
+
+        # If timestamp exists then log every LOG_TIME mins
+        #if (count % LOG_TIME == 0):
+        #    self.logger()
+
+        print('Sleep for {} seconds'.format(SLEEP_TIME))
             
-            self.plantCare.careforplants()
-            
-            # If timestamp exists then log every LOG_TIME mins
-            if (count % LOG_TIME == 0):
-                # set config 
-                self.configure()    
-                self.logger()
-           
-            
-            self.plantCare.careforplants()
-            
-            print('Sleep for {} seconds'.format(SLEEP_TIME))
-            
-            statusLight.setSleepingStatus()                       
-            time.sleep(SLEEP_TIME)           
-            statusLight.setOperationalStatus()
-            
-            count = count + 1
-        
+        statusLight.setSleepingStatus()                       
+        time.sleep(SLEEP_TIME)           
+        statusLight.setOperationalStatus()
+    
 """
 This function is the main entry point for the program.
 
 Parameters:
-None
+None    zoneName: The name of the zone to care for.
 
 Returns:
 None
@@ -331,8 +326,20 @@ None
 def main():   
                
     try: 
-        plantServer = PlantServer()    
-        plantServer.care()
+
+        count = 0
+
+        zone1Server = PlantServer(ZONE_NAMES[0])    
+        zone2Server = PlantServer(ZONE_NAMES[1])    
+        zone3Server = PlantServer(ZONE_NAMES[2])    
+        zone4Server = PlantServer(ZONE_NAMES[3])          
+
+        while True:
+            zone1Server.care(count)
+            zone2Server.care(count)
+            zone3Server.care(count)
+            zone4Server.care(count)
+            count = count + 1
 
     except Exception as err:
         sys.print_exception(err)
@@ -341,5 +348,3 @@ def main():
         #machine.reset()
 
 main()
-
-
