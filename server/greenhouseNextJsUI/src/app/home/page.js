@@ -48,7 +48,7 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   <Knob
-                    value="60"
+                    value="64"
                     min={0}
                     max={100}
                     valueTemplate={'{value}%'}
@@ -73,7 +73,7 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   <Knob
-                    value="10"
+                    value="9"
                     min={0}
                     max={100}
                     valueTemplate={'{value}%'}
@@ -99,11 +99,11 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   <Knob
-                    value="70"
+                    value="21"
                     min={0}
                     max={100}
                     valueTemplate={'{value}%'}
-                    valueColor="green"
+                    valueColor="red"
                     rangeColor="lightgray"
                   />
 

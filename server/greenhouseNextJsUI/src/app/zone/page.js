@@ -20,7 +20,7 @@ export default function Zone(zoneParam) {
 
   const [waterLevel, setWaterLevel] = useState(11);
   const [waterColor, setWaterColor] = useState('red');
-  const [pumpState, setPumpState] = useState('OFF');
+  const [pumpState, setPumpState] = useState('  ');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
@@ -40,17 +40,21 @@ export default function Zone(zoneParam) {
 
   const tick = () => {
     if (waterLevel <= 90 && pumpState === 'ON') {
-      setWaterLevel((waterLevel) => waterLevel + 10);
+      setWaterLevel((waterLevel) => waterLevel + 1);
     } else if (waterLevel >= 15 && pumpState === 'OFF') {
       setWaterLevel((waterLevel) => waterLevel - 1);
+    } else if (waterLevel > 50 && waterLevel <= 70 && pumpState === 'AUTO') {
+      // Do Nothing as the water level is in the optimal range
+    } else if (waterLevel > 70 && pumpState === 'AUTO') {
+      setWaterLevel((waterLevel) => waterLevel - 5);
+    } else if (waterLevel <= 50 && pumpState === 'AUTO') {
+      setWaterLevel((waterLevel) => waterLevel + 5);
     }
     setDial();
+    getConfigData();
   };
 
-  const handleOnSubmit = async (state) => {
-    // Prevent default refresh
-    //event.preventDefault();
-
+  const handleOnSubmit = (state) => {
     let newState = 'OFF';
 
     if (state === 'ON') {
@@ -63,20 +67,19 @@ export default function Zone(zoneParam) {
 
     console.log('state: ' + state);
     console.log('newstate: ' + newState);
-    setPumpState(newState);
     writeConfig(newState);
-
+    setPumpState(newState);
     //window.location.reload(false);
   };
 
-  async function writeConfig(newState) {
+  function writeConfig(newState) {
     let configData = JSON.stringify({
       pumpState: newState,
     });
 
     console.log('****Write Config: ' + JSON.stringify(configData));
 
-    await config.pump(configData, zone);
+    config.pump(configData, zone);
   }
 
   function getConfigData() {
@@ -91,7 +94,7 @@ export default function Zone(zoneParam) {
           response.json().then((data) => {
             const configData = data.doc;
 
-            console.log('***Config****' + JSON.stringify(configData));
+            console.log('***getConfigData****' + JSON.stringify(configData));
 
             if (configData) {
               setPumpState(configData.pumpState);
@@ -116,10 +119,10 @@ export default function Zone(zoneParam) {
   }
 
   useEffect(() => {
-    // getConfigData();
-    // const dInterval = setInterval(() => tick(), 5000);
-    // return () => clearInterval(dInterval);
-  }, [pumpState, waterLevel]);
+    //getConfigData();
+    //const dInterval = setInterval(() => tick(), 1000);
+    //return () => clearInterval(dInterval);
+  }, [zone, pumpState, waterLevel]);
 
   // Set Zone 1 pump button and highlight the one that is enabled
   let waterButton = {};
@@ -175,8 +178,8 @@ export default function Zone(zoneParam) {
             <Button
               kind="primary"
               renderIcon={CiLight}
-              inputid="pump1"
-              name="pumpOn"
+              inputid="light1"
+              name="lightOn"
               value="ON"
             >
               ON
@@ -198,8 +201,8 @@ export default function Zone(zoneParam) {
             <Button
               kind="primary"
               renderIcon={FaFireFlameSimple}
-              inputid="pump1"
-              name="pumpOn"
+              inputid="temp1"
+              name="tempOn"
               value="ON"
             >
               ON
@@ -221,8 +224,8 @@ export default function Zone(zoneParam) {
             <Button
               kind="primary"
               renderIcon={WiHumidity}
-              inputid="pump1"
-              name="pumpOn"
+              inputid="hum1"
+              name="humOn"
               value="ON"
             >
               ON

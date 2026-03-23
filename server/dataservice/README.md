@@ -44,37 +44,68 @@ See:
 
 ### Deployment to code engine on IBM Cloud
 
-1.	Open Rancher WSL shell from VSC
+### Deployment to code engine on IBM Cloud
 
-2.	Login to IBM Cloud.
+1. Open bash shell from VSC
 
-    ibmcloud login --sso
+```bash
+   yarn clean
+   yarn build
+```
 
-    (if using public account,  from the IBM Cloud console click user icon->Login to CLI and API.  e.g.: ibmcloud login -a https://cloud.ibm.com -u passcode -p l6bjKxF0gL)
+2. Login to IBM Cloud.
 
-3.	In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups.  Select the resource group for Code Engine. E.g. default
+```bash
+   ibmcloud login --sso
+```
 
-    ibmcloud target -g default  (redaction-new)
+(if using public or techsales account, logout of ibm cloud (https://cloud.ibm.com/logout), then IBM Cloud Login:
 
-4.	Select the code engine project:  
+https://cloud.ibm.com/authorize/itzwatsonx031
 
-    ibmcloud ce project select -n [PROJECT_NAME]
+Username: student_6954ecabb4@techz12one.ibm.com
+Password: ogk8arxlyrzwyo4
 
-5.	Start Docker Desktop
+from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud login -a https://cloud.ibm.com -u passcode -p l6bjKxF0gL)
 
-    docker login -u ncrowthe -p C****!
+3. In the IBM Cloud console, go to Manage > Account > Account resources > Resource groups. Select the resource group for Code Engine. E.g. default
 
-7.	Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
+```bash
+   ibmcloud resource groups
 
-8.	Using the same bash shell, deploy the sample application to your docker repo:
+   ibmcloud target -g [resource_group] (-r [region])
+```
 
-./CEbuild
+4. Select the code engine project:
 
-9.	Deploy the application to Code Engine on IBM Cloud. From the app's folder do:
+```bash
+   ibmcloud ce project list
 
-./CErun
+   ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
+```
 
-10.	Open the URL using the IBM Cloud Code Engine route for the refunds application
+5. Start Docker (Rancher) Desktop and wait for status to be STARTED
+
+```bash
+   docker login -u ncrowthe -p C\*\*\*\*!
+```
+
+6. Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
+
+7. Using the bash shell [SEPARATE SHELL AS ADMIN], deploy the sample application to your docker repo:
+
+```bash
+   ./CEbuild.sh
+```
+
+9. Deploy the application to Code Engine on IBM Cloud. From the app's folder do:
+
+```bash
+   ./CErun.sh
+```
+
+10. Open the URL using the IBM Cloud Code Engine route for the application
+
 
 
 ## License
