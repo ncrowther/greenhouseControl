@@ -206,10 +206,13 @@ const GreenhouseHeader = () => {
                   <HeaderMenuItem>Water</HeaderMenuItem>
                 </Link>
                 <Link href="/chart" passHref legacyBehavior>
-                  <HeaderMenuItem>Greenhouse</HeaderMenuItem>
+                  <HeaderMenuItem>Chart</HeaderMenuItem>
                 </Link>
                 <Link href="/datalogger" passHref legacyBehavior>
-                  <HeaderMenuItem>Polytunnel</HeaderMenuItem>
+                  <HeaderMenuItem>Poly Air</HeaderMenuItem>
+                </Link>
+                <Link href="/soil" passHref legacyBehavior>
+                  <HeaderMenuItem>Poly Soil</HeaderMenuItem>
                 </Link>
                 <Link href="/timelapse" passHref legacyBehavior>
                   <HeaderMenuItem>Cam</HeaderMenuItem>

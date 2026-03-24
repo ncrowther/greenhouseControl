@@ -5,8 +5,10 @@ import time
 import binascii
 import machine
 import asyncio
+import random
 from StatusLight import StatusLight
 from Errors import HardwareError
+
 
 #################################################
 ### Greenhouse controller for Rasberry Pi Pico ###
@@ -148,10 +150,10 @@ class PlantCare(object):
         self.MAX_TEMPERATURE = max
         
     def getTemperatureData(self):
-        return 20
+        return random.randint(20, 25)
     
     def getHumidityData(self):
-        return 55      
+        return random.randint(50, 55)      
     
     def setPump(self, state):
         self.pump.setState(state)
@@ -204,8 +206,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
 
 

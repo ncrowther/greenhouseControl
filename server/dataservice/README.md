@@ -51,6 +51,7 @@ See:
 ```bash
    yarn clean
    yarn build
+   [yarn start]
 ```
 
 2. Login to IBM Cloud.
@@ -96,6 +97,14 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
 
 ```bash
    ./CEbuild.sh
+```
+
+8. Create config map
+
+```bash
+ibmcloud ce configmap create --name greenhouseconfig --from-env-file greenhouseconfig.txt
+ibmcloud ce configmap get --name greenhouseconfig
+
 ```
 
 9. Deploy the application to Code Engine on IBM Cloud. From the app's folder do:

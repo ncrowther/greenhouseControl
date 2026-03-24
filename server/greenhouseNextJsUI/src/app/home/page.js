@@ -174,6 +174,10 @@ export default function LandingPage() {
                   <strong>Senscap API Key:</strong> <br />
                   {endpoints.sensecapAuth}
                   <br /> <br />
+                  <small>
+                    {' '}
+                    <b>{process.env.NODE_ENV}</b> mode.
+                  </small>
                 </Column>
                 <Column md={4} lg={{ span: 8, offset: 8 }} sm={4}>
                   <Image

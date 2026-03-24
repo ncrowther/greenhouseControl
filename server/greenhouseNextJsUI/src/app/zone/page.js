@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { Grid, Column, Button } from '@carbon/react';
 
@@ -82,7 +82,7 @@ export default function Zone(zoneParam) {
     config.pump(configData, zone);
   }
 
-  function getConfigData() {
+  async function getConfigData() {
     fetch(endpoints.configServiceEndpoint + '?id=' + zone, {
       method: 'get',
       headers: {
@@ -110,6 +110,15 @@ export default function Zone(zoneParam) {
     setLoading(false);
   }
 
+  //useEffect(() => {
+  //  getConfigData();
+  //}, []);
+
+  useEffect(() => {
+    const dInterval = setInterval(() => tick(), 1000);
+    return () => clearInterval(dInterval);
+  }, [zone, pumpState, waterLevel, tick]);
+
   if (loading) {
     return <Grid className="config-page">Loading</Grid>;
   }
@@ -117,12 +126,6 @@ export default function Zone(zoneParam) {
   if (error) {
     return `Error! ${error}`;
   }
-
-  useEffect(() => {
-    //getConfigData();
-    //const dInterval = setInterval(() => tick(), 1000);
-    //return () => clearInterval(dInterval);
-  }, [zone, pumpState, waterLevel]);
 
   // Set Zone 1 pump button and highlight the one that is enabled
   let waterButton = {};

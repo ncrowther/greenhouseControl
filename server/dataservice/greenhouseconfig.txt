@@ -1,0 +1,8 @@
+CLOUDANT_URL=https://342de116-e8d6-466e-9729-23b1c8c49c38-bluemix.cloudantnosqldb.appdomain.cloud
+CLOUDANT_APIKEY=H8TDyr1Fv_q_JayL9E3PH5dnRNIRaMwPD04ap8Fz0-Rd
+CONFIG_DB_NAME=greenhouseconfig
+CAM1_DB_NAME=cam1
+CAM2_DB_NAME=cam2
+CAM3_DB_NAME=cam3
+CAM4_DB_NAME=cam4
+LOG_DB_NAME=greenhouselog
