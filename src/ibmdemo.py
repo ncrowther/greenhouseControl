@@ -9,6 +9,7 @@ import machine
 
 from plantcare_ibm import PlantCare, WindowState, OnOffState
 from StatusLight import StatusLight
+from Buzzer import Buzzer
 
 GREENHOUSE_DATASERVICE = 'https://dataservice.27uzmkl2grxv.us-south.codeengine.appdomain.cloud' 
 #GREENHOUSE_DATASERVICE = 'http://172.65.217.53'
@@ -59,26 +60,7 @@ class PlantServer(object):
         else:
             self.statusLight.setOperationalStatus()   
             self.plantCare = PlantCare(self.ipAddress, self.zoneName, self.pinNumber)
-        
-    """
-    Disconnect existing WIFI
-    """
-    def wifi_disconnect (self, wlan) :
-        #---- Clear existing connection
-        if wlan.active() :
-            print ("Deactivate")
-            if wlan.isconnected () :
-                print ("Disconnecting")
-                wlan.disconnect ()
-                for retry_count in range (20) : # wait for dicconnect
-                    if not wlan.isconnected () :
-                        break
-                    print ("waiting disconnect")
-                    time.sleep_ms (50)
-            wlan.active(False)
-            while wlan.active () :          # is this needed?
-                print ("waiting inactive")
-                time.sleep_ms (50)        
+         
         
     """
     Connect to a Wi-Fi network.
@@ -315,9 +297,10 @@ class PlantServer(object):
     def care(self, count):
         print('Start care...')
         
-        statusLight = StatusLight()        
+        statusLight = StatusLight()
+        statusLight.setOperationalStatus()        
         
-        SLEEP_TIME = 0
+        SLEEP_TIME = 0.1
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
 
         print("Care for zone: " + self.zoneName)
@@ -333,8 +316,9 @@ class PlantServer(object):
             
         statusLight.setSleepingStatus()                       
         time.sleep(SLEEP_TIME)           
-        statusLight.setOperationalStatus()
+  
     
+            
 """
 This function is the main entry point for the program.
 
@@ -364,6 +348,13 @@ def main():
 
     except SystemExit as err:
         sys.print_exception(err)
+        buzzer = Buzzer()
+        buzzer.buzz()
+        
+    except Exception as err:     
+        sys.print_exception(err)
+        buzzer = Buzzer()
+        buzzer.buzz()        
 
 main()
 
