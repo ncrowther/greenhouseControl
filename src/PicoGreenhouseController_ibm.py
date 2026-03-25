@@ -2,16 +2,17 @@ import sys
 import network
 import socket
 import time
-from requests import post, get
+from requests_v2 import post, get
 import json
 import gc
 import machine
 
 from plantcare_ibm import PlantCare, WindowState, OnOffState
 from StatusLight import StatusLight
+from Buzzer import Buzzer
 
-#GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
-GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
+GREENHOUSE_DATASERVICE = 'https://dataservice.27uzmkl2grxv.us-south.codeengine.appdomain.cloud' 
+#GREENHOUSE_DATASERVICE = 'http://172.65.217.53'
 ZONE_NAMES = [
     {"name": "zone1", "pinNumber": 21}, 
     {"name": "zone2", "pinNumber": 20}, 
@@ -26,8 +27,9 @@ from the plant care system
 The program also includes a function to display an error message with a specific code and message.
 """
 class PlantServer(object):
-    
-    zoneName = None
+      
+    #ssid = 'IBMGuest'
+    #password = 'Unit-7-Greet-8-Dial'   
     ssid = 'VM7763450'
     password = 'udWrTpeejf86gugx'
     #ssid = "Nigel’s iPhone"
@@ -36,6 +38,8 @@ class PlantServer(object):
     #password = None    
     ipAddress = "ERR"
         
+    zoneName = None
+    
     def __init__(self, zone):
         
         self.zoneName = zone["name"]
@@ -44,20 +48,19 @@ class PlantServer(object):
         self.statusLight.setConnectingStatus()      
         
         self.wlan = network.WLAN(network.STA_IF)
+        
         self.ipAddress = self.connect_to_network(self.ssid, self.password)
         
         print("***IP: " + str(self.ipAddress))
         
-        if self.ipAddress == None:
-            self.plantCare = PlantCare(None, self.zone.name, zone.pinNumber)         
-            print("No WIFI.  Using default settings...")
+        if self.ipAddress == None:    
+            print("No WIFI.")
             self.statusLight.setErroredStatus()
+            sys.exit()
         else:
             self.statusLight.setOperationalStatus()   
             self.plantCare = PlantCare(self.ipAddress, self.zoneName, self.pinNumber)
-            timestamp = self.configure()
-            self.plantCare.setDateTime(timestamp)
-            
+         
         
     """
     Connect to a Wi-Fi network.
@@ -159,7 +162,7 @@ class PlantServer(object):
         resp = None
         response = "ERROR"
         try:
-            resp = get( request_url, timeout=2000)
+            resp = get( request_url, timeout=5000)
             response = resp.text
             resp.close()
             
@@ -270,7 +273,7 @@ class PlantServer(object):
         resp = None
         response = "ERROR"
         try:
-            resp = post( request_url, headers=header, data=payload, timeout=500)
+            resp = post( request_url, headers=header, data=payload, timeout=5000)
             response = resp.text
             resp.close()
             
@@ -294,9 +297,10 @@ class PlantServer(object):
     def care(self, count):
         print('Start care...')
         
-        statusLight = StatusLight()        
+        statusLight = StatusLight()
+        statusLight.setOperationalStatus()        
         
-        SLEEP_TIME = 1
+        SLEEP_TIME = 0.1
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
 
         print("Care for zone: " + self.zoneName)
@@ -305,15 +309,16 @@ class PlantServer(object):
         self.plantCare.careforplants()
 
         # If timestamp exists then log every LOG_TIME mins
-        #if (count % LOG_TIME == 0):
-        #    self.logger()
+        if (count % LOG_TIME == 0):
+            self.logger()
 
         print('Sleep for {} seconds'.format(SLEEP_TIME))
             
         statusLight.setSleepingStatus()                       
         time.sleep(SLEEP_TIME)           
-        statusLight.setOperationalStatus()
+  
     
+            
 """
 This function is the main entry point for the program.
 
@@ -341,10 +346,18 @@ def main():
             zone4Server.care(count)
             count = count + 1
 
-    except Exception as err:
+    except SystemExit as err:
         sys.print_exception(err)
-        errMsg = '{}: {}'.format(type(err).__name__, err)
-        print(errMsg)
-        #machine.reset()
+        buzzer = Buzzer()
+        buzzer.buzz()
+        
+    except Exception as err:     
+        sys.print_exception(err)
+        buzzer = Buzzer()
+        buzzer.buzz()        
 
 main()
+
+
+
+

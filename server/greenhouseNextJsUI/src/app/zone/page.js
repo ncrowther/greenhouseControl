@@ -40,9 +40,9 @@ export default function Zone(zoneParam) {
 
   const tick = () => {
     if (waterLevel <= 90 && pumpState === 'ON') {
-      setWaterLevel((waterLevel) => waterLevel + 1);
+      setWaterLevel((waterLevel) => waterLevel + 2);
     } else if (waterLevel >= 15 && pumpState === 'OFF') {
-      setWaterLevel((waterLevel) => waterLevel - 1);
+      setWaterLevel((waterLevel) => waterLevel - 2);
     } else if (waterLevel > 50 && waterLevel <= 70 && pumpState === 'AUTO') {
       // Do Nothing as the water level is in the optimal range
     } else if (waterLevel > 70 && pumpState === 'AUTO') {
@@ -115,7 +115,7 @@ export default function Zone(zoneParam) {
   //}, []);
 
   useEffect(() => {
-    const dInterval = setInterval(() => tick(), 1000);
+    const dInterval = setInterval(() => tick(), 5000);
     return () => clearInterval(dInterval);
   }, [zone, pumpState, waterLevel, tick]);
 
