@@ -24,6 +24,16 @@ const endpoints = require('../config/endpoints.js');
 export default function LandingPage() {
   const endpoint = endpoints.serviceEndpoint;
 
+  const zone1Hydration = '22';
+  const zone2Hydration = '9';
+  const zone3Hydration = '42';
+  const zone4Hydration = '2';
+
+  const zone1Color = 'orange';
+  const zone2Color = 'red';
+  const zone3Color = 'green';
+  const zone4Color = 'red';
+
   const router = useRouter();
 
   return (
@@ -48,11 +58,11 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   <Knob
-                    value="64"
+                    value={zone1Hydration}
                     min={0}
                     max={100}
                     valueTemplate={'{value}%'}
-                    valueColor="green"
+                    valueColor={zone1Color}
                     rangeColor="lightgray"
                   />
 
@@ -61,7 +71,14 @@ export default function LandingPage() {
                     inputid="heater2"
                     name="heaterAuto"
                     value="AUTO"
-                    onClick={() => router.push('/zone?id=Zone1')}
+                    onClick={() =>
+                      router.push(
+                        '/zone?id=Zone1&hydration=' +
+                          zone1Hydration +
+                          '&color=' +
+                          zone1Color
+                      )
+                    }
                   >
                     Zone 1
                   </Button>
@@ -73,11 +90,11 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   <Knob
-                    value="9"
+                    value={zone2Hydration}
                     min={0}
                     max={100}
                     valueTemplate={'{value}%'}
-                    valueColor={'red'}
+                    valueColor={zone2Color}
                     rangeColor="lightgray"
                   />
 
@@ -86,7 +103,14 @@ export default function LandingPage() {
                     inputid="heater2"
                     name="heaterAuto"
                     value="AUTO"
-                    onClick={() => router.push('/zone?id=Zone2')}
+                    onClick={() =>
+                      router.push(
+                        '/zone?id=Zone2&hydration=' +
+                          zone2Hydration +
+                          '&color=' +
+                          zone2Color
+                      )
+                    }
                   >
                     Zone 2
                   </Button>
@@ -99,11 +123,11 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   <Knob
-                    value="21"
+                    value={zone3Hydration}
                     min={0}
                     max={100}
                     valueTemplate={'{value}%'}
-                    valueColor="red"
+                    valueColor={zone3Color}
                     rangeColor="lightgray"
                   />
 
@@ -112,7 +136,14 @@ export default function LandingPage() {
                     inputid="heater3"
                     name="heaterAuto"
                     value="AUTO"
-                    onClick={() => router.push('/zone?id=Zone3')}
+                    onClick={() =>
+                      router.push(
+                        '/zone?id=Zone3&hydration=' +
+                          zone3Hydration +
+                          '&color=' +
+                          zone3Color
+                      )
+                    }
                   >
                     Zone 3
                   </Button>
@@ -125,11 +156,11 @@ export default function LandingPage() {
                   className="landing-page__tab-content"
                 >
                   <Knob
-                    value="48"
+                    value={zone4Hydration}
                     min={0}
                     max={100}
                     valueTemplate={'{value}%'}
-                    valueColor="orange"
+                    valueColor={zone4Color}
                     rangeColor="lightgray"
                   />
 
@@ -138,7 +169,14 @@ export default function LandingPage() {
                     inputid="heater4"
                     name="heaterAuto"
                     value="AUTO"
-                    onClick={() => router.push('/zone?id=Zone4')}
+                    onClick={() =>
+                      router.push(
+                        '/zone?id=Zone4&hydration=' +
+                          zone4Hydration +
+                          '&color=' +
+                          zone4Color
+                      )
+                    }
                   >
                     Zone 4
                   </Button>

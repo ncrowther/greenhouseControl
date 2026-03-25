@@ -16,15 +16,21 @@ import { Knob } from 'primereact/knob';
 const endpoints = require('../config/endpoints.js');
 
 export default function Zone(zoneParam) {
-  const endpoint = endpoints.serviceEndpoint;
+  const zone = zoneParam.searchParams.id;
+  const hydration =
+    zoneParam.searchParams.hydration === undefined
+      ? '50'
+      : zoneParam.searchParams.hydration;
+  const color =
+    zoneParam.searchParams.color === undefined
+      ? 'red'
+      : zoneParam.searchParams.color;
 
-  const [waterLevel, setWaterLevel] = useState(11);
-  const [waterColor, setWaterColor] = useState('red');
-  const [pumpState, setPumpState] = useState('  ');
+  const [waterLevel, setWaterLevel] = useState(parseInt(hydration));
+  const [waterColor, setWaterColor] = useState(color);
+  const [pumpState, setPumpState] = useState('OFF');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
-
-  const zone = zoneParam.searchParams.id;
 
   const setDial = () => {
     if (waterLevel <= 15) {
@@ -51,7 +57,7 @@ export default function Zone(zoneParam) {
       setWaterLevel((waterLevel) => waterLevel + 5);
     }
     setDial();
-    getConfigData();
+    //getConfigData();
   };
 
   const handleOnSubmit = (state) => {
