@@ -36,7 +36,7 @@ const GreenhouseHeader = () => {
           </Link>
 
           <HeaderNavigation aria-label="IBM [Platform]">
-            <HeaderMenu aria-label="Set" menuLinkName="View">
+            <HeaderMenu aria-label="Set" menuLinkName="Zones">
               <HeaderMenuItem
                 label="Zone1"
                 onClick={() => {
@@ -177,6 +177,15 @@ const GreenhouseHeader = () => {
               }}
             >
               Cam
+            </HeaderMenuItem>
+
+            <HeaderMenuItem
+              label="Env"
+              onClick={() => {
+                router.push('/settings');
+              }}
+            >
+              Env
             </HeaderMenuItem>
           </HeaderNavigation>
 

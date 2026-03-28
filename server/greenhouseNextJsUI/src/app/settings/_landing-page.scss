@@ -7,7 +7,7 @@
 @use './overrides.scss';
 
 html {
-  background-color: rgb(35, 35, 35);
+  background-color: $layer-01;
 }
 
 .landing-page__illo {
@@ -72,8 +72,6 @@ html {
 .landing-page__r3 {
   margin-left: -20px;
   margin-right: -20px;
-  background-color: 'darkgray';
-  color: 'white';
 
   @include breakpoint-down(md) {
     margin-left: 0;

@@ -40,6 +40,7 @@ Configure paths in `jsconfig.json`
 ```bash
    yarn clean
    yarn build
+   [yarn start]
 ```
 
 2. Login to IBM Cloud.
@@ -63,6 +64,9 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
    ibmcloud resource groups
 
    ibmcloud target -g [resource_group] (-r [region])
+
+   ibmcloud target -g showcase-ai-assistants
+
 ```
 
 4. Select the code engine project:
@@ -71,6 +75,8 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
    ibmcloud ce project list
 
    ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
+
+   ibmcloud ce project select --id innovationstudio
 ```
 
 5. Start Docker (Rancher) Desktop and wait for status to be STARTED

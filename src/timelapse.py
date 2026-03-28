@@ -1,6 +1,6 @@
 # Timelapse camera for Raspbery Pi
 # Author: Nigel T. Crowther
-# Date: 31-Oct-2025
+# Date: 27-March-2026
 #
 # Set CAMERA_NUMBER to uniquely identify camera image
 # For remote maintenance via SSH, see https://phoenixnap.com/kb/enable-ssh-raspberry-pi
@@ -14,14 +14,27 @@ from PIL import Image
 from PIL import ImageDraw, Image, ImageFont
 import socket
 import os
+import logging
 
-CAMERA_NUMBER = 2
+CAMERA_NUMBER = 1
 #GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 GREENHOUSE_SERVER_URL =  'http://86.4.208.162'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
+LOG_FILE = '/home/ncrowther/projects/timelapse/timelapse.log'
+
 WAIT_TIME =  60 * 15 # Photo every 15 mins
 IMAGE_SIZE = (2592, 1944)
 NO_IMAGE = IMAGE_SIZE[0] * IMAGE_SIZE[1] * 0.05  # Image size below which it is discarded
+
+logging.basicConfig(
+        filename=LOG_FILE,
+        encoding="utf-8",
+        filemode="a",
+        format="{asctime} - {levelname} - {message}",
+        style="{",
+        datefmt="%Y-%m-%d %H:%M",
+        level=logging.INFO
+)
 
 
 # Check internet connection
@@ -35,6 +48,7 @@ def checkInternet():
 # Function to wait for internet connection
 def waitForInternet():
     while not(checkInternet()):
+        logging.info("Wait for internet...")
         sleep(1)
 
 def generateTimestamp():
@@ -48,11 +62,11 @@ def postPhoto(image, frame, timestamp):
     image_64 = base64.b64encode(open(image, "rb").read())
 
     imageLen = len(image_64)
-    print("Image length: {}".format(imageLen))
+    logging.info("Image length: {}".format(imageLen))
 
     # Discard if the image is less than a defined size
     if (imageLen < NO_IMAGE):
-        print("Image too dark. Discarding")
+        logging.info("Image too dark. Discarding")
         return False
 
     # Wait until WIFI connected
@@ -63,11 +77,11 @@ def postPhoto(image, frame, timestamp):
     myobj = {'_id': frame, 'cam': CAMERA_NUMBER, 'photo': image_64, 'timestamp': timestamp}
     try:
         res = requests.post(url, data=myobj, timeout=30)
-        print("POST:" + str(res))
+        logging.info("POST:" + str(res))
         return True
     except Exception as e:
-        print(f'Failed to send photo. {type(e)}: e')
-        print("Message: {}".format(e))
+        logging.error(f'Failed to send photo. {type(e)}: e')
+        logging.error("Message: {}".format(e))
         return False
 
 
@@ -75,6 +89,7 @@ def deletePhoto(file):
     # Remove old image if exists
     if os.path.exists(file):
        os.remove(file)
+       logging.info("Deleted")
 
 def takePhoto(timestamp, hostname, ip ):
 
@@ -119,7 +134,7 @@ def initialise():
     s.connect(("8.8.8.8", 80))
     ip = s.getsockname()[0]
 
-    print("Hostname: {}, IP: {}".format(hostname, ip))
+    logging.info("Hostname: {}, IP: {}".format(hostname, ip))
 
     picam2 = Picamera2()
     camera_config = picam2.create_preview_configuration(main={"size": IMAGE_SIZE, "format": "RGB888"})
@@ -136,23 +151,23 @@ frame = 1
 
 while True:
 
-    print("Frame " + str(frame))
+    logging.info("Frame " + str(frame))
 
     # Generate timestamp
     timestamp = generateTimestamp()
-    print(timestamp)
 
+    logging.info("Take photo")
     image = takePhoto(timestamp, hostname, ip)
 
     picam2.stop()
 
+    logging.info("Post photo")
     status = postPhoto(image, frame, timestamp)
 
     if (status == True):
         deletePhoto(image)
 
+    logging.info("Sleeping for {} seconds...".format(WAIT_TIME))
     sleep(WAIT_TIME)
 
     frame = frame + 1
-
-

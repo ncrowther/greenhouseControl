@@ -1,5 +1,7 @@
 'use client';
 
+import './_landing-page.scss';
+
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { Grid, Column, Button } from '@carbon/react';
@@ -10,7 +12,6 @@ import { IoRainyOutline } from 'react-icons/io5';
 import { FaFireFlameSimple } from 'react-icons/fa6';
 import { CiLight } from 'react-icons/ci';
 import { WiHumidity } from 'react-icons/wi';
-
 import { Knob } from 'primereact/knob';
 
 const endpoints = require('../config/endpoints.js');
@@ -29,6 +30,7 @@ export default function Zone(zoneParam) {
   const [waterLevel, setWaterLevel] = useState(parseInt(hydration));
   const [waterColor, setWaterColor] = useState(color);
   const [pumpState, setPumpState] = useState('OFF');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
@@ -46,15 +48,13 @@ export default function Zone(zoneParam) {
 
   const tick = () => {
     if (waterLevel <= 90 && pumpState === 'ON') {
-      setWaterLevel((waterLevel) => waterLevel + 2);
+      setWaterLevel((waterLevel) => waterLevel + 6);
     } else if (waterLevel >= 15 && pumpState === 'OFF') {
-      setWaterLevel((waterLevel) => waterLevel - 2);
-    } else if (waterLevel > 50 && waterLevel <= 70 && pumpState === 'AUTO') {
-      // Do Nothing as the water level is in the optimal range
-    } else if (waterLevel > 70 && pumpState === 'AUTO') {
-      setWaterLevel((waterLevel) => waterLevel - 5);
-    } else if (waterLevel <= 50 && pumpState === 'AUTO') {
-      setWaterLevel((waterLevel) => waterLevel + 5);
+      setWaterLevel((waterLevel) => waterLevel - 6);
+    } else if (waterLevel > 90) {
+      let newState = 'OFF';
+      setPumpState(newState);
+      writeConfig(newState);
     }
     setDial();
     //getConfigData();
@@ -73,9 +73,14 @@ export default function Zone(zoneParam) {
 
     console.log('state: ' + state);
     console.log('newstate: ' + newState);
-    writeConfig(newState);
-    setPumpState(newState);
-    //window.location.reload(false);
+
+    // Delay the state update and config write by 0.5 second (adjust as needed)
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setPumpState(newState);
+      writeConfig(newState);
+      setIsSubmitting(false);
+    }, 1000);
   };
 
   function writeConfig(newState) {
@@ -139,6 +144,7 @@ export default function Zone(zoneParam) {
   waterButton = (
     <div>
       <Button
+        disabled={isSubmitting}
         kind="primary"
         renderIcon={IoRainyOutline}
         inputid="pump1"
@@ -146,15 +152,16 @@ export default function Zone(zoneParam) {
         value={pumpState}
         onClick={(e) => handleOnSubmit(pumpState)}
       >
-        {pumpState}
+        {' '}
+        {isSubmitting ? 'Updating...' : pumpState}
       </Button>
     </div>
   );
 
   return (
     <Grid className="landing-page" fullWidth>
-      <Column lg={16} md={8} sm={4} className="landing-page__banner">
-        <h1>{zone}</h1>
+      <Column lg={16} md={8} sm={4} className="landing-page__r2">
+        <h1>&nbsp;{zone}</h1>
       </Column>
       <Column lg={16} md={8} sm={4} className="landing-page__r2">
         <Grid className="tabs-group-content">
@@ -171,6 +178,8 @@ export default function Zone(zoneParam) {
             />
             {waterButton}
           </Column>
+
+          <Column></Column>
 
           <Column md={2} lg={3} sm={1} className="landing-page__tab-content">
             <h3>Light</h3>
@@ -195,6 +204,8 @@ export default function Zone(zoneParam) {
             </Button>
           </Column>
 
+          <Column></Column>
+
           <Column md={2} lg={3} sm={1} className="landing-page__tab-content">
             <h3>Temperature</h3>
             <br></br>
@@ -217,6 +228,8 @@ export default function Zone(zoneParam) {
               ON
             </Button>
           </Column>
+
+          <Column></Column>
 
           <Column md={2} lg={3} sm={1} className="landing-page__tab-content">
             <h3>Humidity</h3>
