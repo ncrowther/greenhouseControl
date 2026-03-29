@@ -76,20 +76,17 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
 
    ibmcloud ce project select -n [PROJECT_NAME] e.g asc-watsonx
 
-   ibmcloud ce project select --id innovationstudio
+   ibmcloud ce project select --name innovationstudio
 ```
 
 5. Start Docker (Rancher) Desktop and wait for status to be STARTED
-
-```bash
-   docker login -u ncrowthe -p C\*\*\*\*!
-```
 
 6. Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
 
 7. Using the bash shell [SEPARATE SHELL AS ADMIN], deploy the sample application to your docker repo:
 
 ```bash
+    cd /e/ic/rasberrypipico/greenhouseControl/server/greenhouseNextJsUI
    ./CEbuild.sh
 ```
 

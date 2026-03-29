@@ -8,48 +8,62 @@ var environments = [
   { name: 'Zone4', zoneId: '4', camId: '4' },
 ];
 
-var currentEnv = environments[0];
-
-exports.getEnv = function getEnv() {
-  return currentEnv;
-};
-
 exports.getEnvs = function getEnvs() {
   return environments;
 };
 
-exports.setEnv = function setEnv(env) {
-  console.log('Environment set to: ' + env);
-  currentEnv = env;
+// Global read/write zone
+let env = environments[0];
+const getEnv = () => env;
+const setEnv = (value) => {
+  env = value;
 };
 
-/*
-exports.getConfig = function getConfig() {
-  console.log('Get config for: ' + environment.name);  
+exports.getEnv = getEnv;
+exports.setEnv = setEnv;
 
-  const myHeaders = new Headers();
-  myHeaders.append('Content-Type', 'application/json');
-  // Send data to the backend via POST
-  fetch(endpoints.configServiceEndpoint + '?id=' + environment.name, {
-    method: 'POST',
-    mode: 'cors',
-    headers: myHeaders,
-    body: configData, // body data type must match "Content-Type" header
-  })
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((error) => console.error(error));
+exports.getConfigData = async function getConfigData(selectedEnv) {
+  const configEndpoint =
+    endpoints.getEndpoint() +
+    endpoints.configService +
+    '?id=' +
+    selectedEnv.name;
+
+  try {
+    const response = await fetch(configEndpoint, {
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      const configData = data.doc;
+      return configData;
+    } else {
+      console.log('Error getting config data: ' + response.status);
+      throw new Error('Error getting config data: ' + response.status);
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
 };
-*/
 
 exports.writeConfig = function writeConfig(configData, selectedEnv) {
   console.log('SEND: ' + JSON.stringify(configData));
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.configServiceEndpoint + '?id=' + selectedEnv.name, {
+  const configEndpoint =
+    endpoints.getEndpoint() +
+    endpoints.configService +
+    '?id=' +
+    selectedEnv.name;
+  fetch(configEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -66,8 +80,14 @@ exports.light = function light(configData, selectedEnv) {
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.lightServiceEndpoint + '?id=' + selectedEnv.name, {
+  const lightEndpoint =
+    endpoints.getEndpoint() +
+    endpoints.lightService +
+    '?id=' +
+    selectedEnv.name;
+  fetch(lightEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -84,8 +104,11 @@ exports.heat = function heat(configData, selectedEnv) {
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.heatServiceEndpoint + '?id=' + selectedEnv.name, {
+  const heatEndpoint =
+    endpoints.getEndpoint() + endpoints.heatService + '?id=' + selectedEnv.name;
+  fetch(heatEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -102,8 +125,14 @@ exports.humidity = function humidity(configData, selectedEnv) {
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.humidityServiceEndpoint + '?id=' + selectedEnv.name, {
+  const humidityEndpoint =
+    endpoints.getEndpoint() +
+    endpoints.humidityService +
+    '?id=' +
+    selectedEnv.name;
+  fetch(humidityEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -120,8 +149,11 @@ exports.fan = function fan(configData, selectedEnv) {
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.fanServiceEndpoint + '?id=' + selectedEnv.name, {
+  const fanEndpoint =
+    endpoints.getEndpoint() + endpoints.fanService + '?id=' + selectedEnv.name;
+  fetch(fanEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -138,8 +170,11 @@ exports.vent = function vent(configData, selectedEnv) {
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.ventServiceEndpoint + '?id=' + selectedEnv.name, {
+  const ventEndpoint =
+    endpoints.getEndpoint() + endpoints.ventService + '?id=' + selectedEnv.name;
+  fetch(ventEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -156,8 +191,14 @@ exports.water = function water(configData, selectedEnv) {
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.waterServiceEndpoint + '?id=' + selectedEnv.name, {
+  const waterEndpoint =
+    endpoints.getEndpoint() +
+    endpoints.waterService +
+    '?id=' +
+    selectedEnv.name;
+  fetch(waterEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,
@@ -174,8 +215,11 @@ exports.pump = async function pump(configData, selectedEnv) {
 
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json');
+
   // Send data to the backend via POST
-  fetch(endpoints.pumpServiceEndpoint + '?id=' + selectedEnv, {
+  const pumpEndpoint =
+    endpoints.getEndpoint() + endpoints.pumpService + '?id=' + selectedEnv.name;
+  fetch(pumpEndpoint, {
     method: 'POST',
     mode: 'cors',
     headers: myHeaders,

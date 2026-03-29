@@ -19,7 +19,7 @@ const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
 
 export default function LandingPage() {
-  const [selectedServer, setSelectedServer] = useState('Cloud Service');
+  const [selectedServer, setSelectedServer] = useState(endpoints.getEndpoint());
 
   const serverOptions = [
     {
@@ -36,6 +36,7 @@ export default function LandingPage() {
 
   function setServer(serverEndpoint) {
     setSelectedServer(serverEndpoint);
+    endpoints.setEndpoint(serverEndpoint);
   }
 
   return (

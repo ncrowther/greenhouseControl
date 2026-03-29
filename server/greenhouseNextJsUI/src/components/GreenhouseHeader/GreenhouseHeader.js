@@ -173,7 +173,7 @@ const GreenhouseHeader = () => {
             <HeaderMenuItem
               label="Cam"
               onClick={() => {
-                router.push('/timelapse');
+                router.push('/cam');
               }}
             >
               Cam

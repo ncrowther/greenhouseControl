@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Loading, Column } from '@carbon/react';
 import { Galleria } from 'primereact/galleria';
-import { Dropdown } from 'primereact/dropdown';
 const config = require('../config/config.js');
 const endpoints = require('../config/endpoints.js');
 
-function TimelapsePage(camId) {
+function CamPage(camId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [photos, setphotos] = useState(null);
@@ -35,7 +34,11 @@ function TimelapsePage(camId) {
   const getPhotos = async (camId, setImages) => {
     const ONE_SECOND = 1000;
     await new Promise((resolve) => setTimeout(resolve, ONE_SECOND));
-    await fetch(`${endpoints.photoServiceEndpoint}?camId=${camId}`, {
+
+    const camEndpoint =
+      endpoints.getEndpoint() + endpoints.photoService + '?camId=' + camId;
+
+    await fetch(camEndpoint, {
       method: 'get',
       headers: {
         'Content-Type': 'application/json',
@@ -43,14 +46,14 @@ function TimelapsePage(camId) {
     })
       .then((response) => {
         if (response.status == 200) {
-          response.json().then((timelapseData) => {
-            setImages(timelapseData.Docs);
+          response.json().then((camData) => {
+            setImages(camData.Docs);
           }, []);
         }
       })
       .catch((err) => {
         console.log(err);
-        return <Grid className="timelapse-page">Loading</Grid>;
+        return <Grid className="cam-page">Loading</Grid>;
       });
 
     setLoading(false);
@@ -61,7 +64,7 @@ function TimelapsePage(camId) {
   }, []);
 
   if (loading) {
-    return <Loading active className="timelapse-class" description="Loading" />;
+    return <Loading active className="cam-class" description="Loading" />;
   }
 
   if (error) {
@@ -72,20 +75,31 @@ function TimelapsePage(camId) {
     <Grid className="landing-page" fullWidth>
       <Column lg={16} md={8} sm={4} className="landing-page__banner">
         <h1>
-          <Dropdown
-            variant="filled"
-            value={selectedEnv}
-            onChange={(e) => {
-              setSelectedEnv(e.value);
-              setEnv(e.value);
-            }}
-            options={config.getEnvs()}
-            optionLabel="name"
-            checkmark={true}
-            highlightOnSelect={false}
-            placeholder="Select environment"
-            className="w-full md:w-14rem"
-          />
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {config.getEnvs().map((env) => (
+              <button
+                key={env.camId}
+                onClick={() => {
+                  setSelectedEnv(env);
+                  setEnv(env);
+                }}
+                style={{
+                  padding: '16px 32px',
+                  fontSize: '16px',
+                  backgroundColor:
+                    selectedEnv.camId === env.camId ? '#0f62fe' : '#e0e0e0',
+                  color: selectedEnv.camId === env.camId ? 'white' : 'black',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight:
+                    selectedEnv.camId === env.camId ? 'bold' : 'normal',
+                }}
+              >
+                {env.name}
+              </button>
+            ))}
+          </div>
         </h1>
       </Column>
       <Column lg={16} md={8} sm={4} className="landing-page__content">
@@ -94,10 +108,10 @@ function TimelapsePage(camId) {
           value={photos}
           item={itemTemplate}
           autoPlay
-          transitionInterval={150}
+          transitionInterval={100}
         />
       </Column>
     </Grid>
   );
 }
-export default TimelapsePage;
+export default CamPage;

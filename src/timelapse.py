@@ -1,6 +1,6 @@
 # Timelapse camera for Raspbery Pi
 # Author: Nigel T. Crowther
-# Date: 27-March-2026
+# Date: 31-Oct-2025
 #
 # Set CAMERA_NUMBER to uniquely identify camera image
 # For remote maintenance via SSH, see https://phoenixnap.com/kb/enable-ssh-raspberry-pi
@@ -16,7 +16,7 @@ import socket
 import os
 import logging
 
-CAMERA_NUMBER = 1
+CAMERA_NUMBER = 3
 #GREENHOUSE_SERVER_URL =  'https://foxhound-hip-initially.ngrok-free.app'
 GREENHOUSE_SERVER_URL =  'http://86.4.208.162'
 BASE_DIR = '/home/ncrowther/Pictures/greenhouse'
@@ -58,7 +58,7 @@ def generateTimestamp():
     timestamp = str(timestamp)[0:19]
     return timestamp
 
-def postPhoto(image, frame, timestamp):
+def postPhoto(image, timestamp):
     image_64 = base64.b64encode(open(image, "rb").read())
 
     imageLen = len(image_64)
@@ -74,7 +74,7 @@ def postPhoto(image, frame, timestamp):
 
     # Post photo to server
     url = GREENHOUSE_SERVER_URL + '/photo'
-    myobj = {'_id': frame, 'cam': CAMERA_NUMBER, 'photo': image_64, 'timestamp': timestamp}
+    myobj = {'_id': timestamp, 'cam': CAMERA_NUMBER, 'photo': image_64, 'timestamp': timestamp}
     try:
         res = requests.post(url, data=myobj, timeout=30)
         logging.info("POST:" + str(res))
@@ -147,27 +147,17 @@ def initialise():
 
 hostname, ip, picam2 = initialise()
 
-frame = 1
+# Generate timestamp
+timestamp = generateTimestamp()
+logging.info("Photo" + str(timestamp))
 
-while True:
+image = takePhoto(timestamp, hostname, ip)
 
-    logging.info("Frame " + str(frame))
+picam2.stop()
 
-    # Generate timestamp
-    timestamp = generateTimestamp()
+status = postPhoto(image, timestamp)
 
-    logging.info("Take photo")
-    image = takePhoto(timestamp, hostname, ip)
+if (status == True):
+   deletePhoto(image)
 
-    picam2.stop()
-
-    logging.info("Post photo")
-    status = postPhoto(image, frame, timestamp)
-
-    if (status == True):
-        deletePhoto(image)
-
-    logging.info("Sleeping for {} seconds...".format(WAIT_TIME))
-    sleep(WAIT_TIME)
-
-    frame = frame + 1
+sleep(WAIT_TIME)

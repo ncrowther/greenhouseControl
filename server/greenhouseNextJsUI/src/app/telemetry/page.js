@@ -142,7 +142,12 @@ function TelemetryPage() {
   };
 
   async function getData() {
-    await fetch(endpoints.dataServiceEndpoint + '?id=' + config.getEnv().name, {
+    const telemetryEndpoint =
+      endpoints.getEndpoint() +
+      endpoints.dataService +
+      '?id=' +
+      config.getEnv().name;
+    await fetch(telemetryEndpoint, {
       method: 'get',
       headers: {
         'Content-Type': 'application/json',
@@ -191,22 +196,30 @@ function TelemetryPage() {
       {notifications}
 
       <Column lg={16} md={8} sm={4} className="landing-page__banner">
-        <h1>
-          <Dropdown
-            variant="filled"
-            value={selectedEnv}
-            onChange={(e) => {
-              setSelectedEnv(e.value);
-              setEnv(e.value);
-            }}
-            options={config.getEnvs()}
-            optionLabel="name"
-            checkmark={true}
-            highlightOnSelect={false}
-            placeholder="Select environment"
-            className="w-full md:w-14rem"
-          />
-        </h1>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {config.getEnvs().map((env) => (
+            <button
+              key={env.camId}
+              onClick={() => {
+                setSelectedEnv(env);
+                setEnv(env);
+              }}
+              style={{
+                padding: '16px 32px',
+                fontSize: '16px',
+                backgroundColor:
+                  selectedEnv.camId === env.camId ? '#0f62fe' : '#e0e0e0',
+                color: selectedEnv.camId === env.camId ? 'white' : 'black',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: selectedEnv.camId === env.camId ? 'bold' : 'normal',
+              }}
+            >
+              {env.name}
+            </button>
+          ))}
+        </div>
       </Column>
 
       <Column lg={16} md={8} sm={4} className="repo-page__r1">

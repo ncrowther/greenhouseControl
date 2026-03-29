@@ -21,7 +21,7 @@ function LightPage() {
     console.log('Event: ' + JSON.stringify(event));
     config.setEnv(event);
     setLoading(true);
-    await getConfigData();
+    await getConfigData(event);
     setLoading(false);
   };
 
@@ -44,41 +44,27 @@ function LightPage() {
     config.light(configData, selectedEnv);
   };
 
-  async function getConfigData() {
-    await fetch(
-      endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
-      {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status == 200) {
-          response.json().then((data) => {
-            const configData = data.doc;
-
-            console.log('*******' + JSON.stringify(configData));
-
-            if (configData) {
-              setLight(configData.lightState);
-              setLightOnTime(configData.lightOnOff[0]);
-              setLightOffTime(configData.lightOnOff[1]);
-            }
-          }, []);
+  async function getConfigData(selectedEnv) {
+    await config
+      .getConfigData(selectedEnv)
+      .then((configData) => {
+        console.log('Config*******' + JSON.stringify(configData));
+        if (configData) {
+          setLight(configData.lightState);
+          setLightOnTime(configData.lightOnOff[0]);
+          setLightOffTime(configData.lightOnOff[1]);
         }
       })
       .catch((err) => {
         console.log(err);
-        return <Grid className="config-page">Loading</Grid>;
+        return <Grid className="config-page">Error</Grid>;
       });
 
     setLoading(false);
   }
 
   useEffect(() => {
-    getConfigData();
+    getConfigData(selectedEnv);
   }, []);
 
   if (loading) {
@@ -210,22 +196,30 @@ function LightPage() {
   return (
     <Grid>
       <Column lg={16} md={8} sm={4} className="landing-page__banner">
-        <h1>
-          <Dropdown
-            variant="filled"
-            value={selectedEnv}
-            onChange={(e) => {
-              setSelectedEnv(e.value);
-              setEnv(e.value);
-            }}
-            options={config.getEnvs()}
-            optionLabel="name"
-            checkmark={true}
-            highlightOnSelect={false}
-            placeholder="Select environment"
-            className="w-full md:w-14rem"
-          />
-        </h1>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {config.getEnvs().map((env) => (
+            <button
+              key={env.camId}
+              onClick={() => {
+                setSelectedEnv(env);
+                setEnv(env);
+              }}
+              style={{
+                padding: '16px 32px',
+                fontSize: '16px',
+                backgroundColor:
+                  selectedEnv.camId === env.camId ? '#0f62fe' : '#e0e0e0',
+                color: selectedEnv.camId === env.camId ? 'white' : 'black',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: selectedEnv.camId === env.camId ? 'bold' : 'normal',
+              }}
+            >
+              {env.name}
+            </button>
+          ))}
+        </div>
       </Column>
       <Column lg={10} md={10} sm={10}>
         <br></br>

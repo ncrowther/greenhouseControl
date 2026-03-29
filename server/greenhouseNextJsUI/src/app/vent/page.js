@@ -4,14 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Knob } from 'primereact/knob';
 import { BiVent } from 'react-icons/bi';
 import { Button, Grid, Column } from '@carbon/react';
-import { Dropdown } from 'primereact/dropdown';
 import '@carbon/charts-react/styles.css';
-const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
 
 function Vent() {
   const [highTemp, setHighTemp] = useState('0');
-  const [fan, setFan] = useState('OFF');
   const [vent, setVent] = useState('DOWN');
   const [ventRun, setVentRun] = useState('0');
   const [ventPause, setVentPause] = useState(10);
@@ -23,7 +20,7 @@ function Vent() {
     console.log('Event: ' + JSON.stringify(event));
     config.setEnv(event);
     setLoading(true);
-    await getConfigData();
+    await getConfigData(event);
     setLoading(false);
   };
 
@@ -37,7 +34,6 @@ function Vent() {
   const writeConfig = (event) => {
     let configData = JSON.stringify({
       windowState: vent,
-      fanState: fan,
       windowRun: ventRun,
       windowPause: ventPause - 10, // Adjust for UI offset
       maxTemp: highTemp,
@@ -48,40 +44,28 @@ function Vent() {
     config.vent(configData, selectedEnv);
   };
 
-  async function getConfigData() {
-    await fetch(
-      endpoints.configServiceEndpoint + '?id=' + config.getEnv().name,
-      {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-      .then((response) => {
-        if (response.status == 200) {
-          response.json().then((data) => {
-            const configData = data.doc;
-
-            console.log('*******' + JSON.stringify(configData));
-
-            if (configData) {
-              setHighTemp(configData.temperatureRange[1]);
-              setVent(configData.windowState);
-              setVentRun(configData.windowRun);
-              setVentPause(configData.windowPause + 10); // Adjust for UI offset
-            }
-          }, []);
+  async function getConfigData(selectedEnv) {
+    await config
+      .getConfigData(selectedEnv)
+      .then((configData) => {
+        console.log('Config*******' + JSON.stringify(configData));
+        if (configData) {
+          setHighTemp(configData.temperatureRange[1]);
+          setVent(configData.windowState);
+          setVentRun(configData.windowRun);
+          setVentPause(configData.windowPause + 10); // Adjust for UI offset
         }
       })
       .catch((err) => {
         console.log(err);
-        return <Grid className="config-page">Loading</Grid>;
+        return <Grid className="config-page">Error</Grid>;
       });
+
+    setLoading(false);
   }
 
   useEffect(() => {
-    getConfigData();
+    getConfigData(selectedEnv);
   }, []);
 
   if (loading) {
@@ -213,22 +197,30 @@ function Vent() {
   return (
     <Grid>
       <Column lg={16} md={8} sm={4} className="landing-page__banner">
-        <h1>
-          <Dropdown
-            variant="filled"
-            value={selectedEnv}
-            onChange={(e) => {
-              setSelectedEnv(e.value);
-              setEnv(e.value);
-            }}
-            options={config.getEnvs()}
-            optionLabel="name"
-            checkmark={true}
-            highlightOnSelect={false}
-            placeholder="Select environment"
-            className="w-full md:w-14rem"
-          />
-        </h1>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {config.getEnvs().map((env) => (
+            <button
+              key={env.camId}
+              onClick={() => {
+                setSelectedEnv(env);
+                setEnv(env);
+              }}
+              style={{
+                padding: '16px 32px',
+                fontSize: '16px',
+                backgroundColor:
+                  selectedEnv.camId === env.camId ? '#0f62fe' : '#e0e0e0',
+                color: selectedEnv.camId === env.camId ? 'white' : 'black',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: selectedEnv.camId === env.camId ? 'bold' : 'normal',
+              }}
+            >
+              {env.name}
+            </button>
+          ))}
+        </div>
       </Column>
       <Column lg={10} md={10} sm={10}>
         <br></br>

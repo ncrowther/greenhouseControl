@@ -24,30 +24,37 @@ const sensecapAuth =
 //  'https://sensecap.seeed.cc/openapi/list_telemetry_data?device_eui=2CF7F1C06370017B';
 //const sensecapAuth =
 //  'Basic WldGQ0M5VEJUQ0RUWllNNjowRkUwNUNCQzdBMTE0RURCODVBMDcyQ0Q2MjYxNjc2NzgzNTJBNjJEQkM5RjQ3NTM5N0VCNzFGMEI3QjJFNUE5';
+const configService = '/config';
+const dataService = '/docs';
+const lightService = '/light';
+const heatService = '/heat';
+const humidityService = '/humidity';
+const fanService = '/fan';
+const ventService = '/vent';
+const waterService = '/water';
+const pumpService = '/pump';
+const photoService = '/photos';
 
-const configServiceEndpoint = `${serviceEndpoint}/config`;
-const lightServiceEndpoint = `${serviceEndpoint}/light`;
-const heatServiceEndpoint = `${serviceEndpoint}/heat`;
-const humidityServiceEndpoint = `${serviceEndpoint}/humidity`;
-const fanServiceEndpoint = `${serviceEndpoint}/fan`;
-const ventServiceEndpoint = `${serviceEndpoint}/vent`;
-const waterServiceEndpoint = `${serviceEndpoint}/water`;
-const pumpServiceEndpoint = `${serviceEndpoint}/pump`;
-const dataServiceEndpoint = `${serviceEndpoint}/docs`;
-const photoServiceEndpoint = `${serviceEndpoint}/photos`;
+// Global read/write endpoint variable (default to serviceEndpoint)
+let endpoint = serviceEndpoint;
+const getEndpoint = () => endpoint;
+const setEndpoint = (value) => {
+  endpoint = value;
+};
 
-exports.serviceEndpoint = serviceEndpoint;
-exports.sensecapAuth = sensecapAuth;
-exports.configServiceEndpoint = configServiceEndpoint;
-exports.lightServiceEndpoint = lightServiceEndpoint;
-exports.heatServiceEndpoint = heatServiceEndpoint;
-exports.humidityServiceEndpoint = humidityServiceEndpoint;
-exports.fanServiceEndpoint = fanServiceEndpoint;
-exports.ventServiceEndpoint = ventServiceEndpoint;
-exports.waterServiceEndpoint = waterServiceEndpoint;
-exports.pumpServiceEndpoint = pumpServiceEndpoint;
-exports.dataServiceEndpoint = dataServiceEndpoint;
-exports.photoServiceEndpoint = photoServiceEndpoint;
+exports.getEndpoint = getEndpoint;
+exports.setEndpoint = setEndpoint;
+
+exports.dataService = dataService;
+exports.configService = configService;
+exports.lightService = lightService;
+exports.heatService = heatService;
+exports.humidityService = humidityService;
+exports.fanService = fanService;
+exports.ventService = ventService;
+exports.waterService = waterService;
+exports.pumpService = pumpService;
+exports.photoService = photoService;
 exports.sensecapDatalogEndpoint = sensecapDatalogEndpoint;
 exports.sensecapSoilEndpoint = sensecapSoilEndpoint;
 exports.sensecapAuth = sensecapAuth;

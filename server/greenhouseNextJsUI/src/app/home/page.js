@@ -31,7 +31,7 @@ export default function LandingPage() {
           }}
         >
           <Image
-            src="/instana.jpg"
+            src="/instanazones.jpg"
             alt="Instana map"
             fill
             style={{ objectFit: 'cover' }}
