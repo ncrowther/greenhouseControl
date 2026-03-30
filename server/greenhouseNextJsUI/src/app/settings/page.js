@@ -32,6 +32,10 @@ export default function LandingPage() {
       name: 'Foxhound',
       value: 'https://foxhound-hip-initially.ngrok-free.app',
     },
+    {
+      name: 'Raspberry Pi',
+      value: 'http://86.4.208.162',
+    },
   ];
 
   function setServer(serverEndpoint) {

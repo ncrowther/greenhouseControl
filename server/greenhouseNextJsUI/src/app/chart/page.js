@@ -198,23 +198,14 @@ function ChartPage() {
 
   // Initialize chart when data is loaded
   useEffect(() => {
-    if (
-      airTemperatureData.length > 0 ||
-      leafTemperatureData.length > 0 ||
-      humidityData.length > 0 ||
-      vpdData.length > 0 ||
-      co2Data.length > 0 ||
-      luxData.length > 0
-    ) {
-      refreshChart(
-        airTemperatureChecked,
-        leafTemperatureChecked,
-        humidityChecked,
-        vpdChecked,
-        co2Checked,
-        luxChecked
-      );
-    }
+    refreshChart(
+      airTemperatureChecked,
+      leafTemperatureChecked,
+      humidityChecked,
+      vpdChecked,
+      co2Checked,
+      luxChecked
+    );
   }, [
     airTemperatureData,
     leafTemperatureData,
