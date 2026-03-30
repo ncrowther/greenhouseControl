@@ -210,7 +210,7 @@ exports.water = function water(configData, selectedEnv) {
     .catch((error) => console.error(error));
 };
 
-exports.pump = async function pump(configData, selectedEnv) {
+exports.pump = async function pump(configData, zoneId) {
   console.log('SEND: ' + JSON.stringify(configData));
 
   const myHeaders = new Headers();
@@ -218,7 +218,7 @@ exports.pump = async function pump(configData, selectedEnv) {
 
   // Send data to the backend via POST
   const pumpEndpoint =
-    endpoints.getEndpoint() + endpoints.pumpService + '?id=' + selectedEnv.name;
+    endpoints.getEndpoint() + endpoints.pumpService + '?id=' + zoneId;
   fetch(pumpEndpoint, {
     method: 'POST',
     mode: 'cors',

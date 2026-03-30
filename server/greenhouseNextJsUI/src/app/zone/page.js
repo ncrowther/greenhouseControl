@@ -93,29 +93,18 @@ export default function Zone(zoneParam) {
     config.pump(configData, zone);
   }
 
-  async function getConfigData() {
-    fetch(endpoints.configServiceEndpoint + '?id=' + zone, {
-      method: 'get',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => {
-        if (response.status == 200) {
-          response.json().then((data) => {
-            const configData = data.doc;
-
-            console.log('***getConfigData****' + JSON.stringify(configData));
-
-            if (configData) {
-              setPumpState(configData.pumpState);
-            }
-          }, []);
+  async function getConfigData(selectedEnv) {
+    await config
+      .getConfigData(selectedEnv)
+      .then((configData) => {
+        console.log('Config*******' + JSON.stringify(configData));
+        if (configData) {
+          setPumpState(configData.pumpState);
         }
       })
       .catch((err) => {
         console.log(err);
-        return <Grid className="config-page">Loading</Grid>;
+        return <Grid className="config-page">Error</Grid>;
       });
 
     setLoading(false);
