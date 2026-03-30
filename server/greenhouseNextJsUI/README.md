@@ -65,7 +65,7 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
 
    ibmcloud target -g [resource_group] (-r [region])
 
-   ibmcloud target -g showcase-ai-assistants
+   ibmcloud target -g showcase-ai-assistants -r us-south
 
 ```
 
