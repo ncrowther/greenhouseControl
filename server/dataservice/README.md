@@ -21,6 +21,8 @@ See:
 
  ```sh
    setenv.bat
+
+   source ./setenv.sh [UNIX]
 ```
 
  Start a local nodejs server: 
