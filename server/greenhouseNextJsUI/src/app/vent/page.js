@@ -243,23 +243,23 @@ function Vent() {
             rangeColor="lightgray"
           />
 
-          <h4>Vent Run (1 - 30 Sec):</h4>
+          <h4>Vent Run (1 - 10 Sec):</h4>
           <Knob
             value={ventRun}
             onChange={(e) => setVentRun(e.value)}
             min={1}
-            max={30}
+            max={10}
             valueTemplate={'{value}'}
             valueColor="blue"
             rangeColor="lightgray"
           />
 
-          <h4>Vent Pause (10 - 30 Sec):</h4>
+          <h4>Vent Pause (10 - 45 Sec):</h4>
           <Knob
             value={ventPause}
             onChange={(e) => setVentPause(e.value)}
             min={10}
-            max={30}
+            max={45}
             valueTemplate={'{value}'}
             valueColor="purple"
             rangeColor="lightgray"

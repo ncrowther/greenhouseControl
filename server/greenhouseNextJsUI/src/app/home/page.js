@@ -74,6 +74,7 @@ export default function LandingPage() {
               )
             }
             title="Go to Zone 2"
+            className="zone-button-flash"
             style={{
               position: 'absolute',
               top: '60%',
@@ -128,6 +129,7 @@ export default function LandingPage() {
               )
             }
             title="Go to Zone 4"
+            className="zone-button-flash"
             style={{
               position: 'absolute',
               top: '86%',

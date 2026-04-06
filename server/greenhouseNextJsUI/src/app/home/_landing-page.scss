@@ -97,3 +97,17 @@ html {
     padding-bottom: $spacing-05 * 4;
   }
 }
+
+@keyframes flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.zone-button-flash {
+  animation: flash 1s infinite;
+}
