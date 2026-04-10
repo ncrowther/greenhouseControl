@@ -40,7 +40,7 @@ export default function LandingPage() {
           <button
             onClick={() =>
               router.push(
-                '/zone?id=Zone1&hydration=' +
+                '/zone?id=1&hydration=' +
                   zone1Hydration +
                   '&color=' +
                   zone1Color
@@ -67,7 +67,7 @@ export default function LandingPage() {
           <button
             onClick={() =>
               router.push(
-                '/zone?id=Zone2&hydration=' +
+                '/zone?id=2&hydration=' +
                   zone2Hydration +
                   '&color=' +
                   zone2Color
@@ -95,7 +95,7 @@ export default function LandingPage() {
           <button
             onClick={() =>
               router.push(
-                '/zone?id=Zone3&hydration=' +
+                '/zone?id=3&hydration=' +
                   zone3Hydration +
                   '&color=' +
                   zone3Color
@@ -122,7 +122,7 @@ export default function LandingPage() {
           <button
             onClick={() =>
               router.push(
-                '/zone?id=Zone4&hydration=' +
+                '/zone?id=4&hydration=' +
                   zone4Hydration +
                   '&color=' +
                   zone4Color

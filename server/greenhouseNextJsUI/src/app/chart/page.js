@@ -40,8 +40,8 @@ function ChartPage() {
     const telemetryEndpoint =
       endpoints.getEndpoint() +
       endpoints.dataService +
-      '?id=' +
-      config.getEnv().name;
+      '?id=zone' +
+      config.getEnv().id;
     await fetch(telemetryEndpoint, {
       method: 'get',
       headers: {
@@ -232,7 +232,7 @@ function ChartPage() {
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             {config.getEnvs().map((env) => (
               <button
-                key={env.camId}
+                key={env.id}
                 onClick={() => {
                   setSelectedEnv(env);
                   setEnv(env);
@@ -241,13 +241,12 @@ function ChartPage() {
                   padding: '16px 32px',
                   fontSize: '16px',
                   backgroundColor:
-                    selectedEnv.camId === env.camId ? '#0f62fe' : '#e0e0e0',
-                  color: selectedEnv.camId === env.camId ? 'white' : 'black',
+                    selectedEnv.id === env.id ? '#0f62fe' : '#e0e0e0',
+                  color: selectedEnv.id === env.id ? 'white' : 'black',
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  fontWeight:
-                    selectedEnv.camId === env.camId ? 'bold' : 'normal',
+                  fontWeight: selectedEnv.id === env.id ? 'bold' : 'normal',
                 }}
               >
                 {env.name}

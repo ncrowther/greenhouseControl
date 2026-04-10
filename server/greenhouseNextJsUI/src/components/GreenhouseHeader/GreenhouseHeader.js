@@ -40,7 +40,7 @@ const GreenhouseHeader = () => {
               <HeaderMenuItem
                 label="Zone1"
                 onClick={() => {
-                  router.push('/zone?id=Zone1');
+                  router.push('/zone?id=1');
                 }}
               >
                 Zone1
@@ -49,7 +49,7 @@ const GreenhouseHeader = () => {
               <HeaderMenuItem
                 label="Zone2"
                 onClick={() => {
-                  router.push('/zone?id=Zone2');
+                  router.push('/zone?id=2');
                 }}
               >
                 Zone2
@@ -58,7 +58,7 @@ const GreenhouseHeader = () => {
               <HeaderMenuItem
                 label="Zone3"
                 onClick={() => {
-                  router.push('/zone?id=Zone3');
+                  router.push('/zone?id=3');
                 }}
               >
                 Zone3
@@ -67,14 +67,14 @@ const GreenhouseHeader = () => {
               <HeaderMenuItem
                 label="Zone4"
                 onClick={() => {
-                  router.push('/zone?id=Zone4');
+                  router.push('/zone?id=4');
                 }}
               >
                 Zone4
               </HeaderMenuItem>
             </HeaderMenu>
 
-            <HeaderMenu aria-label="Set" menuLinkName="Set">
+            <HeaderMenu aria-label="Control" menuLinkName="Control">
               <HeaderMenuItem
                 label="Light"
                 onClick={() => {
@@ -180,12 +180,12 @@ const GreenhouseHeader = () => {
             </HeaderMenuItem>
 
             <HeaderMenuItem
-              label="Env"
+              label="Settings"
               onClick={() => {
                 router.push('/settings');
               }}
             >
-              Env
+              Settings
             </HeaderMenuItem>
           </HeaderNavigation>
 

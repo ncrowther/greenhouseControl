@@ -797,26 +797,10 @@ app.get('/config', async (req, res) => {
 
   // ////// Helper function to get photoDb from cameraId passed in query param ///
   function getPhotoDb(camId) {
-    if (camId == null) {
-      camId = 1;
-    }
 
-    let photoDb = process.env.CAM1_DB_NAME;
-
-    if (camId == 2) {
-      photoDb = process.env.CAM2_DB_NAME;
-    }
-
-    if (camId == 3) {
-      photoDb = process.env.CAM3_DB_NAME;
-    }
-
-    if (camId == 4) {
-      photoDb = process.env.CAM4_DB_NAME;
-    }
-
-    console.log("Selected db " + photoDb)
-    return photoDb;
+    camId = camId.toLowerCase();
+    console.log("Selected db " + camId)
+    return camId;
   }
 
   app.listen(port, () => {

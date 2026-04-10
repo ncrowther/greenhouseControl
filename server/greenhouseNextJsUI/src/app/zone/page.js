@@ -60,7 +60,7 @@ export default function Zone(zoneParam) {
     //getConfigData();
   };
 
-  const handleOnSubmit = (state) => {
+  const handleOnSubmit = (state, zone) => {
     let newState = 'OFF';
 
     if (state === 'ON') {
@@ -78,12 +78,12 @@ export default function Zone(zoneParam) {
     setIsSubmitting(true);
     setTimeout(() => {
       setPumpState(newState);
-      writeConfig(newState);
+      writeConfig(newState, zone);
       setIsSubmitting(false);
     }, 1000);
   };
 
-  function writeConfig(newState) {
+  function writeConfig(newState, zone) {
     let configData = JSON.stringify({
       pumpState: newState,
     });
@@ -139,7 +139,7 @@ export default function Zone(zoneParam) {
         inputid="pump1"
         name="pumpOn"
         value={pumpState}
-        onClick={(e) => handleOnSubmit(pumpState)}
+        onClick={(e) => handleOnSubmit(pumpState, zone)}
       >
         {' '}
         {isSubmitting ? 'Updating...' : pumpState}
@@ -150,7 +150,7 @@ export default function Zone(zoneParam) {
   return (
     <Grid className="landing-page" fullWidth>
       <Column lg={16} md={8} sm={4} className="landing-page__r2">
-        <h1>&nbsp;{zone}</h1>
+        <h1>&nbsp;Zone {zone}</h1>
       </Column>
       <Column lg={16} md={8} sm={4} className="landing-page__r2">
         <Grid className="tabs-group-content">

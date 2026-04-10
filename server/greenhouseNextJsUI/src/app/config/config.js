@@ -2,10 +2,10 @@ const { ResponseCookies } = require('next/dist/compiled/@edge-runtime/cookies');
 const endpoints = require('./endpoints.js');
 
 var environments = [
-  { name: 'Zone1', zoneId: '1', camId: '1' },
-  { name: 'Zone2', zoneId: '2', camId: '2' },
-  { name: 'Zone3', zoneId: '3', camId: '3' },
-  { name: 'Zone4', zoneId: '4', camId: '4' },
+  { name: 'Polytunnel', id: '1' },
+  { name: 'Greenhouse', id: '2' },
+  { name: 'Allotment', id: '3' },
+  { name: 'Drive', id: '4' },
 ];
 
 exports.getEnvs = function getEnvs() {
@@ -26,8 +26,8 @@ exports.getConfigData = async function getConfigData(selectedEnv) {
   const configEndpoint =
     endpoints.getEndpoint() +
     endpoints.configService +
-    '?id=' +
-    selectedEnv.name;
+    '?id=zone' +
+    selectedEnv.id;
 
   try {
     const response = await fetch(configEndpoint, {
@@ -61,8 +61,8 @@ exports.writeConfig = function writeConfig(configData, selectedEnv) {
   const configEndpoint =
     endpoints.getEndpoint() +
     endpoints.configService +
-    '?id=' +
-    selectedEnv.name;
+    '?id=zone' +
+    selectedEnv.id;
   fetch(configEndpoint, {
     method: 'POST',
     mode: 'cors',
@@ -85,8 +85,8 @@ exports.light = function light(configData, selectedEnv) {
   const lightEndpoint =
     endpoints.getEndpoint() +
     endpoints.lightService +
-    '?id=' +
-    selectedEnv.name;
+    '?id=zone' +
+    selectedEnv.id;
   fetch(lightEndpoint, {
     method: 'POST',
     mode: 'cors',
@@ -107,7 +107,10 @@ exports.heat = function heat(configData, selectedEnv) {
 
   // Send data to the backend via POST
   const heatEndpoint =
-    endpoints.getEndpoint() + endpoints.heatService + '?id=' + selectedEnv.name;
+    endpoints.getEndpoint() +
+    endpoints.heatService +
+    '?id=zone' +
+    selectedEnv.id;
   fetch(heatEndpoint, {
     method: 'POST',
     mode: 'cors',
@@ -130,8 +133,8 @@ exports.humidity = function humidity(configData, selectedEnv) {
   const humidityEndpoint =
     endpoints.getEndpoint() +
     endpoints.humidityService +
-    '?id=' +
-    selectedEnv.name;
+    '?id=zone' +
+    selectedEnv.id;
   fetch(humidityEndpoint, {
     method: 'POST',
     mode: 'cors',
@@ -152,7 +155,10 @@ exports.fan = function fan(configData, selectedEnv) {
 
   // Send data to the backend via POST
   const fanEndpoint =
-    endpoints.getEndpoint() + endpoints.fanService + '?id=' + selectedEnv.name;
+    endpoints.getEndpoint() +
+    endpoints.fanService +
+    '?id=zone' +
+    selectedEnv.id;
   fetch(fanEndpoint, {
     method: 'POST',
     mode: 'cors',
@@ -173,7 +179,10 @@ exports.vent = function vent(configData, selectedEnv) {
 
   // Send data to the backend via POST
   const ventEndpoint =
-    endpoints.getEndpoint() + endpoints.ventService + '?id=' + selectedEnv.name;
+    endpoints.getEndpoint() +
+    endpoints.ventService +
+    '?id=zone' +
+    selectedEnv.id;
   fetch(ventEndpoint, {
     method: 'POST',
     mode: 'cors',
@@ -196,8 +205,8 @@ exports.water = function water(configData, selectedEnv) {
   const waterEndpoint =
     endpoints.getEndpoint() +
     endpoints.waterService +
-    '?id=' +
-    selectedEnv.name;
+    '?id=zone' +
+    selectedEnv.id;
   fetch(waterEndpoint, {
     method: 'POST',
     mode: 'cors',
@@ -210,7 +219,7 @@ exports.water = function water(configData, selectedEnv) {
     .catch((error) => console.error(error));
 };
 
-exports.pump = async function pump(configData, zoneId) {
+exports.pump = async function pump(configData, zone) {
   console.log('SEND: ' + JSON.stringify(configData));
 
   const myHeaders = new Headers();
@@ -218,7 +227,7 @@ exports.pump = async function pump(configData, zoneId) {
 
   // Send data to the backend via POST
   const pumpEndpoint =
-    endpoints.getEndpoint() + endpoints.pumpService + '?id=' + zoneId;
+    endpoints.getEndpoint() + endpoints.pumpService + '?id=zone' + zone;
   fetch(pumpEndpoint, {
     method: 'POST',
     mode: 'cors',
