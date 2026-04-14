@@ -30,10 +30,10 @@ class PlantServer(object):
       
     #ssid = 'IBMGuest'
     #password = 'Unit-7-Greet-8-Dial'   
-    ssid = 'VM7763450'
-    password = 'udWrTpeejf86gugx'
-    #ssid = "Nigel’s iPhone"
-    #password = 'Porker01!'     
+    #ssid = 'VM7763450'
+    #password = 'udWrTpeejf86gugx'
+    ssid = "Nigel’s iPhone"
+    password = 'Porker01!'     
     #ssid = 'MIFI_3880'
     #password = None    
     ipAddress = "ERR"
@@ -357,7 +357,3 @@ def main():
         buzzer.buzz()        
 
 main()
-
-
-
-

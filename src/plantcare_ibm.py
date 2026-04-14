@@ -181,9 +181,7 @@ class PlantCare(object):
         screen = 0
      
         # Look after plants
-        try:
-            time.sleep_ms(500)        
-            
+        try:  
             print("control watering...")
             self.pump.control()         
       
@@ -199,12 +197,11 @@ class PlantCare(object):
             
 def main():
     
-    plantCare = PlantCare("192.168.1.1")
+    plantCare = PlantCare("192.168.1.1", "Zone1", 1)
              
     while True:
         plantCare.careforplants()
 
 if __name__ == "__main__":
     main()
-
 

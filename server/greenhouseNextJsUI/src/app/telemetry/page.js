@@ -11,6 +11,8 @@ import {
   Column,
   Grid,
   ToastNotification,
+  TextInput,
+  Button,
 } from '@carbon/react';
 const endpoints = require('../config/endpoints.js');
 const config = require('../config/config.js');
@@ -46,9 +48,9 @@ const headers = [
   },
 ];
 
-const getNotifications = (rows) => {
-  const MAX_TEMPERATURE = 30.0;
-  const MIN_TEMPERATURE = 4.0;
+const getNotifications = (rows, maxTemp, minTemp) => {
+  const MAX_TEMPERATURE = maxTemp;
+  const MIN_TEMPERATURE = minTemp;
 
   const notifications = [];
   let maxViolation = null;
@@ -132,6 +134,18 @@ function TelemetryPage() {
   const [rows, setRows] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
+  const [maxViolationTemp, setMaxViolationTemp] = useState(30.0);
+  const [minViolationTemp, setMinViolationTemp] = useState(4.0);
+  const [showSettings, setShowSettings] = useState(false);
+
+  useEffect(() => {
+    // Load temperature thresholds from localStorage
+    const savedMaxTemp = localStorage.getItem('maxViolationTemp');
+    const savedMinTemp = localStorage.getItem('minViolationTemp');
+
+    if (savedMaxTemp) setMaxViolationTemp(parseFloat(savedMaxTemp));
+    if (savedMinTemp) setMinViolationTemp(parseFloat(savedMinTemp));
+  }, []);
 
   const setEnv = async (event) => {
     console.log('Event: ' + JSON.stringify(event));
@@ -139,6 +153,16 @@ function TelemetryPage() {
     setLoading(true);
     await getData();
     setLoading(false);
+  };
+
+  const saveTemperatureSettings = () => {
+    localStorage.setItem('maxViolationTemp', maxViolationTemp.toString());
+    localStorage.setItem('minViolationTemp', minViolationTemp.toString());
+    // Refresh notifications with new thresholds
+    setNotifications(
+      getNotifications(rows, maxViolationTemp, minViolationTemp)
+    );
+    setShowSettings(false);
   };
 
   async function getData() {
@@ -157,7 +181,9 @@ function TelemetryPage() {
         if (response.status == 200) {
           response.json().then((data) => {
             setRows(getRowItems(data.Docs));
-            setNotifications(getNotifications(data.Docs));
+            setNotifications(
+              getNotifications(data.Docs, maxViolationTemp, minViolationTemp)
+            );
           });
         }
       })
@@ -195,8 +221,15 @@ function TelemetryPage() {
     <Grid className="repo-page">
       {notifications}
 
-      <Column lg={16} md={8} sm={4} className="landing-page__banner">
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <Column lg={16} md={8} sm={4}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '10px',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
           {config.getEnvs().map((env) => (
             <button
               key={env.id}
@@ -221,6 +254,121 @@ function TelemetryPage() {
           ))}
         </div>
       </Column>
+
+      <Column>
+        <div>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            style={{
+              padding: '16px 32px',
+              fontSize: '16px',
+              backgroundColor: showSettings ? '#0f62fe' : '#e0e0e0',
+              color: showSettings ? 'white' : 'black',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: showSettings ? 'bold' : 'normal',
+            }}
+          >
+            Alerts
+          </button>
+        </div>
+      </Column>
+
+      {showSettings && (
+        <Column
+          lg={16}
+          md={8}
+          sm={4}
+          style={{
+            marginTop: '20px',
+            padding: '20px',
+            backgroundColor: '#f4f4f4',
+            borderRadius: '4px',
+          }}
+        >
+          <h4 style={{ marginBottom: '16px' }}>Temperature Alert Settings</h4>
+          <div
+            style={{
+              display: 'flex',
+              gap: '20px',
+              flexWrap: 'wrap',
+              alignItems: 'flex-end',
+            }}
+          >
+            <div style={{ flex: '1', minWidth: '200px' }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: '8px',
+                  fontWeight: '500',
+                }}
+              >
+                Max Temperature Alert (°C)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={maxViolationTemp}
+                onChange={(e) =>
+                  setMaxViolationTemp(parseFloat(e.target.value) || 0)
+                }
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '14px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              />
+            </div>
+            <div style={{ flex: '1', minWidth: '200px' }}>
+              <label
+                style={{
+                  display: 'block',
+                  marginBottom: '8px',
+                  fontWeight: '500',
+                }}
+              >
+                Min Temperature Alert (°C)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={minViolationTemp}
+                onChange={(e) =>
+                  setMinViolationTemp(parseFloat(e.target.value) || 0)
+                }
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '14px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              />
+            </div>
+            <button
+              onClick={saveTemperatureSettings}
+              style={{
+                padding: '8px 24px',
+                fontSize: '14px',
+                backgroundColor: '#0f62fe',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >
+              Save Settings
+            </button>
+          </div>
+          <p style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
+            Current settings: Max {maxViolationTemp}°C, Min {minViolationTemp}°C
+          </p>
+        </Column>
+      )}
 
       <Column lg={16} md={8} sm={4} className="repo-page__r1">
         <TelemetryTable headers={headers} rows={rows} />
