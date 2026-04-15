@@ -11,7 +11,7 @@ function Vent() {
   const [highTemp, setHighTemp] = useState('0');
   const [vent, setVent] = useState('DOWN');
   const [ventRun, setVentRun] = useState('0');
-  const [ventPause, setVentPause] = useState(10);
+  const [ventPause, setVentPause] = useState(0);
   const [selectedEnv, setSelectedEnv] = useState(config.getEnv());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -35,7 +35,7 @@ function Vent() {
     let configData = JSON.stringify({
       windowState: vent,
       windowRun: ventRun,
-      windowPause: ventPause - 10, // Adjust for UI offset
+      windowPause: ventPause,
       maxTemp: highTemp,
     });
 
@@ -53,7 +53,7 @@ function Vent() {
           setHighTemp(configData.temperatureRange[1]);
           setVent(configData.windowState);
           setVentRun(configData.windowRun);
-          setVentPause(configData.windowPause + 10); // Adjust for UI offset
+          setVentPause(configData.windowPause);
         }
       })
       .catch((err) => {
@@ -243,23 +243,23 @@ function Vent() {
             rangeColor="lightgray"
           />
 
-          <h4>Vent Run (1 - 10 Sec):</h4>
+          <h4>Vent Run (1 - 45 Sec):</h4>
           <Knob
             value={ventRun}
             onChange={(e) => setVentRun(e.value)}
             min={1}
-            max={10}
+            max={45}
             valueTemplate={'{value}'}
             valueColor="blue"
             rangeColor="lightgray"
           />
 
-          <h4>Vent Pause (10 - 45 Sec):</h4>
+          <h4>Vent Pause (1 - 240 Sec):</h4>
           <Knob
             value={ventPause}
             onChange={(e) => setVentPause(e.value)}
-            min={10}
-            max={45}
+            min={1}
+            max={240}
             valueTemplate={'{value}'}
             valueColor="purple"
             rangeColor="lightgray"

@@ -33,7 +33,7 @@ class Clock(object):
             self.bus = I2C(I2C_PORT,scl=Pin(I2C_SCL),sda=Pin(I2C_SDA))
         except Exception as e:
             print(e)  
-            raise HardwareError("DS18B20 Temperature Probe", 100)                
+            raise HardwareError("RTC", 100)                
 
     def set_time(self,new_time):
         
@@ -54,7 +54,7 @@ class Clock(object):
 
         except Exception as e:
             print(e)  
-            raise HardwareError("DS18B20 Temperature Probe", 100)        
+            raise HardwareError("DDs3231 Clock", 100)        
     
     def getDateTime(self):      
         try: 

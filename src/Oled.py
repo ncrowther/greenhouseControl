@@ -10,8 +10,7 @@ class Oled                                                                      
         #====== setup the I2C communication
         i2c = I2C(0, sda=Pin(0), scl=Pin(1))
 
-        # Set up the OLED display (128x64 pixels) on the I2C bus
-        # SSD1306_I2C is a subclass of FrameBuffer. FrameBuffer provides support for graphics primitives.
+        # Set up the OLED display (128x64 pixels) on the I2C bus                                                                                                                                                                                                  D1306_I2C is a subclass of FrameBuffer. FrameBuffer provides support for graphics primitives.
         # http://docs.micropython.org/en/latest/pyboard/library/framebuf.html
         self.oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 

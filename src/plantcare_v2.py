@@ -199,28 +199,43 @@ class LinearActuator(object):
         elif (state == WindowState.CLOSED):
             self.up_pin.value(0)  # Set up to OFF state        
             self.down_pin.value(1)  # Set down to ON state
-            self.windowAngle = 15 # Assume its been left slighty ajar so we can close it
+            self.windowAngle = 0 # Fully closed angle
             print("Window CLOSED")
         elif (state == WindowState.AUTO):
-            self.up_pin.value(0)  # Set up to OFF state        
-            self.down_pin.value(0)  # Set down to ON state
+            #self.up_pin.value(0)  # Set up to OFF state        
+            #self.down_pin.value(0)  # Set down to ON state
             print("Window AUTO")               
             
-    def control(self, temperature, maxTemperature, oled):
+    def control(self, count, temperature, maxTemperature, oled, statusLight):
         
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 2
+        
+        # Return if delay time not met
+        modulus = count % self.PAUSE_SECS
+        print("Count %s, Pause: %s, Modulus %s " %(count, self.PAUSE_SECS, modulus) )           
+        if (modulus != 0):
+            # Sleep for pause interval
+            remaining = self.PAUSE_SECS - modulus
+            print("Remaining time %s " %remaining )
+            statusLight.setVentDwellStatus()
+            return
            
         # Open
         if (WindowState.AUTO == self.status()) and (temperature > maxTemperature) and (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
+            print("UP Temp %s > maxTemp: %s degrees %s" %(temperature, maxTemperature, self.windowAngle) )     
             oled.showVentStatus("UP", ">", temperature, maxTemperature, self.windowAngle, self.RUN_SECS, self.PAUSE_SECS)
-            self.up(self.RUN_SECS, self.PAUSE_SECS)
+            statusLight.setVentRunStatus()
+            
+            self.up(self.RUN_SECS)
 
         # Close
         minTemperature = (maxTemperature - DEAD_ZONE)
         if (WindowState.AUTO == self.status()) and (temperature < minTemperature) and (self.windowAngle > 0):
+            print("DOWN Temp %s < minTemp: %s degrees %s" %(temperature, minTemperature, self.windowAngle) )              
             oled.showVentStatus("DOWN", "<", temperature, minTemperature, self.windowAngle, self.RUN_SECS, self.PAUSE_SECS)
-            self.down(self.RUN_SECS, self.PAUSE_SECS)
+            statusLight.setVentRunStatus()            
+            self.down(self.RUN_SECS)
 
     def angle(self):
         return self.windowAngle  
@@ -234,42 +249,34 @@ class LinearActuator(object):
     def setRunSecs(self, runSecs):
         self.RUN_SECS = runSecs            
     
-    def up(self, runTimeSeconds, intervalSeconds):
+    def up(self, runTimeSeconds):
         
         self.down_pin.value(0)  # Set down to OFF state
         self.up_pin.value(1)  # Set up to ON state   
         
-        print("Run Period %s seconds " %runTimeSeconds )        
+        print("UP run %s seconds " %runTimeSeconds )        
              
         time.sleep_ms(runTimeSeconds * 1000)
         
         print("Run period OFF ")
-        self.up_pin.value(0)  # Set up to OFF state
-        
-        # Sleep for pause interval
-        print("Interval %s seconds " %intervalSeconds )           
-        time.sleep_ms(intervalSeconds * 1000)        
+        self.up_pin.value(0)  # Set up to OFF state      
         
         # Increment degrees incline
         self.windowAngle = self.windowAngle + runTimeSeconds
             
         print("Window Angle: " + str(self.windowAngle))              
         
-    def down(self, runTimeSeconds, intervalSeconds):
+    def down(self, runTimeSeconds):
      
         self.up_pin.value(0)  # Set up to OFF state   
         self.down_pin.value(1)  # Set down to ON state    
         
-        print("Run Period %s seconds " %runTimeSeconds )        
+        print("DOWN run %s seconds " %runTimeSeconds )        
              
         time.sleep_ms(runTimeSeconds * 1000)
         
         print("Run period OFF ")
-        self.down_pin.value(0)  # Set down to OFF state
-        
-        # Sleep for pause interval
-        print("Interval %s seconds " %intervalSeconds )           
-        time.sleep_ms(intervalSeconds * 1000)  
+        self.down_pin.value(0)  # Set down to OFF state 
 
         # Decrement degrees decline
         self.windowAngle = self.windowAngle - runTimeSeconds
@@ -277,7 +284,18 @@ class LinearActuator(object):
         if (self.windowAngle < 0):
             self.windowAngle = 0
             
-        print("Window Angle: " + str(self.windowAngle))      
+        print("Window Angle: " + str(self.windowAngle))
+        
+    def fullDown(self):
+        self.up_pin.value(0)  # Set up to OFF state   
+        self.down_pin.value(1)  # Set down to ON state         
+        self.windowAngle = 0
+        
+    def fullUp(self):
+        self.up_pin.value(1)  # Set up to OFF state   
+        self.down_pin.value(0)  # Set down to ON state         
+        self.windowAngle = self.MAX_ACTUATOR_ANGLE        
+                    
        
                     
 """
@@ -392,13 +410,15 @@ class PlantCare(object):
     
     # define temperature range
     MIN_TEMPERATURE  = 15
-    MAX_TEMPERATURE = 25
+    MAX_TEMPERATURE = 25    
         
     def __init__(self, ip):
         
         try:
             self.ip = ip
             
+            self.statusLight = StatusLight()
+                    
             # Clock used to active objects on a schedule 
             self.rtc = Clock()
             
@@ -406,19 +426,14 @@ class PlantCare(object):
             self.oled = Oled()              
             
             # Init temperature probe
-            self.temperatureProbe = TemperatureHumidityProbe()          
+            self.temperatureProbe = TemperatureHumidityProbe()
+            self.temperatureProbe.measureIt()                    
+            airTemperature = self.temperatureProbe.temperature           
 
             ## Create the objects to be controlled
             self.windows = LinearActuator()
             self.pump = Pump()
             self.fan = Fan()
-
-            # Startup check
-            # Turn off everything and then set to AUTO before starting loop
-            self.windows.setState(WindowState.OPEN)
-            time.sleep_ms(50)
-            self.windows.setState(WindowState.CLOSED)               
-            self.windows.setState(WindowState.AUTO)
             
             self.pump.setState(OnOffState.OFF)
             self.pump.setState(OnOffState.AUTO)        
@@ -426,11 +441,17 @@ class PlantCare(object):
             self.fan.setState(OnOffState.OFF)
             self.fan.setState(OnOffState.AUTO)
             
+            # Startup 
+            # Set to default pos before auto controls
+            if (airTemperature <= self.MAX_TEMPERATURE): 
+                self.windows.fullDown()
+            else:
+                self.windows.fullUp()               
+            
         except HardwareError as e:
             print("Exception: " + str(e))
             
-            statusLight = StatusLight()
-            statusLight.setErroredStatus()                 
+            self.statusLight.setErroredStatus()                 
         
     def setDateTime(self, datetime):              
         
@@ -498,7 +519,7 @@ class PlantCare(object):
         self.pump.setState(OnOffState.OFF)
         self.light.setState(OnOffState.OFF)        
 
-    def careforplants(self):
+    def careforplants(self, count):
           
         print("careforplants...")
         
@@ -512,10 +533,10 @@ class PlantCare(object):
             
             self.temperatureProbe.measureIt()                    
             airTemperature = self.temperatureProbe.temperature
-            humidity = self.temperatureProbe.humidity              
+            humidity = self.temperatureProbe.humidity       
             
             print("control vents")
-            self.windows.control(airTemperature, self.MAX_TEMPERATURE, self.oled)
+            self.windows.control(count, airTemperature, self.MAX_TEMPERATURE, self.oled, self.statusLight)
             
             print("control fans")            
             self.fan.control(airTemperature, self.MAX_TEMPERATURE)            
@@ -534,8 +555,7 @@ class PlantCare(object):
         except HardwareError as e:
             print("Exception: " + str(e))
             
-            statusLight = StatusLight()
-            statusLight.setErroredStatus()  
+            self.statusLight.setErroredStatus()  
          
             sys.exit("Terminated")
                                    
@@ -546,10 +566,8 @@ def main():
     plantCare = PlantCare("192.168.1.1")
              
     while True:
-        plantCare.careforplants()
+        plantCare.careforplants(0)
 
 if __name__ == "__main__":
     main()
-
-
 

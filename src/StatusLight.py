@@ -19,7 +19,8 @@ GREEN = (00, 255, 0)
 BLUE = (00, 00, 255)
 MAGENTA = (255, 00, 255)
 ORANGE = (255, 255, 0)
-    
+WHITE = (255, 255, 255)
+
 class StatusLight(object):
         
     def __init__(self):
@@ -61,7 +62,15 @@ class StatusLight(object):
         
     def setWarningStatus(self):
         self.setColor(ORANGE, 1)
-        self.show()                
+        self.show()
+        
+    def setVentRunStatus(self):
+        self.setColor(ORANGE, 1)
+        self.show()
+        
+    def setVentDwellStatus(self):
+        self.setColor(WHITE, 1)
+        self.show()            
 
     def setErroredStatus(self):
         self.setColor(RED, 255)
@@ -88,6 +97,3 @@ def main():
 if __name__ == "__main__":
     main()    
         
-
-
-
