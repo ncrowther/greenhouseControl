@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
 import { Knob } from 'primereact/knob';
 const config = require('../config/config.js');
 import { IoRainyOutline } from 'react-icons/io5';
@@ -278,7 +279,7 @@ function Water() {
             ariaLabelInput="Lower bound"
             invalidText="Invalid value"
             labelText=""
-            max={59}
+            max={55}
             min={0}
             step={1}
             unstable_ariaLabelInputUpper="Upper bound"

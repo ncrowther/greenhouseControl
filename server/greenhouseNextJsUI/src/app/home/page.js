@@ -27,11 +27,11 @@ export default function LandingPage() {
             position: 'relative',
             width: '100vw',
             height: 'calc(100vh - 120px)',
-            maxHeight: 'calc(100vh - 100px)',
+            maxHeight: 'calc(100vh - 120px)',
           }}
         >
           <Image
-            src="/instanazones.jpg"
+            src="/zones.jpg"
             alt="Instana map"
             fill
             style={{ objectFit: 'cover' }}
@@ -49,10 +49,10 @@ export default function LandingPage() {
             title="Go to Zone 1"
             style={{
               position: 'absolute',
-              top: '48%',
-              left: '17%',
-              width: '72px',
-              height: '72px',
+              top: '44%',
+              left: '13%',
+              width: '120px',
+              height: '120px',
               borderRadius: '50%',
               border: '3px solid #fff',
               backgroundColor: 'rgba(255, 165, 0, 0.85)',
@@ -77,10 +77,10 @@ export default function LandingPage() {
             className="zone-button-flash"
             style={{
               position: 'absolute',
-              top: '60%',
-              left: '26%',
-              width: '72px',
-              height: '72px',
+              top: '44%',
+              left: '36%',
+              width: '120px',
+              height: '120px',
               borderRadius: '50%',
               border: '3px solid #fff',
               backgroundColor: 'rgba(255, 0, 0, 0.85)',
@@ -104,10 +104,10 @@ export default function LandingPage() {
             title="Go to Zone 3"
             style={{
               position: 'absolute',
-              top: '73%',
-              left: '34%',
-              width: '72px',
-              height: '72px',
+              top: '44%',
+              left: '58%',
+              width: '120px',
+              height: '120px',
               borderRadius: '50%',
               border: '3px solid #fff',
               backgroundColor: 'rgba(0, 255, 0, 0.85)',
@@ -132,10 +132,10 @@ export default function LandingPage() {
             className="zone-button-flash"
             style={{
               position: 'absolute',
-              top: '86%',
-              left: '42%',
-              width: '72px',
-              height: '72px',
+              top: '44%',
+              left: '80%',
+              width: '120px',
+              height: '120px',
               borderRadius: '50%',
               border: '3px solid #fff',
               backgroundColor: 'rgba(255, 0, 0, 0.85)',

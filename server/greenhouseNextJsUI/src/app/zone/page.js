@@ -13,6 +13,7 @@ import { FaFireFlameSimple } from 'react-icons/fa6';
 import { CiLight } from 'react-icons/ci';
 import { WiHumidity } from 'react-icons/wi';
 import { Knob } from 'primereact/knob';
+import Image from 'next/image';
 
 const endpoints = require('../config/endpoints.js');
 
@@ -30,6 +31,7 @@ export default function Zone(zoneParam) {
   const [waterLevel, setWaterLevel] = useState(parseInt(hydration));
   const [waterColor, setWaterColor] = useState(color);
   const [pumpState, setPumpState] = useState('OFF');
+  const [direction, setDirection] = useState('DOWN');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -46,16 +48,39 @@ export default function Zone(zoneParam) {
     }
   };
 
-  const tick = () => {
-    if (waterLevel <= 90 && pumpState === 'ON') {
-      setWaterLevel((waterLevel) => waterLevel + 6);
-    } else if (waterLevel >= 15 && pumpState === 'OFF') {
-      setWaterLevel((waterLevel) => waterLevel - 6);
-    } else if (waterLevel > 90) {
-      let newState = 'OFF';
-      setPumpState(newState);
-      writeConfig(newState);
+  const tick = (zone) => {
+    if (waterLevel <= 43 && pumpState === 'AUTO') {
+      if (direction !== 'UP') {
+        writePumpConfig('ON', zone);
+        setDirection('UP');
+      }
+    } else if (waterLevel >= 67 && pumpState === 'AUTO') {
+      if (direction !== 'DOWN') {
+        writePumpConfig('OFF', zone);
+        setDirection('DOWN');
+      }
     }
+
+    if (waterLevel >= 97 && pumpState === 'ON') {
+      setPumpState('OFF');
+      writePumpConfig('OFF', zone);
+      setDirection('DOWN');
+    }
+
+    if (pumpState === 'ON') {
+      setDirection('UP');
+    }
+
+    if (pumpState === 'OFF') {
+      setDirection('DOWN');
+    }
+
+    if (direction === 'UP' && waterLevel < 97) {
+      setWaterLevel((waterLevel) => waterLevel + 3);
+    } else if (direction === 'DOWN' && waterLevel > 3) {
+      setWaterLevel((waterLevel) => waterLevel - 3);
+    }
+
     setDial();
     //getConfigData();
   };
@@ -78,12 +103,12 @@ export default function Zone(zoneParam) {
     setIsSubmitting(true);
     setTimeout(() => {
       setPumpState(newState);
-      writeConfig(newState, zone);
+      writePumpConfig(newState, zone);
       setIsSubmitting(false);
     }, 1000);
   };
 
-  function writeConfig(newState, zone) {
+  function writePumpConfig(newState, zone) {
     let configData = JSON.stringify({
       pumpState: newState,
     });
@@ -115,7 +140,7 @@ export default function Zone(zoneParam) {
   //}, []);
 
   useEffect(() => {
-    const dInterval = setInterval(() => tick(), 5000);
+    const dInterval = setInterval(() => tick(zone), 1000);
     return () => clearInterval(dInterval);
   }, [zone, pumpState, waterLevel, tick]);
 
@@ -243,6 +268,33 @@ export default function Zone(zoneParam) {
             </Button>
           </Column>
         </Grid>
+      </Column>
+
+      <Column lg={16} md={8} sm={4} style={{ marginTop: '1px' }}>
+        <hr
+          style={{
+            border: 'none',
+            borderTop: '3px solid #797676',
+            margin: '10px 0',
+          }}
+        />
+      </Column>
+
+      <Column lg={16} md={8} sm={4} style={{ marginTop: '4px' }}>
+        <div style={{ width: '100%', height: 'auto', position: 'relative' }}>
+          <Image
+            src={
+              pumpState === 'AUTO' && direction === 'UP'
+                ? '/basilruleautoon.jpg'
+                : pumpState === 'AUTO' && direction === 'DOWN'
+                ? '/basilruleautooff.jpg'
+                : '/watering.jpg'
+            }
+            width={1200}
+            height={400}
+            style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+          />
+        </div>
       </Column>
     </Grid>
   );

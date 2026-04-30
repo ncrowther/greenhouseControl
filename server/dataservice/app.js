@@ -48,7 +48,7 @@ console.log('Config DB: ' + configDbName);
 app.post('/doc', async (req, res) => {
 
   const id = checkId(req, res)
-  if (id == null) return;
+  if (id == undefined) return;
 
   const logDbName = (id + 'log').toLowerCase();
   console.log('Write doc to DB: ' + logDbName)
@@ -94,7 +94,7 @@ app.post('/doc', async (req, res) => {
 app.get('/docs', async (req, res) => {
 
   const id = checkId(req, res)
-  if (id == null) return;
+  if (id == undefined) return;
 
   const logDbName = (id + 'log').toLowerCase();
   console.log('Get docs for ' + logDbName)
@@ -133,7 +133,7 @@ app.get('/docs', async (req, res) => {
 app.post('/light', async (req, res) => {
 
   const id = checkId(req, res)
-  if (id == null) return;
+  if (id == undefined) return;
   console.log('Set light for ' + id)
 
   const inputDoc = req.body;
@@ -190,7 +190,7 @@ app.post('/heat', async (req, res) => {
   console.log('Set Heat ' + JSON.stringify(inputDoc));
 
   const id = checkId(req, res)
-  if (id == null) return;
+  if (id == undefined) return;
   console.log('Get heat for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -244,7 +244,7 @@ app.post('/water', async (req, res) => {
   console.log('Set irrigation ' + JSON.stringify(inputDoc));
 
   const id = checkId(req, res);
-  if (id == null) return;
+  if (id == undefined) return;
   console.log('Set irrigation for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -298,7 +298,7 @@ app.post('/pump', async (req, res) => {
   console.log('Set pump ' + JSON.stringify(inputDoc));
 
   const id = checkId(req, res);
-  if (id == null) return;
+  if (id == undefined) return;
   console.log('Set pump for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -348,7 +348,7 @@ app.post('/pump', async (req, res) => {
 app.post('/fan', async (req, res) => {
 
   const id = checkId(req, res);
-  if (id == null) return;
+  if (id == undefined) return;
     
   const inputDoc = req.body;
 
@@ -407,7 +407,7 @@ app.post('/vent', async (req, res) => {
   console.log('Set vent ' + JSON.stringify(inputDoc));
 
   const id = checkId(req, res)
-  if (id == null) return;
+  if (id == undefined) return;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -461,7 +461,7 @@ app.post('/humidity', async (req, res) => {
   console.log('Set humidity ' + JSON.stringify(inputDoc));
 
   const id = checkId(req, res)
-  if (id == null) return;
+  if (id == undefined) return;
   console.log('Get config for ' + id)
 
   await cloudantLib.findById(service, configDbName, id).then(function (originalDoc) {
@@ -511,7 +511,7 @@ app.post('/humidity', async (req, res) => {
 app.post('/config', async (req, res) => {
 
   const id = checkId(req, res);
-  if (id == null) return;
+  if (id == undefined) return;
   console.log('Write config for ' + id);
 
   var time = moment();
@@ -562,7 +562,7 @@ app.post('/config', async (req, res) => {
 app.get('/config', async (req, res) => {
 
   const id = checkId(req, res);
-  if (id == null) return;
+  if (id == undefined) return;
 
   await cloudantLib.findById(service, configDbName, id).then(function (doc) {
 

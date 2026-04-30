@@ -9,7 +9,6 @@ from StatusLight import StatusLight
 from Sht20Probe import TemperatureHumidityProbe
 from Rtc import Clock
 from Errors import HardwareError
-from Oled import Oled
 
 #################################################
 ### Greenhouse controller for Rasberry Pi Pico ###
@@ -39,7 +38,7 @@ class WindowState():
         setState(state): Sets the state of the device.
         status(): Returns the current state of the device.
     """
-class OnOFFAutoController:
+class OnOffController:
     
     state = OnOffState.AUTO
         
@@ -49,7 +48,7 @@ class OnOFFAutoController:
             print('**Invalid state:' + str(state))
             return
         
-        #print('**Set state:' + str(self.state) + "->" + str(state))
+        print('**Set state:' + str(self.state) + "->" + str(state))
         
         if (state == OnOffState.ON):
             self.on()
@@ -62,13 +61,63 @@ class OnOFFAutoController:
             
     def status(self):
         return self.state
-           
     
+class SolenoidController(OnOffController):
+
+    internalState = OnOffState.ON
+                    
+    def __init__(self):
+        
+        self.initialised = False
+        # GPIO pin + window is connected to
+        UP_PIN = 16
+        self.up_pin = Pin(UP_PIN, Pin.OUT)
+        self.up_pin.value(0)  # Set down to OFF state        
+        
+        # GPIO pin - window is connected to
+        DOWN_PIN = 17
+        self.down_pin = Pin(DOWN_PIN, Pin.OUT)
+        self.down_pin.value(0)  # Set down to OFF state
+
+    
+    def on(self):
+        
+        print("ON: " + self.internalState)
+        
+        if (OnOffState.OFF == self.internalState):   
+            self.down_pin.value(0)  # Set down to OFF state
+            self.up_pin.value(1)  # Set up to ON state    
+                 
+            # Pulse on             
+            time.sleep_ms(5000)
+            # Pulse off
+            
+            self.up_pin.value(0)  # Set up to OFF state
+            
+            self.internalState = OnOffState.ON            
+                     
+        
+    def off(self):
+        
+        print("OFF: " + self.internalState)        
+     
+        if (OnOffState.ON == self.internalState):     
+            self.up_pin.value(0)  # Set up to OFF state   
+            self.down_pin.value(1)  # Set down to ON state    
+                     
+            # Pulse on             
+            time.sleep_ms(5000)
+            # Pulse off
+            
+            self.down_pin.value(0)  # Set down to OFF state
+            
+            self.internalState = OnOffState.OFF            
+           
     
 """
 The Light class has methods to turn the light on and off, as well as to control the light based on a given time.
 """
-class LightSwitch(OnOFFAutoController):
+class LightSwitch(OnOffController):
     # Relay light switch
 
     # Define light on and off times
@@ -112,13 +161,13 @@ class LightSwitch(OnOFFAutoController):
 
 
 """
-This code defines a class called Heater that inherits from the OnOFFAutoController class. 
+This code defines a class called Heater that inherits from the OnOffController class. 
 The Heater class has an init method that initializes the relay pin number and sets it to output mode. 
 It also has on and off methods that set the relay pin to the corresponding state. 
 The control method turns on the heater if it is lower than the min temperature
 If the temperature rises above the dead zone, the heater is turned off
 """
-class Heater(OnOFFAutoController):
+class Heater(OnOffController):
     # Relay heater
     
     def __init__(self):
@@ -162,15 +211,16 @@ This class is for Window Control.
 It sets up two GPIO pins, one for the up button and one for the down button. 
 It also initializes the window angle to 0 and sets the initial state of the window to AUTO.
 """
-class LinearActuator(object):
-    # Linear Actuator for window
+class Vent(object):
+    # Vent control
 
-    # Define window pulse count and length
-    MAX_ACTUATOR_ANGLE = 180
+    MAX_RUN_SECONDS = 180
     RUN_SECS = 5
     PAUSE_SECS = 10
     
     def __init__(self):
+        
+        self.initialised = False
         # GPIO pin + window is connected to
         UP_PIN = 14
         self.up_pin = Pin(UP_PIN, Pin.OUT)
@@ -182,7 +232,7 @@ class LinearActuator(object):
         self.down_pin.value(0)  # Set down to OFF state        
         
         # Degree opening for window
-        self.windowAngle = 0
+        self.runSeconds = 0
     
         self.state = WindowState.AUTO
                 
@@ -194,23 +244,37 @@ class LinearActuator(object):
         if (state == WindowState.OPEN):
             self.down_pin.value(0)  # Set down to OFF state
             self.up_pin.value(1)  # Set up to ON state
-            self.windowAngle = self.MAX_ACTUATOR_ANGLE
+            self.runSeconds = self.MAX_RUN_SECONDS
             print("Window OPEN")
         elif (state == WindowState.CLOSED):
             self.up_pin.value(0)  # Set up to OFF state        
             self.down_pin.value(1)  # Set down to ON state
-            self.windowAngle = 0 # Fully closed angle
+            self.runSeconds = 0 # Fully closed angle
             print("Window CLOSED")
         elif (state == WindowState.AUTO):
             #self.up_pin.value(0)  # Set up to OFF state        
             #self.down_pin.value(0)  # Set down to ON state
             print("Window AUTO")               
             
-    def control(self, count, temperature, maxTemperature, oled, statusLight):
+    def control(self, count, temperature, maxTemperature, statusLight):
         
         # Degrees in which the temp must drop below max temperature before closing
         DEAD_ZONE = 2
-        
+
+        # Return if initialisation delay not met
+        if not (self.initialised):
+            modulus = count % self.MAX_RUN_SECONDS
+            print("Count %s, Pause: %s, Modulus %s " %(count, self.MAX_RUN_SECONDS, modulus) )                   
+            if (modulus != 0):
+                # Sleep for pause interval
+                remaining = self.MAX_RUN_SECONDS - modulus
+                print("**Initialisation delay remaining seconds: %s " %remaining )
+                statusLight.setVentDwellStatus()
+                return
+            else:
+                self.initialised = True
+                self.setState(OnOffState.AUTO)
+
         # Return if delay time not met
         modulus = count % self.PAUSE_SECS
         print("Count %s, Pause: %s, Modulus %s " %(count, self.PAUSE_SECS, modulus) )           
@@ -222,23 +286,21 @@ class LinearActuator(object):
             return
            
         # Open
-        if (WindowState.AUTO == self.status()) and (temperature > maxTemperature) and (self.windowAngle <= self.MAX_ACTUATOR_ANGLE):
-            print("UP Temp %s > maxTemp: %s degrees %s" %(temperature, maxTemperature, self.windowAngle) )     
-            oled.showVentStatus("UP", ">", temperature, maxTemperature, self.windowAngle, self.RUN_SECS, self.PAUSE_SECS)
+        if (WindowState.AUTO == self.status()) and (temperature > maxTemperature) and (self.runSeconds <= self.MAX_RUN_SECONDS):
+            print("UP Temp %s > maxTemp: %s run %s -> %s" %(temperature, maxTemperature, self.runSeconds, self.MAX_RUN_SECONDS) )     
             statusLight.setVentRunStatus()
             
             self.up(self.RUN_SECS)
 
         # Close
         minTemperature = (maxTemperature - DEAD_ZONE)
-        if (WindowState.AUTO == self.status()) and (temperature < minTemperature) and (self.windowAngle > 0):
-            print("DOWN Temp %s < minTemp: %s degrees %s" %(temperature, minTemperature, self.windowAngle) )              
-            oled.showVentStatus("DOWN", "<", temperature, minTemperature, self.windowAngle, self.RUN_SECS, self.PAUSE_SECS)
+        if (WindowState.AUTO == self.status()) and (temperature < minTemperature) and (self.runSeconds > 0):
+            print("DOWN Temp %s < minTemp: %s run %s -> 0" %(temperature, minTemperature, self.runSeconds) )              
             statusLight.setVentRunStatus()            
             self.down(self.RUN_SECS)
 
     def angle(self):
-        return self.windowAngle  
+        return self.runSeconds  
 
     def status(self):
         return self.state
@@ -261,40 +323,40 @@ class LinearActuator(object):
         print("Run period OFF ")
         self.up_pin.value(0)  # Set up to OFF state      
         
-        # Increment degrees incline
-        self.windowAngle = self.windowAngle + runTimeSeconds
+        # Increment seconds running up
+        self.runSeconds = self.runSeconds + runTimeSeconds
             
-        print("Window Angle: " + str(self.windowAngle))              
+        print("Total UP run: %s seconds " %self.runSeconds )               
         
     def down(self, runTimeSeconds):
      
         self.up_pin.value(0)  # Set up to OFF state   
         self.down_pin.value(1)  # Set down to ON state    
         
-        print("DOWN run %s seconds " %runTimeSeconds )        
+        print("DOWN run: %s seconds " %runTimeSeconds )        
              
         time.sleep_ms(runTimeSeconds * 1000)
         
         print("Run period OFF ")
         self.down_pin.value(0)  # Set down to OFF state 
 
-        # Decrement degrees decline
-        self.windowAngle = self.windowAngle - runTimeSeconds
+        # Increment seconds running down
+        self.runSeconds = self.runSeconds - runTimeSeconds
         
-        if (self.windowAngle < 0):
-            self.windowAngle = 0
+        if (self.runSeconds < 0):
+            self.runSeconds = 0
             
-        print("Window Angle: " + str(self.windowAngle))
+        print("Total DOWN run: %s seconds " %self.runSeconds )             
         
     def fullDown(self):
         self.up_pin.value(0)  # Set up to OFF state   
         self.down_pin.value(1)  # Set down to ON state         
-        self.windowAngle = 0
+        self.runSeconds = 0       
         
     def fullUp(self):
-        self.up_pin.value(1)  # Set up to OFF state   
-        self.down_pin.value(0)  # Set down to ON state         
-        self.windowAngle = self.MAX_ACTUATOR_ANGLE        
+        self.up_pin.value(1)  # Set up to ON state   
+        self.down_pin.value(0)  # Set down to OFF state         
+        self.runSeconds = self.MAX_RUN_SECONDS        
                     
        
                     
@@ -303,11 +365,11 @@ This code defines a class Fan that controls a fan using PWM signals.
 The on method turns the fan on, and the off method turns it off. 
 The control method checks the temperature and turns the fan on or off based on the specified conditions.
 """
-class Fan(OnOFFAutoController):
+class Fan(OnOffController):
     
     def __init__(self):
-        # GPIO pin number fan is connected to
-        RELAY_PIN = 21
+        # GPIO pin number 
+        RELAY_PIN = 18
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
     def on(self):
@@ -338,36 +400,11 @@ class Fan(OnOFFAutoController):
 The Pump class has methods for controlling the pump's speed, turning it off, and watering the plants. 
 It also has a control method that determines when to water the plants based on temperature and time.
 """
-class Pump(OnOFFAutoController):
+class Pump(SolenoidController):
     
     #### DEFINE WATERING TIMES HERE ####
     WATERING_TIMES = [6, 12, 18]
     WATERING_DURATION = 1 # minutes
-
-    def __init__(self):
-        # GPIO pin number  relay is connected to
-        RELAY_PIN = 20
-        self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
-        
-    def on(self):
-        #print("Pump ON")
-        self.relay_pin.value(1)  # Set relay to ON state
-            
-    def off(self):   
-        #print("Pump OFF")
-        self.relay_pin.value(0)  # Set relay to OFF state
-              
-    async def watering(self, wateringPeriod):
-        print("Watering Period %s seconds " %wateringPeriod )
-        
-        self.setState(OnOffState.ON) 
-        await asyncio.sleep_ms(wateringPeriod * 1000)
-        
-        print("Watering Period OFF ")
-        self.setState(OnOffState.OFF)
-        
-        # Set back to Auto for next time
-        self.setState(OnOffState.AUTO)   
               
     def control(self, temperature, rtc):
         
@@ -381,21 +418,24 @@ class Pump(OnOFFAutoController):
                 PUMP_ON_HOUR  = h # 24 hour
  
                 PUMP_ON_TIME  = time.mktime((2000, 1, 1, PUMP_ON_HOUR, 0, 0, 0, 0))
-                PUMP_OFF_TIME = time.mktime((2000, 1, 1, PUMP_ON_HOUR, self.WATERING_DURATION, 0, 0, 0))                     
+                PUMP_OFF_TIME = time.mktime((2000, 1, 1, PUMP_ON_HOUR, self.WATERING_DURATION, 0, 0, 0))                   
                     
                 if (rtc.timeInRange(PUMP_ON_TIME, PUMP_OFF_TIME)):
-                    print("Pump on: " + str(PUMP_ON_HOUR)+ "h for " + str(self.WATERING_DURATION) + "m")
+                    print("Pump on: " + str(PUMP_ON_HOUR)+ "h for " + str(self.WATERING_DURATION) + "s")
                     self.setState(OnOffState.ON)          
                     self.setState(OnOffState.AUTO)
                     return
-                    
-                if (not rtc.timeInRange(PUMP_ON_TIME, PUMP_OFF_TIME)):
-                    self.setState(OnOffState.OFF)
+                
+                OFF_WINDOW = 59  # minutes
+                PUMP_OFF_TIME2 = time.mktime((2000, 1, 1, PUMP_ON_HOUR, OFF_WINDOW, 0, 0, 0))                   
+                
+                if (rtc.timeInRange(PUMP_OFF_TIME, PUMP_OFF_TIME2)):
+                    print("Pump off: " + str(PUMP_ON_HOUR)+ "h for " + str(OFF_WINDOW) + "s")
+                    self.setState(OnOffState.OFF)          
                     self.setState(OnOffState.AUTO)
-                               
-        
-        #if ( (temperature > self.MIN_WATERING_TEMP) and (timeNow in self.WATERING_TIMES) and (OnOffState.AUTO == self.status()) ):                                     
-         #   asyncio.create_task(self.watering(self.WATERING_DURATION))
+                    return                
+                    
+                
      
     def setTimes(self, wateringTimes, period, minTemp):
         self.WATERING_TIMES = wateringTimes
@@ -403,27 +443,25 @@ class Pump(OnOFFAutoController):
         
 """
 This code controls various devices such as a pump, fan, heater, , and probe. 
-The "careforplants" method performs various tasks such as controlling the lights, temperature, watering, and displaying data on the Oled screen. 
+The "careforplants" method performs various tasks such as controlling the lights, temperature, watering 
 It also includes error handling to handle hardware errors and general exceptions.
 """
 class PlantCare(object):
     
     # define temperature range
     MIN_TEMPERATURE  = 15
-    MAX_TEMPERATURE = 25    
+    MAX_VENT_TEMPERATURE = 25
+    MAX_FAN_TEMPERATURE = MAX_VENT_TEMPERATURE + 2
         
     def __init__(self, ip):
-        
+       
         try:
             self.ip = ip
             
             self.statusLight = StatusLight()
                     
             # Clock used to active objects on a schedule 
-            self.rtc = Clock()
-            
-            # Set up the Oled Display
-            self.oled = Oled()              
+            self.rtc = Clock()             
             
             # Init temperature probe
             self.temperatureProbe = TemperatureHumidityProbe()
@@ -431,7 +469,7 @@ class PlantCare(object):
             airTemperature = self.temperatureProbe.temperature           
 
             ## Create the objects to be controlled
-            self.windows = LinearActuator()
+            self.windows = Vent()
             self.pump = Pump()
             self.fan = Fan()
             
@@ -443,14 +481,13 @@ class PlantCare(object):
             
             # Startup 
             # Set to default pos before auto controls
-            if (airTemperature <= self.MAX_TEMPERATURE): 
+            if (airTemperature <= self.MAX_VENT_TEMPERATURE): 
                 self.windows.fullDown()
             else:
                 self.windows.fullUp()               
             
         except HardwareError as e:
-            print("Exception: " + str(e))
-            
+            print("Exception: " + str(e))         
             self.statusLight.setErroredStatus()                 
         
     def setDateTime(self, datetime):              
@@ -491,7 +528,8 @@ class PlantCare(object):
     def setTemperatureRange(self, min, max):      
         print("Set temp range: {}-{}".format(min, max))     
         self.MIN_TEMPERATURE = min
-        self.MAX_TEMPERATURE = max
+        self.MAX_VENT_TEMPERATURE = max
+        self.MAX_FAN_TEMPERATURE= max + 5
         
     def getTemperatureData(self):
         return self.temperatureProbe.temperature
@@ -536,10 +574,11 @@ class PlantCare(object):
             humidity = self.temperatureProbe.humidity       
             
             print("control vents")
-            self.windows.control(count, airTemperature, self.MAX_TEMPERATURE, self.oled, self.statusLight)
+            self.windows.control(count, airTemperature, self.MAX_VENT_TEMPERATURE, self.statusLight)
             
-            print("control fans")            
-            self.fan.control(airTemperature, self.MAX_TEMPERATURE)            
+            print("control fans")
+            
+            self.fan.control(airTemperature, self.MAX_FAN_TEMPERATURE)            
             
             print("control watering...")
             self.pump.control(airTemperature, self.rtc)
@@ -547,9 +586,7 @@ class PlantCare(object):
             print("display data...")        
   
             timeStr = self.rtc.getTimeStr()   
-            dateStr = self.rtc.getDateTimeStr()[:10]
-      
-            self.oled.show(dateStr, timeStr, airTemperature, humidity, self.MAX_TEMPERATURE, self.MIN_TEMPERATURE, self.pump.WATERING_TIMES, self.pump.WATERING_DURATION)            
+            dateStr = self.rtc.getDateTimeStr()[:10]        
 
           
         except HardwareError as e:
@@ -570,4 +607,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

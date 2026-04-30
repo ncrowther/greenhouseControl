@@ -28,12 +28,14 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
       
+    ssid = 'gigacube-9C08'
+    password = 'efmG7GRybqvNJxEQ'       
     #ssid = 'IBMGuest'
-    #password = 'Unit-7-Greet-8-Dial'   
+    #password = 'Unit-7-Greet-8-Dial' dean pin 2005  
     #ssid = 'VM7763450'
     #password = 'udWrTpeejf86gugx'
-    ssid = "Nigel’s iPhone"
-    password = 'Porker01!'     
+    #ssid = "Nigel’s iPhone"
+    #password = 'Porker01!'     
     #ssid = 'MIFI_3880'
     #password = None    
     ipAddress = "ERR"
@@ -300,7 +302,7 @@ class PlantServer(object):
         statusLight = StatusLight()
         statusLight.setOperationalStatus()        
         
-        SLEEP_TIME = 0.1
+        SLEEP_TIME = 0.05
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
 
         print("Care for zone: " + self.zoneName)
@@ -357,3 +359,370 @@ def main():
         buzzer.buzz()        
 
 main()
+
+
+
+
+import sys
+import network
+import socket
+import time
+from requests_v2 import post, get
+import json
+import gc
+import machine
+
+from plantcare_ibm import PlantCare, WindowState, OnOffState
+from StatusLight import StatusLight
+from Buzzer import Buzzer
+
+GREENHOUSE_DATASERVICE = 'https://dataservice.27uzmkl2grxv.us-south.codeengine.appdomain.cloud' 
+#GREENHOUSE_DATASERVICE = 'http://172.65.217.53'
+ZONE_NAMES = [
+    {"name": "zone1", "pinNumber": 21}, 
+    {"name": "zone2", "pinNumber": 20}, 
+    {"name": "zone3", "pinNumber": 19}, 
+    {"name": "zone4", "pinNumber": 18}
+]
+
+"""
+This code is a Python program that controls a plant care system. 
+It connects to a network, retrieves system time, temperature, humidity, 
+from the plant care system
+The program also includes a function to display an error message with a specific code and message.
+"""
+class PlantServer(object):
+      
+    ssid = 'gigacube-9C08'
+    password = 'efmG7GRybqvNJxEQ'       
+    #ssid = 'IBMGuest'
+    #password = 'Unit-7-Greet-8-Dial' dean pin 2005  
+    #ssid = 'VM7763450'
+    #password = 'udWrTpeejf86gugx'
+    #ssid = "Nigel’s iPhone"
+    #password = 'Porker01!'     
+    #ssid = 'MIFI_3880'
+    #password = None    
+    ipAddress = "ERR"
+        
+    zoneName = None
+    
+    def __init__(self, zone):
+        
+        self.zoneName = zone["name"]
+        self.pinNumber = zone["pinNumber"]
+        self.statusLight = StatusLight()
+        self.statusLight.setConnectingStatus()      
+        
+        self.wlan = network.WLAN(network.STA_IF)
+        
+        self.ipAddress = self.connect_to_network(self.ssid, self.password)
+        
+        print("***IP: " + str(self.ipAddress))
+        
+        if self.ipAddress == None:    
+            print("No WIFI.")
+            self.statusLight.setErroredStatus()
+            sys.exit()
+        else:
+            self.statusLight.setOperationalStatus()   
+            self.plantCare = PlantCare(self.ipAddress, self.zoneName, self.pinNumber)
+         
+        
+    """
+    Connect to a Wi-Fi network.
+
+    Parameters:
+    self (object): The instance of the class.
+
+    Returns:
+    str: The IP address of the connected network.
+    """    
+    def connect_to_network(self, ssid, password):  
+        
+        try:        
+            print("Connect to Wi-Fi....")
+            
+            # Check if already connected            
+            wlanStatus = self.wlan.status()
+            if (wlanStatus == network.STAT_GOT_IP):                        
+                print('******** WIFI ALREADY CONNECTED ********')
+                return self.ipAddress
+            
+            self.wlan.active(True)
+            self.wlan.config(pm = 0xa11140) # Disable power-save mode
+
+            if (password):
+                self.wlan.connect(ssid, password)
+            else:
+                self.wlan.connect(ssid)
+            
+            MAX_TRIES = 3
+            for i in range(MAX_TRIES):
+
+                print('waiting for connection attempt {}...'.format(i))
+                time.sleep(6)
+
+                print('Wlan status:' + self.getWlanStatus())
+                
+                wlanStatus = self.wlan.status()
+                
+                if (wlanStatus == network.STAT_GOT_IP):                        
+                    print('******** WIFI CONNECTED ********')
+
+                    status = self.wlan.ifconfig()
+                    ip = status[0]
+                    print('ip = ' + ip)
+                    self.ipAddress = ip
+                    
+                    print('IP address: '  + self.ipAddress)
+                    
+                    return self.ipAddress
+            
+        except Exception as e:
+            
+            err = self.getWlanStatus()
+            print('Error: ' + err)
+            raise TypeError("Connetion error") from e
+            
+
+    """
+    Get WIreless lan connection status
+    """
+    def getWlanStatus(self):
+        
+            err = "Unknown error"
+            wlanStatus = self.wlan.status()
+            if (wlanStatus == network.STAT_IDLE):
+                err = "- no connection and no activity"
+
+            if (wlanStatus == network.STAT_CONNECTING):
+                err = "– connecting in progress"
+
+            if (wlanStatus ==  network.STAT_WRONG_PASSWORD):
+                err = "– failed due to incorrect password"
+
+            if (wlanStatus ==  network.STAT_NO_AP_FOUND):
+                err = "– failed because no access point replied"
+
+            if (wlanStatus ==  network.STAT_CONNECT_FAIL):
+                err = "– failed due to other problems"
+                
+            return err
+        
+    """
+    Configure the plant care system based on the configuration stored in the Greenhouse Data Service.
+
+    Args:
+        plantCare (PlantCare): The plant care system to configure.
+
+    Returns:
+        str: The timestamp of the last successful configuration.
+    """
+    def configure(self):
+        
+        request_url = GREENHOUSE_DATASERVICE + '/config?id=' + self.zoneName
+        resp = None
+        timestamp = None
+        
+        gc.collect() 
+        resp = None
+        response = "ERROR"
+        try:
+            resp = get( request_url, timeout=5000)
+            response = resp.text
+            resp.close()
+            
+            print("************RESPONSE **********" + response)
+      
+            jsonData = json.loads(response)
+            timestamp = jsonData["timestamp"]
+            print("timestamp: " + timestamp)           
+            
+            self.setData(self.plantCare, jsonData)               
+                
+        except Exception as e:
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                print(resp)
+                resp.close()
+            print("configure(): CONNECTION ERROR " + str(e))
+        finally:
+            if resp:
+                resp.close()
+                gc.collect()
+                           
+                return timestamp
+
+    """
+    Reonfigure the plant care system based on the configuration passed in.
+
+    Args:
+        plantCare (PlantCare): The plant care system to configure.
+        jsonData: The new configuration
+
+    """
+    def setData(self, plantCare, jsonData):
+            
+        # Config stored inside doc          
+        doc = jsonData["doc"]
+        
+        temperatureRange = doc["temperatureRange"]
+        print("****Configure TEMPERATURE RANGE to: " + str(temperatureRange)     )   
+        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )
+        
+                
+        windowState = doc["windowState"]
+        plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
+        
+        windowRun = doc["windowRun"]
+        plantCare.setWindowRun(windowRun)  # must be same as PlantCare.WindowState
+        
+        windowPause = doc["windowPause"]
+        plantCare.setWindowPause(windowPause)  # must be same as PlantCare.WindowState        
+        
+        pumpState = doc["pumpState"]
+        plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
+        
+        fanState = doc["fanState"]
+        plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState        
+        
+        wateringPeriod = doc["wateringDuration"]  	# minutes
+        wateringTimes = doc["wateringTimes"]  		# list of three start times in 24H format
+        wateringMinTemp = 5       					# Not implemented
+        plantCare.setWateringTimes(wateringTimes, wateringPeriod, wateringMinTemp)        
+            
+ # This function is used to log data from the plant care system. 
+    # It attempts to connect to the network, retrieve system time,  temperature, humidity, 
+    # and CO2 from the plant care system, and then log the data. If any errors occur during this process, 
+    # it will display an error message and reset the machine.
+    def logger(self):  
+        
+        print('Start logger for zone: ' + self.zoneName)
+        
+        try: 
+        
+            self.connect_to_network(self.ssid, self.password)
+                             
+            temperatureData = self.plantCare.getTemperatureData()
+            humidityData = self.plantCare.getHumidityData()
+            co2Data = 0 #self.plantCare.getCo2Data()
+            vpd = 0 #self.plantCare.getVpdData()
+            lux = 0 #self.plantCare.getluxData()
+            self.logData( temperatureData, 0, humidityData, co2Data, vpd, lux)
+                
+        except Exception as err:
+            sys.print_exception(err)
+            errMsg = '{}: {}'.format(type(err).__name__, err)
+            print(errMsg)
+            
+            
+    # This code is a function that logs data to the Greenhouse Data Service. 
+    def logData(self, airTemperature, leafTemperature, humidity, co2, vpd, lux):
+        
+        print("Logging data...")
+        
+        header = {
+          'Content-Type': 'application/json',
+          }
+        
+        payload = json.dumps({
+          "airTemperature": airTemperature,
+          "leafTemperature": 0,          
+          "humidity": humidity,
+          "co2": 0,
+          "vpd": 0,
+          "lux": 0          
+        })
+        
+        request_url = GREENHOUSE_DATASERVICE + '/doc' + '?id=' + self.zoneName
+     
+        gc.collect() 
+        resp = None
+        response = "ERROR"
+        try:
+            resp = post( request_url, headers=header, data=payload, timeout=5000)
+            response = resp.text
+            resp.close()
+            
+        except Exception as e: # Here it catches any error.
+            print(e)
+            if isinstance(e, OSError) and resp: # If the error is an OSError the socket has to be closed.
+                resp.close()
+        finally:   
+            gc.collect()          
+            return response
+        
+    """
+    This function is responsible for caring for plants.
+
+    Parameters:
+    self (object): An instance of the class.
+
+    Returns:
+    None
+    """
+    def care(self, count):
+        print('Start care...')
+        
+        statusLight = StatusLight()
+        statusLight.setOperationalStatus()        
+        
+        SLEEP_TIME = 0.05
+        LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
+
+        print("Care for zone: " + self.zoneName)
+
+        self.configure()   
+        self.plantCare.careforplants()
+
+        # If timestamp exists then log every LOG_TIME mins
+        if (count % LOG_TIME == 0):
+            self.logger()
+
+        print('Sleep for {} seconds'.format(SLEEP_TIME))
+            
+        statusLight.setSleepingStatus()                       
+        time.sleep(SLEEP_TIME)           
+  
+    
+            
+"""
+This function is the main entry point for the program.
+
+Parameters:
+None    zoneName: The name of the zone to care for.
+
+Returns:
+None
+"""
+def main():   
+               
+    try: 
+
+        count = 0
+
+        zone1Server = PlantServer(ZONE_NAMES[0])    
+        zone2Server = PlantServer(ZONE_NAMES[1])    
+        zone3Server = PlantServer(ZONE_NAMES[2])    
+        zone4Server = PlantServer(ZONE_NAMES[3])          
+
+        while True:
+            zone1Server.care(count)
+            zone2Server.care(count)
+            zone3Server.care(count)
+            zone4Server.care(count)
+            count = count + 1
+
+    except SystemExit as err:
+        sys.print_exception(err)
+        buzzer = Buzzer()
+        buzzer.buzz()
+        
+    except Exception as err:     
+        sys.print_exception(err)
+        buzzer = Buzzer()
+        buzzer.buzz()        
+
+main()
+
+

@@ -23,12 +23,12 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    ssid = 'VM7763450'
-    password = 'udWrTpeejf86gugx'
+    #ssid = 'VM7763450'
+    #password = 'udWrTpeejf86gugx'
     #ssid = "Nigel’s iPhone"
     #password = 'Porker01!'     
-    #ssid = 'MIFI_3880'
-    #password = None    
+    ssid = 'MIFI_3880'
+    password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -154,7 +154,7 @@ class PlantServer(object):
         resp = None
         response = "ERROR"
         try:
-            resp = get( request_url, timeout=2000)
+            resp = get( request_url, timeout=20)
             response = resp.text
             resp.close()
             
@@ -294,17 +294,17 @@ class PlantServer(object):
         SLEEP_TIME = 1
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
         
-        count = 0
+        count = 1
         
         while True:
 
-            print("Care")
+            print("Care")          
             
             # If timestamp exists then log every LOG_TIME mins
             if (count % LOG_TIME == 0):
                 # set config 
-                self.configure()    
                 self.logger()
+                self.configure()                    
             
             self.plantCare.careforplants(count)
             
@@ -312,8 +312,8 @@ class PlantServer(object):
             
             statusLight.setSleepingStatus()                       
             time.sleep(SLEEP_TIME)           
-            statusLight.setOperationalStatus()
-            
+            statusLight.setOperationalStatus()  
+  
             count = count + 1
         
 """
@@ -338,4 +338,3 @@ def main():
         #machine.reset()
 
 main()
-

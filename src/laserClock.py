@@ -2,26 +2,7 @@ from machine import Pin, PWM
 from math import floor
 import time
 import math
-
-a = 2
-b = 3
-r = 3
-
-#The lower this value the higher quality the circle is with more points generated
-stepSize = 0.109
-
-#Generated vertices
-positions = []
-
-t = 0
-while t < 2 * math.pi:
-    positions.append((((r * math.cos(t) + a) * 5), (r * math.sin(t) + b) * 5))
-    t += stepSize
-
-print("LEN: " + str(len(positions)))
-
-
-    
+ 
 ##############################
     
 class ServoMotor(object):
@@ -76,16 +57,34 @@ class ServoMotor(object):
     """
     def tick(self, pos):                        
         
-        #print("Tick : %2d" % (pos))   # print position
-        
-        self.servo_write(pos)
+        OFFSET = 60      
+        self.servo_write(OFFSET + pos)
  
 #######################
 
-
-def plot_pixel(point):
-    # Draw a pixel at the given point (x, y)
+def createCircle():
     
+    a = 2
+    b = 3
+    r = 3
+
+    #The lower this value the higher quality the circle is with more points generated
+    stepSize = 0.109
+
+    #Generated vertices
+    positions = []
+
+    t = 0
+    while t < 2 * math.pi:
+        positions.append((((r * math.cos(t) + a) * 5), (r * math.sin(t) + b) * 5))
+        t += stepSize
+
+    print("LEN: " + str(len(positions)))
+    
+    return positions
+    
+
+def display(point):
     print("%3d, %3d" % point) # print position
             
 # Continuously display current time every second 
@@ -94,28 +93,19 @@ def main():
     servoMotorX = ServoMotor(16)
     servoMotorY = ServoMotor(17)
     
-    MIN_X = 60
-    MAX_X = 90
-    MIN_Y = 60
-    MAX_Y = 90
-    x_operand = 1
-    y_operand = 1    
-    x = 1
-    y = MAX_Y
-
+    positions = createCircle()
         
     while True:
             
         for point in reversed(positions):
-            plot_pixel(point)
-            servoMotorX.tick(MIN_X + point[0])
-            servoMotorY.tick(MIN_Y + point[1])
+            display(point)
+            servoMotorX.tick(point[0])
+            servoMotorY.tick(point[1])
                 
-            time.sleep_ms(1000)  # One second
+            time.sleep_ms(100)  # One second
                     
     
 if __name__ == "__main__":
-    main()    
-
+    main()                                                                                                                                                                      
 
 
