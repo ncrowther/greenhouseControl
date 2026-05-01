@@ -35,6 +35,13 @@ Configure paths in `jsconfig.json`
 
 ### Deployment to code engine on IBM Cloud
 
+0. Edit .env and ensure the InnovationStudio url is enabled (not commented out)
+
+```bash
+#InnovationStudio
+NEXT_PUBLIC_DATA_SERVICE_END_POINT='URL POINTING TO INNOVATION STUDIO DATA SERVICE'
+```
+
 1. Open bash shell from VSC
 
 ```bash
@@ -79,7 +86,7 @@ from the IBM Cloud console click user icon->Login to CLI and API. e.g.: ibmcloud
    ibmcloud ce project select --name innovationstudio
 ```
 
-5. Start Docker (Rancher) Desktop and wait for status to be STARTED
+5. Start Docker (Rancher) Desktop and wait for status to be STARTED (Engine Runnging)
 
 6. Within this folder, edit CEbuild.sh and CErun.sh and change the REGISTRY to your Docker registry.
 
