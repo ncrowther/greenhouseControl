@@ -12,7 +12,7 @@ from StatusLight import StatusLight
 
 #GREENHOUSE_DATASERVICE = 'http://192.168.0.207:3000' 
 GREENHOUSE_DATASERVICE = 'http://86.4.208.162'
-DEVICE_NAME = "zone1"
+DEVICE_NAME = "zone3"
 
 
 """
@@ -23,12 +23,12 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    #ssid = 'VM7763450'
-    #password = 'udWrTpeejf86gugx'
+    ssid = 'VM7763450'
+    password = 'udWrTpeejf86gugx'
     #ssid = "Nigel’s iPhone"
     #password = 'Porker01!'     
-    ssid = 'MIFI_3880'
-    password = None    
+    #ssid = 'MIFI_3880'
+    #password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -158,11 +158,10 @@ class PlantServer(object):
             response = resp.text
             resp.close()
             
-            print("************RESPONSE **********" + response)
+            print(response)
       
             jsonData = json.loads(response)
-            timestamp = jsonData["timestamp"]
-            print("timestamp: " + timestamp)           
+            timestamp = jsonData["timestamp"]          
             
             self.setData(plantCare, jsonData)               
                 
@@ -191,11 +190,17 @@ class PlantServer(object):
         # Config stored inside doc          
         doc = jsonData["doc"]
         
-        temperatureRange = doc["temperatureRange"]
-        print("****Configure TEMPERATURE RANGE to: " + str(temperatureRange)     )   
-        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )
+        lightOnOff = doc["lightOnOff"]
+        onTime = lightOnOff[0]
+        offTime = lightOnOff[1]        
+        plantCare.setLightOnOffTime(onTime, offTime)
+            
+        lightState = doc["lightState"]
+        plantCare.setLight(lightState)  
         
-                
+        temperatureRange = doc["temperatureRange"] 
+        plantCare.setTemperatureRange(temperatureRange[0], temperatureRange[1] )
+                    
         windowState = doc["windowState"]
         plantCare.setWindow(windowState)  # must be same as PlantCare.WindowState
         
@@ -209,7 +214,10 @@ class PlantServer(object):
         plantCare.setPump(pumpState)  # must be same as PlantCare.OnOffState
         
         fanState = doc["fanState"]
-        plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState        
+        plantCare.setFan(fanState)  # must be same as PlantCare.OnOffState
+        
+        heaterState = doc["heaterState"]
+        plantCare.setHeater(heaterState)  # must be same as PlantCare.OnOffState           
         
         wateringPeriod = doc["wateringDuration"]  	# minutes
         wateringTimes = doc["wateringTimes"]  		# list of three start times in 24H format
@@ -297,23 +305,24 @@ class PlantServer(object):
         count = 1
         
         while True:
-
-            print("Care")          
+            
+            self.configure()              
             
             # If timestamp exists then log every LOG_TIME mins
-            if (count % LOG_TIME == 0):
+            #if (count % LOG_TIME == 0):
                 # set config 
-                self.logger()
-                self.configure()                    
+                #self.logger()
             
             self.plantCare.careforplants(count)
             
-            print('Sleep for {} seconds'.format(SLEEP_TIME))
+            print('Sleep {} seconds'.format(SLEEP_TIME))
             
             statusLight.setSleepingStatus()                       
             time.sleep(SLEEP_TIME)           
-            statusLight.setOperationalStatus()  
+            statusLight.setOperationalStatus()
+            
   
+            
             count = count + 1
         
 """
@@ -338,3 +347,4 @@ def main():
         #machine.reset()
 
 main()
+

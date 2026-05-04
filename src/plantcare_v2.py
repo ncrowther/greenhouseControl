@@ -48,7 +48,7 @@ class OnOffController:
             print('**Invalid state:' + str(state))
             return
         
-        print('**Set state:' + str(self.state) + "->" + str(state))
+        #print('**Set state:' + str(self.state) + "->" + str(state))
         
         if (state == OnOffState.ON):
             self.on()
@@ -89,7 +89,7 @@ class SolenoidController(OnOffController):
             self.up_pin.value(1)  # Set up to ON state    
                  
             # Pulse on             
-            time.sleep_ms(5000)
+            time.sleep_ms(1000)
             # Pulse off
             
             self.up_pin.value(0)  # Set up to OFF state
@@ -106,7 +106,7 @@ class SolenoidController(OnOffController):
             self.down_pin.value(1)  # Set down to ON state    
                      
             # Pulse on             
-            time.sleep_ms(5000)
+            time.sleep_ms(1000)
             # Pulse off
             
             self.down_pin.value(0)  # Set down to OFF state
@@ -128,7 +128,7 @@ class LightSwitch(OnOffController):
 
     def __init__(self):
         # GPIO pin number  relay is connected to
-        RELAY_PIN = 18
+        RELAY_PIN = 19
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         self.state = OnOffState.AUTO
 
@@ -140,16 +140,14 @@ class LightSwitch(OnOffController):
         self.LIGHT_OFF_TIME = time.mktime((2000, 1, 1, self.LIGHT_OFF_HOUR, 0, 0, 0, 0))                    
             
     def on(self):
-        print("Light ON")
         self.relay_pin.value(1)  # Set relay to ON state
             
     def off(self):   
-        print("Light OFF")
         self.relay_pin.value(0)  # Set relay to OFF state
         
     def control(self, rtc):
 
-        print("Light state %s" %self.status())
+        #print("Light state %s" %self.status())
         
         if (OnOffState.AUTO == self.status()) and (rtc.timeInRange(self.LIGHT_ON_TIME, self.LIGHT_OFF_TIME)):
             self.setState(OnOffState.ON)          
@@ -172,37 +170,32 @@ class Heater(OnOffController):
     
     def __init__(self):
         # GPIO pin number  relay is connected to
-        RELAY_PIN = 19
+        RELAY_PIN = 20
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
     def on(self):
-        print("Heater ON")
         self.relay_pin.value(1)  # Set relay to ON state
             
     def off(self):   
-        print("Heater OFF")
         self.relay_pin.value(0)  # Set relay to OFF state
         
     def control(self, temperature, minTemperature):
         
         # Degrees in which the temp must rise before turning off
         DEAD_ZONE = 1
-        
-        # Print the rounded temperature to 1 decimal place
-        print("On temp: {} <= {}".format(temperature, minTemperature))        
-        
+            
         # On     
         if (OnOffState.AUTO == self.status()) and (temperature <= minTemperature):
-            print("Heat On: " + str(temperature) + "<=" + str(minTemperature))          
+            #print("Heat On: " + str(temperature) + "<=" + str(minTemperature))          
             self.setState(OnOffState.ON)
             self.setState(OnOffState.AUTO)
             
-        print("Off temp: {} > {}".format(temperature, minTemperature + DEAD_ZONE))                 
+        #print("Off temp: {} > {}".format(temperature, minTemperature + DEAD_ZONE))                 
 
         # Off
         offTemperature = (minTemperature + DEAD_ZONE)
         if (OnOffState.AUTO == self.status()) and (temperature > offTemperature):
-            print("Heat Off: " + str(temperature) + ">" + str(offTemperature))
+            #print("Heat Off: " + str(temperature) + ">" + str(offTemperature))
             self.setState(OnOffState.OFF)
             self.setState(OnOffState.AUTO)
             
@@ -245,16 +238,12 @@ class Vent(object):
             self.down_pin.value(0)  # Set down to OFF state
             self.up_pin.value(1)  # Set up to ON state
             self.runSeconds = self.MAX_RUN_SECONDS
-            print("Window OPEN")
+            #print("Window OPEN")
         elif (state == WindowState.CLOSED):
             self.up_pin.value(0)  # Set up to OFF state        
             self.down_pin.value(1)  # Set down to ON state
             self.runSeconds = 0 # Fully closed angle
-            print("Window CLOSED")
-        elif (state == WindowState.AUTO):
-            #self.up_pin.value(0)  # Set up to OFF state        
-            #self.down_pin.value(0)  # Set down to ON state
-            print("Window AUTO")               
+            #print("Window CLOSED")           
             
     def control(self, count, temperature, maxTemperature, statusLight):
         
@@ -373,11 +362,9 @@ class Fan(OnOffController):
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
     def on(self):
-        print("Fan ON")
         self.relay_pin.value(1)  # Set relay to ON state
             
     def off(self):   
-        print("Fan OFF")
         self.relay_pin.value(0)  # Set relay to OFF state
      
     def control(self, temperature, maxTemperature):
@@ -458,10 +445,11 @@ class PlantCare(object):
         try:
             self.ip = ip
             
-            self.statusLight = StatusLight()
-                    
             # Clock used to active objects on a schedule 
-            self.rtc = Clock()             
+            self.rtc = Clock()
+            
+            # Neopixel status light
+            self.statusLight = StatusLight()
             
             # Init temperature probe
             self.temperatureProbe = TemperatureHumidityProbe()
@@ -472,12 +460,21 @@ class PlantCare(object):
             self.windows = Vent()
             self.pump = Pump()
             self.fan = Fan()
+            # Agricultural grow light
+            self.light = LightSwitch()            
+            self.heater = Heater()            
             
             self.pump.setState(OnOffState.OFF)
             self.pump.setState(OnOffState.AUTO)        
                          
             self.fan.setState(OnOffState.OFF)
             self.fan.setState(OnOffState.AUTO)
+            
+            self.light.setState(OnOffState.OFF)
+            self.light.setState(OnOffState.AUTO)
+            
+            self.heater.setState(OnOffState.OFF)
+            self.heater.setState(OnOffState.AUTO)            
             
             # Startup 
             # Set to default pos before auto controls
@@ -507,8 +504,14 @@ class PlantCare(object):
  
         self.rtc.set_time(formatedDateTime)      
         
+    def setLight(self, state):
+        self.light.setState(state)
+        
+    def setLightOnOffTime(self, onTime, offTime):
+        self.light.setOnOffTime(onTime, offTime)
+        
     def setHeater(self, state):
-        self.heater.setState(state)      
+        self.heater.setState(state)    
           
     def setWindow(self, state):      
         self.windows.setState(state)
@@ -517,16 +520,9 @@ class PlantCare(object):
         self.windows.setRunSecs(runSecs)
         
     def setWindowPause(self, pauseSecs):      
-        self.windows.setPauseSecs(pauseSecs)        
+        self.windows.setPauseSecs(pauseSecs)              
         
-    def setLight(self, state):
-        self.light.setState(state)
-        
-    def setLightOnOffTime(self, onTime, offTime):
-        self.light.setOnOffTime(onTime, offTime)        
-        
-    def setTemperatureRange(self, min, max):      
-        print("Set temp range: {}-{}".format(min, max))     
+    def setTemperatureRange(self, min, max):          
         self.MIN_TEMPERATURE = min
         self.MAX_VENT_TEMPERATURE = max
         self.MAX_FAN_TEMPERATURE= max + 5
@@ -558,35 +554,29 @@ class PlantCare(object):
         self.light.setState(OnOffState.OFF)        
 
     def careforplants(self, count):
-          
-        print("careforplants...")
-        
-        screen = 0
      
         # Look after plants
         try:
             time.sleep_ms(500)
-            timestamp = self.rtc.getDateTimeStr() 
-            print(timestamp)
             
             self.temperatureProbe.measureIt()                    
             airTemperature = self.temperatureProbe.temperature
-            humidity = self.temperatureProbe.humidity       
+            humidity = self.temperatureProbe.humidity
             
-            print("control vents")
+            #print("control vents")
             self.windows.control(count, airTemperature, self.MAX_VENT_TEMPERATURE, self.statusLight)
             
-            print("control fans")
+            #print("control fans")
+            self.fan.control(airTemperature, self.MAX_FAN_TEMPERATURE)
             
-            self.fan.control(airTemperature, self.MAX_FAN_TEMPERATURE)            
+            #print("control heater")            
+            self.heater.control(airTemperature, self.MIN_TEMPERATURE) 
             
-            print("control watering...")
+            # print("control watering...")
             self.pump.control(airTemperature, self.rtc)
             
-            print("display data...")        
-  
-            timeStr = self.rtc.getTimeStr()   
-            dateStr = self.rtc.getDateTimeStr()[:10]        
+            #print("controlLights...")
+            self.light.control(self.rtc)                   
 
           
         except HardwareError as e:
@@ -603,7 +593,9 @@ def main():
     plantCare = PlantCare("192.168.1.1")
              
     while True:
-        plantCare.careforplants(0)
+        plantCare.careforplants(1)
 
 if __name__ == "__main__":
     main()
+
+

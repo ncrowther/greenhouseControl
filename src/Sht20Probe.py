@@ -35,7 +35,7 @@ class TemperatureHumidityProbe(object):
     def measureIt(self):   
     
         try:
-            print('SHT20 measureIt')
+            #print('SHT20 measureIt')
             
             time.sleep(1)
                         
@@ -45,8 +45,7 @@ class TemperatureHumidityProbe(object):
             self.humidity = self.sht.humidity
             self.humidity = round(self.humidity, 2)
                  
-            print("SH20 Temperature (C): " + str(self.temperature))
-            print("SH20 Humidity (%RH): " + str(self.humidity))
+            print("T%2d H%2d" % (self.temperature, self.humidity))
              
             # Set temperature high score
             if (self.temperature > self.highTemp):
@@ -70,3 +69,5 @@ if __name__ == '__main__':
     
     probe = TemperatureHumidityProbe()
     probe.measureIt()        
+
+                                                                                                                                                                                                                                                                                             
