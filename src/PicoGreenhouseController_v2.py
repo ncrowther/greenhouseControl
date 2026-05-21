@@ -23,12 +23,12 @@ The program also includes a function to display an error message with a specific
 """
 class PlantServer(object):
     
-    ssid = 'VM7763450'
-    password = 'udWrTpeejf86gugx'
+    #ssid = 'VM7763450'
+    #password = 'udWrTpeejf86gugx'
     #ssid = "Nigel’s iPhone"
     #password = 'Porker01!'     
-    #ssid = 'MIFI_3880'
-    #password = None    
+    ssid = 'MIFI_3880'
+    password = None    
     ipAddress = "ERR"
         
     def __init__(self):
@@ -110,7 +110,7 @@ class PlantServer(object):
             
 
     """
-    Get WIreless lan connection status
+    Get Wireless lan connection status
     """
     def getWlanStatus(self):
         
@@ -301,17 +301,21 @@ class PlantServer(object):
         
         SLEEP_TIME = 1
         LOG_TIME = 90 # log period in seconds = SLEEP_TIME * LOG_TIME
-        
+        CONFIG_TIME = 10 # log period in seconds = SLEEP_TIME * LOG_TIME
+                
         count = 1
         
-        while True:
-            
-            self.configure()              
-            
-            # If timestamp exists then log every LOG_TIME mins
-            #if (count % LOG_TIME == 0):
-                # set config 
-                #self.logger()
+        while True:             
+           
+            # Read config every CONFIG_TIME mins
+            if (count % CONFIG_TIME == 0):
+                # Get config 
+                self.configure() 
+                
+            # Log every LOG_TIME mins
+            if (count % LOG_TIME == 0):
+                # Log telemetry 
+                self.logger()
             
             self.plantCare.careforplants(count)
             
@@ -320,8 +324,6 @@ class PlantServer(object):
             statusLight.setSleepingStatus()                       
             time.sleep(SLEEP_TIME)           
             statusLight.setOperationalStatus()
-            
-  
             
             count = count + 1
         

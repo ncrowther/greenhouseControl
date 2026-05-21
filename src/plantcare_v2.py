@@ -170,7 +170,7 @@ class Heater(OnOffController):
     
     def __init__(self):
         # GPIO pin number  relay is connected to
-        RELAY_PIN = 20
+        RELAY_PIN = 10
         self.relay_pin = Pin(RELAY_PIN, Pin.OUT)
         
     def on(self):
@@ -597,5 +597,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
