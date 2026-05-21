@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function LandingPage() {
-  const zone1Hydration = '22';
-  const zone2Hydration = '9';
-  const zone3Hydration = '42';
-  const zone4Hydration = '2';
+  const zone1Hydration = '0';
+  const zone2Hydration = '0';
+  const zone3Hydration = '0';
+  const zone4Hydration = '0';
 
   const zone1Color = 'orange';
   const zone2Color = 'red';
@@ -20,23 +20,43 @@ export default function LandingPage() {
 
   return (
     <Grid fullWidth style={{ backgroundColor: 'black' }}>
+      <Column
+        lg={16}
+        md={8}
+        sm={4}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          padding: '20px 0',
+          backgroundColor: 'black',
+        }}
+      >
+        <video
+          src="/demo.mp4"
+          controls
+          autoPlay
+          loop
+          muted
+          preload="metadata"
+          style={{
+            position: 'relative',
+            width: '100vw',
+            height: 'calc(90vh - 240px)',
+            maxHeight: 'calc(90vh - 240px)',
+          }}
+        />
+      </Column>
+
       <Column style={{ backgroundColor: 'black' }}>
         <div
           className="map-fullscreen"
           style={{
             position: 'relative',
             width: '100vw',
-            height: 'calc(100vh - 120px)',
-            maxHeight: 'calc(100vh - 120px)',
+            height: 'calc(60vh)',
+            maxHeight: 'calc(60vh - 240px)',
           }}
         >
-          <Image
-            src="/zones.jpg"
-            alt="Instana map"
-            fill
-            style={{ objectFit: 'cover' }}
-          />
-
           <button
             onClick={() =>
               router.push(
@@ -49,8 +69,8 @@ export default function LandingPage() {
             title="Go to Zone 1"
             style={{
               position: 'absolute',
-              top: '44%',
-              left: '13%',
+              top: '16%',
+              left: '10%',
               width: '120px',
               height: '120px',
               borderRadius: '50%',
@@ -77,8 +97,8 @@ export default function LandingPage() {
             className="zone-button-flash"
             style={{
               position: 'absolute',
-              top: '44%',
-              left: '36%',
+              top: '16%',
+              left: '33%',
               width: '120px',
               height: '120px',
               borderRadius: '50%',
@@ -104,8 +124,8 @@ export default function LandingPage() {
             title="Go to Zone 3"
             style={{
               position: 'absolute',
-              top: '44%',
-              left: '58%',
+              top: '16%',
+              left: '55%',
               width: '120px',
               height: '120px',
               borderRadius: '50%',
@@ -132,8 +152,8 @@ export default function LandingPage() {
             className="zone-button-flash"
             style={{
               position: 'absolute',
-              top: '44%',
-              left: '80%',
+              top: '16%',
+              left: '77%',
               width: '120px',
               height: '120px',
               borderRadius: '50%',
