@@ -283,6 +283,7 @@ export default function Zone(zoneParam) {
       <Column lg={16} md={8} sm={4} style={{ marginTop: '4px' }}>
         <div style={{ width: '100%', height: 'auto', position: 'relative' }}>
           <Image
+            alt="Watering Rules"
             src={
               pumpState === 'AUTO' && direction === 'UP'
                 ? '/basilruleautoon.jpg'
